@@ -391,7 +391,6 @@ export default function GalleryPage() {
                           src={getEmbedUrl(selectedVideo.videoUrl) || undefined}
                           className="w-full h-full border-0"
                           allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer"
-                          allowFullScreen
                           referrerPolicy="strict-origin-when-cross-origin"
                           sandbox="allow-top-navigation allow-same-origin allow-forms allow-scripts allow-popups allow-presentation"
                           title={selectedVideo.title}
