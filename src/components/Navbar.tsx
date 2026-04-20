@@ -38,6 +38,13 @@ export default function Navbar() {
     }
   };
 
+  const handleLogoClick = (e: React.MouseEvent<HTMLElement>) => {
+    if (location.pathname === '/') {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   const navLinks = [
     { id: 'cinematography', label: t.nav.films },
     { id: 'photography', label: t.nav.stills },
@@ -54,7 +61,7 @@ export default function Navbar() {
           isScrolled || isMenuOpen ? "bg-bg-paper/80 backdrop-blur-md py-4 border-b border-ink/5" : "bg-transparent"
         )}
       >
-        <Link to="/" className="flex items-baseline gap-2 relative z-50">
+        <Link to="/" onClick={handleLogoClick} className="flex items-baseline gap-2 relative z-50">
           <span className="text-2xl font-serif tracking-[2px] uppercase">0848</span>
         </Link>
 

@@ -6,6 +6,7 @@ import VideoSection from './components/VideoSection';
 import Footer from './components/Footer';
 import CustomCursor from './components/CustomCursor';
 import GalleryPage from './components/GalleryPage';
+import { cn } from './lib/utils';
 import { motion, useScroll, useSpring } from 'motion/react';
 import { LanguageProvider, useLanguage } from './LanguageContext';
 import { useState, useEffect, lazy, Suspense } from 'react';
@@ -25,37 +26,81 @@ function LoadingFallback() {
   );
 }
 
-function BackToTop() {
+function SidebarNav() {
   const [isVisible, setIsVisible] = useState(false);
+  const [activeSection, setActiveSection] = useState('hero');
+  const { location } = window;
 
   useEffect(() => {
-    const toggleVisibility = () => {
-      if (window.pageYOffset > 500) {
-        setIsVisible(true);
-      } else {
-        setIsVisible(false);
+    const handleScroll = () => {
+      // Toggle visibility
+      setIsVisible(window.pageYOffset > 500);
+
+      // detect active section
+      const sections = ['hero', 'about', 'cinematography', 'photography'];
+      for (const sectionId of sections) {
+        const element = document.getElementById(sectionId);
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          if (rect.top <= 200 && rect.bottom >= 200) {
+            setActiveSection(sectionId);
+            break;
+          }
+        }
       }
     };
-    window.addEventListener('scroll', toggleVisibility);
-    return () => window.removeEventListener('scroll', toggleVisibility);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth',
-    });
+  const scrollToSection = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    } else if (id === 'hero') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
+  const sections = [
+    { id: 'hero', label: 'Home' },
+    { id: 'about', label: 'About' },
+    { id: 'cinematography', label: 'Films' },
+    { id: 'photography', label: 'Stills' },
+  ];
+
   return (
-    <motion.button
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: isVisible ? 1 : 0, scale: isVisible ? 1 : 0 }}
-      onClick={scrollToTop}
-      className="fixed bottom-12 right-12 z-40 bg-white border border-ink/5 p-4 rounded-full shadow-xl text-ink hover:bg-ink hover:text-white transition-all cursor-pointer"
-    >
-      <ChevronUp size={20} />
-    </motion.button>
+    <div className="fixed right-6 md:right-12 top-1/2 -translate-y-1/2 z-40 hidden md:flex flex-col items-center gap-8">
+      <div className="flex flex-col gap-4">
+        {sections.map((section) => (
+          <button
+            key={section.id}
+            onClick={() => scrollToSection(section.id)}
+            className="group relative flex items-center justify-center p-2"
+          >
+            <span className={cn(
+              "w-1 h-1 rounded-full transition-all duration-500",
+              activeSection === section.id ? "bg-accent scale-[3]" : "bg-ink/20 group-hover:bg-ink/40"
+            )} />
+            <span className="absolute right-full mr-4 text-[9px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap text-ink/60">
+              {section.label}
+            </span>
+          </button>
+        ))}
+      </div>
+      
+      <div className="w-[1px] h-12 bg-ink/5" />
+
+      <motion.button
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 10 }}
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        className="p-2 text-ink/40 hover:text-ink transition-colors"
+        title="Back to Top"
+      >
+        <ChevronUp size={20} />
+      </motion.button>
+    </div>
   );
 }
 
@@ -137,7 +182,7 @@ function AppContent() {
     <div className="min-h-screen selection:bg-ink selection:text-bg-paper">
       <CustomCursor />
       <Navbar />
-      <BackToTop />
+      <SidebarNav />
       
       <main>
         <Routes>
