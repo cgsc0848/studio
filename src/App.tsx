@@ -82,8 +82,11 @@ function SidebarNav() {
       </motion.button>
 
       {/* Desktop Sidebar Nav */}
-      <div className="fixed right-6 md:right-12 top-1/2 -translate-y-1/2 z-40 hidden md:flex flex-col items-center gap-8">
-        <div className="flex flex-col gap-4">
+      <div className={cn(
+        "fixed right-6 md:right-12 top-1/2 -translate-y-1/2 z-40 hidden md:flex flex-col items-center gap-8 transition-opacity duration-300",
+        document.body.style.overflow === 'hidden' ? "opacity-0 pointer-events-none" : "opacity-100"
+      )}>
+        <div className="flex flex-col gap-6">
           {sections.map((section) => (
           <button
             key={section.id}
@@ -91,17 +94,17 @@ function SidebarNav() {
             className="group relative flex items-center justify-center p-2"
           >
             <span className={cn(
-              "w-1 h-1 rounded-full transition-all duration-500",
-              activeSection === section.id ? "bg-accent scale-[3]" : "bg-ink/20 group-hover:bg-ink/40"
+              "w-1.5 h-1.5 rounded-full transition-all duration-500 ring-1 ring-white/20 mix-blend-difference",
+              activeSection === section.id ? "bg-white scale-[2.5]" : "bg-white/40 group-hover:bg-white"
             )} />
-            <span className="absolute right-full mr-4 text-[9px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap text-ink/60">
+            <span className="absolute right-full mr-6 text-[10px] lowercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0 whitespace-nowrap text-white mix-blend-difference">
               {section.label}
             </span>
           </button>
         ))}
       </div>
       
-      <div className="w-[1px] h-12 bg-ink/5" />
+      <div className="w-[1px] h-12 bg-white/10 mix-blend-difference" />
 
       <motion.button
         initial={{ opacity: 0, y: 10 }}

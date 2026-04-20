@@ -105,9 +105,8 @@ export default function GalleryPage() {
       if (url.includes('v=')) id = url.split('v=')[1].split('&')[0];
       else if (url.includes('shorts/')) id = url.split('shorts/')[1].split('?')[0];
       else id = url.split('/').pop()?.split('?')[0] || '';
-      // Improved parameters and origin for YouTube stability
-      const origin = typeof window !== 'undefined' ? window.location.origin : '';
-      return `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&origin=${origin}`;
+      // Cleanest YouTube URL to prevent Error 153 configuration conflicts
+      return `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&rel=0&modestbranding=1&playsinline=1`;
     }
     if (url.includes('bilibili.com') || url.includes('b23.tv')) {
       let bvid = '';
@@ -294,13 +293,13 @@ export default function GalleryPage() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-              className="relative max-w-[98vw] max-h-[92dvh] w-fit flex flex-col items-center justify-center z-[2005]"
+              className="relative max-w-[98vw] max-h-[92dvh] w-fit flex flex-col items-center justify-center z-[2005] mx-auto"
               onClick={(e) => e.stopPropagation()}
             >
               <img 
                 src={selectedPhoto.url} 
                 alt={selectedPhoto.title}
-                className="max-w-full max-h-[70dvh] md:max-h-[85dvh] object-contain shadow-[0_20px_50px_rgba(0,0,0,0.5)] select-none"
+                className="max-w-full max-h-[70dvh] md:max-h-[85dvh] object-contain shadow-[0_20px_50px_rgba(0,0,0,0.5)] select-none block mx-auto"
                 referrerPolicy="no-referrer"
               />
               <div className="mt-8 text-center text-white">

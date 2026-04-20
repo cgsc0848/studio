@@ -84,9 +84,8 @@ export default function VideoSection() {
       if (url.includes('v=')) id = url.split('v=')[1].split('&')[0];
       else if (url.includes('shorts/')) id = url.split('shorts/')[1].split('?')[0];
       else id = url.split('/').pop()?.split('?')[0] || '';
-      // Added origin and improved parameters for YouTube stability
-      const origin = typeof window !== 'undefined' ? window.location.origin : '';
-      return `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&origin=${origin}`;
+      // Cleanest YouTube URL to prevent Error 153 configuration conflicts
+      return `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&rel=0&modestbranding=1&playsinline=1`;
     }
     
     // Bilibili

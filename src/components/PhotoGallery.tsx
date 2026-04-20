@@ -239,13 +239,13 @@ export default function PhotoGallery() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-              className="relative max-w-[98vw] max-h-[92dvh] w-fit flex flex-col items-center justify-center z-[2005]"
+              className="relative max-w-[98vw] max-h-[92dvh] w-fit flex flex-col items-center justify-center z-[2005] mx-auto"
               onClick={(e) => e.stopPropagation()}
             >
               <img 
                 src={selectedPhoto.url || undefined} 
                 alt={selectedPhoto.title}
-                className="max-w-full max-h-[70dvh] md:max-h-[85dvh] object-contain shadow-[0_20px_50px_rgba(0,0,0,0.5)] select-none"
+                className="max-w-full max-h-[70dvh] md:max-h-[85dvh] object-contain shadow-[0_20px_50px_rgba(0,0,0,0.5)] select-none block mx-auto"
                 referrerPolicy="no-referrer"
               />
               <div className="mt-8 text-center">
