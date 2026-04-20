@@ -239,31 +239,42 @@ export default function VideoSection() {
             >
               <X size={28} />
             </button>
-            <div className="w-full max-w-6xl h-fit max-h-[85dvh] shadow-2xl relative flex items-center justify-center">
-              {selectedVideo.videoUrl && (selectedVideo.videoUrl.includes('youtube.com') || selectedVideo.videoUrl.includes('youtu.be') || selectedVideo.videoUrl.includes('bilibili.com') || selectedVideo.videoUrl.includes('vimeo.com')) ? (
-                <div className="w-full aspect-video">
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              className="w-full max-w-6xl h-fit max-h-[85dvh] shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative flex items-center justify-center z-[2005]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="w-full aspect-video bg-black rounded-lg overflow-hidden border border-white/5">
+                {selectedVideo.videoUrl && (selectedVideo.videoUrl.includes('youtube.com') || selectedVideo.videoUrl.includes('youtu.be') || selectedVideo.videoUrl.includes('bilibili.com') || selectedVideo.videoUrl.includes('vimeo.com')) ? (
                   <iframe 
                     src={getEmbedUrl(selectedVideo.videoUrl) || undefined}
                     className="w-full h-full border-0"
                     allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
                     allowFullScreen
-                    referrerPolicy={selectedVideo.videoUrl.includes('bilibili.com') ? "no-referrer" : "no-referrer-when-downgrade"}
+                    referrerPolicy="no-referrer"
                     sandbox="allow-top-navigation allow-same-origin allow-forms allow-scripts allow-popups allow-presentation allow-fullscreen"
                   />
-                </div>
-              ) : selectedVideo.videoUrl ? (
-                <video 
-                  src={selectedVideo.videoUrl || undefined} 
-                  controls 
-                  autoPlay 
-                  className="w-full h-full object-contain"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-white/20 text-xs uppercase tracking-widest">
-                  {language === 'en' ? 'No video URL provided' : '未提供视频链接'}
-                </div>
-              )}
-            </div>
+                ) : selectedVideo.videoUrl ? (
+                  <video 
+                    src={selectedVideo.videoUrl || undefined} 
+                    controls 
+                    autoPlay 
+                    className="w-full h-full object-contain"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-white/20 text-xs uppercase tracking-widest">
+                    {language === 'en' ? 'No video URL provided' : '未提供视频链接'}
+                  </div>
+                )}
+              </div>
+              <div className="absolute -bottom-16 left-0 right-0 text-center pointer-events-none">
+                <h3 className="text-lg font-medium tracking-tight text-white">{selectedVideo.title}</h3>
+                <p className="text-[10px] uppercase tracking-widest text-white/40 mt-1">{selectedVideo.category}</p>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
