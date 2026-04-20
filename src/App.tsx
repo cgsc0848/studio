@@ -124,6 +124,7 @@ function HomePage() {
               alt="Artist Portrait"
               className="w-full aspect-[4/5] object-cover grayscale hover:grayscale-0 transition-all duration-1000"
               referrerPolicy="no-referrer"
+              fetchPriority="high"
             />
           </motion.div>
           

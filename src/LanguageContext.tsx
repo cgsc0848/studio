@@ -33,12 +33,12 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [settings, setSettings] = useState<SiteSettings>({
     heroTitle: '0848 Studio',
     heroSubtitle: 'Visual Storytelling through Light & Motion',
-    heroImageUrl: '',
+    heroImageUrl: 'https://picsum.photos/seed/cinema/1920/1080',
     aboutTitle: 'The Vision Behind the Lens',
-    aboutDesc: 'Capturing the essence of moments...',
+    aboutDesc: 'Capturing the essence of moments through a unique lens, blending traditional techniques with modern visual storytelling.',
     aboutYears: '10+',
     aboutProjects: '200+',
-    aboutImageUrl: '',
+    aboutImageUrl: 'https://picsum.photos/seed/artist/800/1000',
     galleryLayout: 'masonry',
     primaryColor: '#1a1a1a',
     fontFamily: 'serif'

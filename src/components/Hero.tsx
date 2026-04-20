@@ -30,6 +30,7 @@ export default function Hero() {
               alt="Artistic Hero"
               className="w-full h-full object-cover"
               referrerPolicy="no-referrer"
+              fetchPriority="high"
             />
           </motion.div>
         )}

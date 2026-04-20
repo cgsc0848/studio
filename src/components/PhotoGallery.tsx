@@ -52,7 +52,7 @@ function PhotoItem({ photo, index, onSelect }: { photo: Photo, index: number, on
           onError={() => setError(true)}
           className={cn(
             "w-full h-full object-cover transition-all duration-1000 group-hover:scale-105 select-none",
-            isLoaded ? "opacity-100 filter-none" : "opacity-0 blur-lg"
+            isLoaded ? "opacity-100 filter-none" : "opacity-30 blur-lg"
           )}
           referrerPolicy="no-referrer"
           onContextMenu={(e) => e.preventDefault()}
@@ -133,7 +133,21 @@ export default function PhotoGallery() {
         id: doc.id,
         ...doc.data()
       } as Photo));
-      setPhotos(photoData);
+      
+      // If no photos in DB, provide sample data
+      if (photoData.length === 0) {
+        const samples: Photo[] = [
+          { id: 's1', url: 'https://picsum.photos/seed/p1/800/1000', title: 'Urban Geometry', category: 'Editorial', aspectRatio: '4/5', createdAt: new Date().toISOString() },
+          { id: 's2', url: 'https://picsum.photos/seed/p2/800/1000', title: 'Light Play', category: 'Personal', aspectRatio: '4/5', createdAt: new Date().toISOString() },
+          { id: 's3', url: 'https://picsum.photos/seed/p3/800/1000', title: 'Soulful Portraits', category: 'Commercial', aspectRatio: '4/5', createdAt: new Date().toISOString() },
+          { id: 's4', url: 'https://picsum.photos/seed/p4/800/1000', title: 'Minimalist Void', category: 'Editorial', aspectRatio: '4/5', createdAt: new Date().toISOString() },
+          { id: 's5', url: 'https://picsum.photos/seed/p5/800/1000', title: 'Grit & Grace', category: 'Personal', aspectRatio: '4/5', createdAt: new Date().toISOString() },
+          { id: 's6', url: 'https://picsum.photos/seed/p6/800/1000', title: 'Modern Muse', category: 'Editorial', aspectRatio: '4/5', createdAt: new Date().toISOString() },
+        ];
+        setPhotos(samples);
+      } else {
+        setPhotos(photoData);
+      }
     }, (error) => {
       handleFirestoreError(error, OperationType.LIST, 'photos');
       setPhotos([]);
