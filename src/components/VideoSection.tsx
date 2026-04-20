@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Video, Category } from '@/src/types';
 import { Play, X } from 'lucide-react';
 import { cn } from '@/src/lib/utils';

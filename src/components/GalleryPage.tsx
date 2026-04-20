@@ -248,7 +248,6 @@ export default function GalleryPage() {
         </div>
       </div>
 
-      {/* Photo Modal */}
       {/* Photo Modal (Portaled for precision centering) */}
       {typeof document !== 'undefined' && createPortal(
         <AnimatePresence>
