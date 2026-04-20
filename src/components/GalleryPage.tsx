@@ -149,6 +149,17 @@ export default function GalleryPage() {
     };
   }, []);
 
+  const getCategoryLabel = (cat: string) => {
+    const key = cat.toLowerCase();
+    if (settings.categoryLabels[key]) return settings.categoryLabels[key];
+    
+    // Check specific categories for translations
+    if (activeType === 'photos') {
+      return (t.photography.categories as any)[key] || cat;
+    }
+    return (t.cinematography.categories as any)[key] || cat;
+  };
+
   const categories = activeType === 'photos' 
     ? ['All', 'Editorial', 'Personal', 'Commercial']
     : ['All', 'Cinematic', 'Commercial', 'Personal', 'Editorial'];
@@ -203,7 +214,7 @@ export default function GalleryPage() {
                     activeCategory === cat ? "text-ink border-ink" : "text-ink/40 border-transparent hover:text-ink"
                   )}
                 >
-                  {cat === 'All' ? (language === 'en' ? 'All' : '全部') : cat}
+                  {getCategoryLabel(cat)}
                 </button>
               ))}
             </div>
@@ -252,7 +263,7 @@ export default function GalleryPage() {
               </div>
               <div className="mt-4">
                 <h3 className="text-sm font-medium tracking-tight">{item.title}</h3>
-                <p className="text-[10px] uppercase tracking-widest text-ink/40">{item.category}</p>
+                <p className="text-[10px] uppercase tracking-widest text-ink/40">{getCategoryLabel(item.category)}</p>
               </div>
             </motion.div>
           ))}

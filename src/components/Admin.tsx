@@ -5,7 +5,7 @@ import { auth, db, storage, googleProvider, handleFirestoreError, OperationType 
 import { signInWithPopup, onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, setDoc } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
-import { LogOut, Plus, Trash2, Save, Image as ImageIcon, Video as VideoIcon, Settings as SettingsIcon, Layout, Type, Palette, X, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { LogOut, Plus, Trash2, Save, Image as ImageIcon, Video as VideoIcon, Settings as SettingsIcon, Layout, Type, Palette, X, CheckCircle, AlertCircle, Loader2, Menu, Mail } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface SiteSettings {
@@ -20,6 +20,10 @@ interface SiteSettings {
   galleryLayout: 'masonry' | 'grid' | 'editorial';
   primaryColor: string;
   fontFamily: 'serif' | 'sans' | 'mono';
+  email: string;
+  socialLinks: { platform: string; url: string; }[];
+  categoryLabels: Record<string, string>;
+  navLabels: Record<string, string>;
 }
 
 export default function Admin() {
@@ -37,8 +41,13 @@ export default function Admin() {
     heroImageUrl: '',
     galleryLayout: 'masonry',
     primaryColor: '#1a1a1a',
-    fontFamily: 'serif'
+    fontFamily: 'serif',
+    email: 'cgsc0848@gmail.com',
+    socialLinks: [],
+    categoryLabels: {},
+    navLabels: {}
   });
+  const [isPhotoPickerOpen, setIsPhotoPickerOpen] = useState<'hero' | 'about' | null>(null);
   const [activeTab, setActiveTab] = useState<'content' | 'settings'>('content');
   const [loading, setLoading] = useState(true);
   const [uploadProgress, setUploadProgress] = useState<{ [key: string]: number } | null>(null);
@@ -704,7 +713,7 @@ export default function Admin() {
             </section>
           </div>
         ) : activeTab === 'settings' ? (
-          <div className="bg-white rounded-2xl border border-ink/5 p-12 max-w-3xl mx-auto">
+          <div className="bg-white rounded-2xl border border-ink/5 p-8 md:p-12 max-w-4xl mx-auto">
             <div className="flex justify-between items-center mb-12">
               <h2 className="text-3xl font-serif">{t.admin.customization}</h2>
               <button onClick={saveSettings} className="bg-accent text-white px-8 py-3 rounded-full hover:opacity-80 transition-all flex items-center gap-2 text-[10px] uppercase tracking-widest font-medium">
@@ -712,214 +721,401 @@ export default function Admin() {
               </button>
             </div>
 
-            <div className="space-y-12">
-              <section className="space-y-6">
-                <h3 className="text-[10px] uppercase tracking-[0.3em] text-ink/40 flex items-center gap-2">
-                  <Type size={14} /> {t.admin.typography}
-                </h3>
-                <div className="grid grid-cols-1 gap-6">
-                  <div>
-                    <label className="block text-[10px] uppercase tracking-widest text-ink/40 mb-2">{t.admin.heroTitle}</label>
-                    <input 
-                      value={settings.heroTitle}
-                      onChange={(e) => setSettings({ ...settings, heroTitle: e.target.value })}
-                      className="w-full p-4 bg-ink/5 rounded-xl outline-none focus:ring-1 ring-accent font-serif text-xl"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] uppercase tracking-widest text-ink/40 mb-2">{t.admin.heroSubtitle}</label>
-                    <input 
-                      value={settings.heroSubtitle}
-                      onChange={(e) => setSettings({ ...settings, heroSubtitle: e.target.value })}
-                      className="w-full p-4 bg-ink/5 rounded-xl outline-none focus:ring-1 ring-accent text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] uppercase tracking-widest text-ink/40 mb-2">{language === 'en' ? 'Hero Background Image' : '首页背景图片'}</label>
-                    <div className="flex flex-col gap-4 mb-2">
-                      <div className="flex gap-4 items-center">
-                        <div className="w-24 h-24 rounded-lg overflow-hidden bg-ink/5 border border-ink/10">
-                          <img src={settings.heroImageUrl} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                        </div>
-                        <div className="flex-1 space-y-3">
-                          <div className="flex items-center gap-3">
-                            <label className="cursor-pointer inline-block text-[10px] uppercase tracking-widest bg-ink text-white px-4 py-2 rounded-full hover:opacity-80 transition-opacity">
-                              {language === 'en' ? 'Upload New Image' : '上传新图片'}
-                              <input type="file" className="hidden" onChange={(e) => handleFileUpload(e, 'hero')} />
-                            </label>
-                            {settings.heroImageUrl && (
-                              <button 
-                                onClick={async () => {
-                                  const newSettings = { ...settings, heroImageUrl: '' };
-                                  setSettings(newSettings);
-                                  await setDoc(doc(db, 'settings', 'global'), newSettings);
-                                }}
-                                className="text-[10px] uppercase tracking-widest text-red-500 hover:underline"
-                              >
-                                {language === 'en' ? 'Remove Image' : '删除图片'}
-                              </button>
-                            )}
-                            <span className="text-[10px] text-ink/40 uppercase tracking-widest">{language === 'en' ? 'OR' : '或者'}</span>
-                          </div>
-                          <div>
-                            <p className="text-[9px] text-ink/40 uppercase tracking-widest mb-1">{language === 'en' ? 'Paste Image URL' : '粘贴图片链接'}</p>
-                            <input 
-                              value={settings.heroImageUrl}
-                              onChange={(e) => setSettings({ ...settings, heroImageUrl: e.target.value })}
-                              className="w-full p-3 bg-ink/5 rounded-lg text-[10px] outline-none focus:ring-1 ring-accent"
-                              placeholder="https://example.com/image.jpg"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <p className="text-[9px] text-ink/40 italic">
-                      {language === 'en' 
-                        ? 'Recommended: 2500x1400px, WebP or JPG, < 1MB for best performance.' 
-                        : '建议：2500x1400px，WebP 或 JPG 格式，体积小于 1MB 以获得最佳性能。'}
-                    </p>
-                  </div>
-                  <div>
-                    <label className="block text-[10px] uppercase tracking-widest text-ink/40 mb-2">{t.admin.aboutTitle}</label>
-                    <input 
-                      value={settings.aboutTitle}
-                      onChange={(e) => setSettings({ ...settings, aboutTitle: e.target.value })}
-                      className="w-full p-4 bg-ink/5 rounded-xl outline-none focus:ring-1 ring-accent text-lg"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] uppercase tracking-widest text-ink/40 mb-2">{t.admin.aboutDesc}</label>
-                    <textarea 
-                      value={settings.aboutDesc}
-                      onChange={(e) => setSettings({ ...settings, aboutDesc: e.target.value })}
-                      className="w-full p-4 bg-ink/5 rounded-xl outline-none focus:ring-1 ring-accent text-sm h-32"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] uppercase tracking-widest text-ink/40 mb-2">{language === 'en' ? 'About Section Image' : '关于板块图片'}</label>
-                    <div className="flex gap-6 items-start">
-                      <div className="w-32 h-40 rounded-xl overflow-hidden bg-ink/5 border border-ink/10 flex-shrink-0">
-                        {settings.aboutImageUrl ? (
-                          <img src={settings.aboutImageUrl} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-ink/20"><ImageIcon size={32} /></div>
-                        )}
-                      </div>
-                      
-                      <div className="flex-1 space-y-4">
-                        <div className="flex flex-wrap gap-2">
-                          <label className="cursor-pointer text-[9px] uppercase tracking-[0.2em] bg-ink text-white px-4 py-2 rounded-lg hover:opacity-80 transition-opacity">
-                            {language === 'en' ? 'Upload Image' : '上传图片'}
-                            <input type="file" className="hidden" onChange={(e) => handleFileUpload(e, 'about')} />
-                          </label>
-                          {settings.aboutImageUrl && (
-                            <button 
-                              onClick={async () => {
-                                const newSettings = { ...settings, aboutImageUrl: '' };
-                                setSettings(newSettings);
-                                await setDoc(doc(db, 'settings', 'global'), newSettings);
-                              }}
-                              className="text-[9px] uppercase tracking-[0.2em] border border-red-500/20 text-red-500 px-4 py-2 rounded-lg hover:bg-red-50 transition-colors"
-                            >
-                              {language === 'en' ? 'Remove' : '删除'}
-                            </button>
-                          )}
-                        </div>
-                        
-                        <div className="space-y-1">
-                          <p className="text-[9px] text-ink/40 uppercase tracking-widest">{language === 'en' ? 'Image URL' : '图片链接'}</p>
-                          <input 
-                            value={settings.aboutImageUrl}
-                            onChange={(e) => setSettings({ ...settings, aboutImageUrl: e.target.value })}
-                            className="w-full p-3 bg-ink/5 rounded-lg text-[10px] outline-none focus:ring-1 ring-accent"
-                            placeholder="https://..."
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <p className="mt-4 text-[9px] text-ink/40 italic">
-                      {language === 'en' 
-                        ? 'Recommended: 1000x1250px (4:5 aspect ratio), grayscale style recommended.' 
-                        : '建议：1000x1250px（4:5 比例），推荐使用黑白风格。'}
-                    </p>
-                  </div>
-                  <div className="grid grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-[10px] uppercase tracking-widest text-ink/40 mb-2">{t.admin.aboutYears}</label>
-                      <input 
-                        value={settings.aboutYears}
-                        onChange={(e) => setSettings({ ...settings, aboutYears: e.target.value })}
-                        className="w-full p-4 bg-ink/5 rounded-xl outline-none focus:ring-1 ring-accent text-sm"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] uppercase tracking-widest text-ink/40 mb-2">{t.admin.aboutProjects}</label>
-                      <input 
-                        value={settings.aboutProjects}
-                        onChange={(e) => setSettings({ ...settings, aboutProjects: e.target.value })}
-                        className="w-full p-4 bg-ink/5 rounded-xl outline-none focus:ring-1 ring-accent text-sm"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </section>
-
+            <div className="space-y-16">
+              {/* Layout Control */}
               <section className="space-y-6">
                 <h3 className="text-[10px] uppercase tracking-[0.3em] text-ink/40 flex items-center gap-2">
                   <Layout size={14} /> {t.admin.layout}
                 </h3>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {(['masonry', 'grid', 'editorial'] as const).map((mode) => (
                     <button
                       key={mode}
                       onClick={() => setSettings({ ...settings, galleryLayout: mode })}
-                      className={`p-6 rounded-xl border-2 transition-all text-center ${settings.galleryLayout === mode ? 'border-accent bg-accent/5' : 'border-ink/5 hover:border-ink/10'}`}
+                      className={`group relative p-4 rounded-xl border-2 transition-all text-left ${settings.galleryLayout === mode ? 'border-accent bg-accent/[0.02]' : 'border-ink/5 hover:border-ink/10'}`}
                     >
-                      <span className="block text-[10px] uppercase tracking-widest font-medium mb-1">{mode}</span>
-                      <span className="text-[9px] text-ink/40">{mode === 'masonry' ? 'Dynamic Heights' : mode === 'grid' ? 'Perfect Squares' : 'Story-focused'}</span>
+                      <div className="aspect-[4/3] bg-ink/5 rounded-lg mb-4 overflow-hidden relative">
+                         {/* Visual Representation */}
+                         {mode === 'masonry' && (
+                           <div className="p-2 grid grid-cols-3 gap-1 h-full">
+                              <div className="bg-ink/10 rounded-sm h-12" />
+                              <div className="bg-ink/10 rounded-sm h-8" />
+                              <div className="bg-ink/10 rounded-sm h-10" />
+                              <div className="bg-ink/10 rounded-sm h-6" />
+                              <div className="bg-ink/10 rounded-sm h-14" />
+                              <div className="bg-ink/10 rounded-sm h-9" />
+                           </div>
+                         )}
+                         {mode === 'grid' && (
+                           <div className="p-2 grid grid-cols-3 gap-1 h-full">
+                              {[...Array(9)].map((_, i) => <div key={i} className="bg-ink/10 rounded-sm aspect-square" />)}
+                           </div>
+                         )}
+                         {mode === 'editorial' && (
+                           <div className="p-2 flex flex-col gap-1 h-full">
+                              <div className="bg-ink/10 rounded-sm h-1/2 w-full" />
+                              <div className="flex gap-1 h-1/2">
+                                 <div className="bg-ink/10 rounded-sm flex-1" />
+                                 <div className="bg-ink/10 rounded-sm flex-1" />
+                              </div>
+                           </div>
+                         )}
+                         {settings.galleryLayout === mode && (
+                           <div className="absolute inset-0 bg-accent/10 flex items-center justify-center">
+                              <div className="bg-accent text-white p-1 rounded-full"><CheckCircle size={12} /></div>
+                           </div>
+                         )}
+                      </div>
+                      <span className="block text-[10px] uppercase tracking-widest font-bold text-ink mb-1">{mode}</span>
+                      <p className="text-[9px] text-ink/40 leading-relaxed uppercase tracking-widest">
+                         {mode === 'masonry' ? 'Dynamic mosaic layout' : mode === 'grid' ? 'Perfectly uniform grid' : 'Story-driven focus'}
+                      </p>
                     </button>
                   ))}
                 </div>
               </section>
 
+              {/* Navigation Labels */}
               <section className="space-y-6">
                 <h3 className="text-[10px] uppercase tracking-[0.3em] text-ink/40 flex items-center gap-2">
-                  <Palette size={14} /> {t.admin.visual}
+                  <Menu size={14} /> {language === 'en' ? 'Navigation Labels' : '导航标签设置'}
                 </h3>
-                <div className="grid grid-cols-2 gap-8">
-                  <div>
-                    <label className="block text-[10px] uppercase tracking-widest text-ink/40 mb-2">{t.admin.accentColor}</label>
-                    <div className="flex gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {['home', 'about', 'films', 'stills', 'journal'].map((key) => (
+                    <div key={key}>
+                      <label className="block text-[9px] uppercase tracking-widest text-ink/40 mb-1.5 font-bold">{key}</label>
                       <input 
-                        type="color"
-                        value={settings.primaryColor}
-                        onChange={(e) => setSettings({ ...settings, primaryColor: e.target.value })}
-                        className="w-12 h-12 rounded-lg cursor-pointer"
-                      />
-                      <input 
-                        value={settings.primaryColor}
-                        onChange={(e) => setSettings({ ...settings, primaryColor: e.target.value })}
-                        className="flex-1 p-3 bg-ink/5 rounded-lg outline-none font-mono text-[10px]"
+                        placeholder={(t.nav as any)[key]}
+                        value={settings.navLabels[key] || ''}
+                        onChange={(e) => setSettings({
+                          ...settings,
+                          navLabels: { ...settings.navLabels, [key]: e.target.value }
+                        })}
+                        className="w-full p-3 bg-ink/5 rounded-lg outline-none focus:ring-1 ring-accent text-[10px] tracking-widest font-medium"
                       />
                     </div>
+                  ))}
+                </div>
+              </section>
+
+              {/* Video Category Labels */}
+              <section className="space-y-6">
+                <h3 className="text-[10px] uppercase tracking-[0.3em] text-ink/40 flex items-center gap-2">
+                  <VideoIcon size={14} /> {language === 'en' ? 'Film Category Labels' : '影片分类标签设置'}
+                </h3>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                  {['cinematic', 'commercial', 'personal', 'editorial', 'all'].map((key) => (
+                    <div key={key}>
+                      <label className="block text-[9px] uppercase tracking-widest text-ink/40 mb-1.5 font-bold">{key}</label>
+                      <input 
+                        placeholder={(t.cinematography.categories as any)[key]}
+                        value={settings.categoryLabels[key] || ''}
+                        onChange={(e) => setSettings({
+                          ...settings,
+                          categoryLabels: { ...settings.categoryLabels, [key]: e.target.value }
+                        })}
+                        className="w-full p-3 bg-ink/5 rounded-lg outline-none focus:ring-1 ring-accent text-[10px] tracking-widest font-medium"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              {/* Contact & Socials */}
+              <section className="space-y-6">
+                <h3 className="text-[10px] uppercase tracking-[0.3em] text-ink/40 flex items-center gap-2">
+                   <Mail size={14} /> {language === 'en' ? 'Contact & Social Media' : '联系方式与社交媒体'}
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div>
+                    <label className="block text-[10px] uppercase tracking-widest text-ink/40 mb-2 font-bold">{language === 'en' ? 'Contact Email' : '联系邮箱'}</label>
+                    <input 
+                      value={settings.email}
+                      onChange={(e) => setSettings({ ...settings, email: e.target.value })}
+                      className="w-full p-4 bg-ink/5 rounded-xl outline-none focus:ring-1 ring-accent text-sm"
+                      placeholder="email@example.com"
+                    />
                   </div>
                   <div>
-                    <label className="block text-[10px] uppercase tracking-widest text-ink/40 mb-2">{t.admin.fontFamily}</label>
-                    <select 
-                      value={settings.fontFamily}
-                      onChange={(e) => setSettings({ ...settings, fontFamily: e.target.value as any })}
-                      className="w-full p-3 bg-ink/5 rounded-lg outline-none text-[10px] uppercase tracking-widest"
-                    >
-                      <option value="serif">Classic Serif</option>
-                      <option value="sans">Modern Sans</option>
-                      <option value="mono">Technical Mono</option>
-                    </select>
+                    <label className="block text-[10px] uppercase tracking-widest text-ink/40 mb-2 font-bold">{language === 'en' ? 'Social Links' : '社交媒体链接'}</label>
+                    <div className="space-y-3">
+                      {settings.socialLinks.map((link, idx) => (
+                        <div key={idx} className="flex gap-2">
+                          <input 
+                            placeholder="Platform"
+                            value={link.platform}
+                            onChange={(e) => {
+                              const newLinks = [...settings.socialLinks];
+                              newLinks[idx].platform = e.target.value;
+                              setSettings({ ...settings, socialLinks: newLinks });
+                            }}
+                            className="w-24 p-3 bg-ink/5 rounded-lg outline-none text-[10px] uppercase tracking-widest font-medium"
+                          />
+                          <input 
+                            placeholder="URL"
+                            value={link.url}
+                            onChange={(e) => {
+                              const newLinks = [...settings.socialLinks];
+                              newLinks[idx].url = e.target.value;
+                              setSettings({ ...settings, socialLinks: newLinks });
+                            }}
+                            className="flex-1 p-3 bg-ink/5 rounded-lg outline-none text-[10px]"
+                          />
+                          <button 
+                            onClick={() => {
+                              const newLinks = settings.socialLinks.filter((_, i) => i !== idx);
+                              setSettings({ ...settings, socialLinks: newLinks });
+                            }}
+                            className="p-3 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      ))}
+                      <button 
+                        onClick={() => setSettings({
+                          ...settings,
+                          socialLinks: [...settings.socialLinks, { platform: '', url: '' }]
+                        })}
+                        className="w-full py-3 border border-dashed border-ink/20 rounded-lg text-ink/40 text-[10px] uppercase tracking-widest hover:bg-ink/[0.02] flex items-center justify-center gap-2"
+                      >
+                        <Plus size={14} /> {language === 'en' ? 'Add Social Link' : '添加社交链接'}
+                      </button>
+                    </div>
                   </div>
+                </div>
+              </section>
+
+              {/* Visual Style & Typography */}
+              <section className="space-y-6">
+                <h3 className="text-[10px] uppercase tracking-[0.3em] text-ink/40 flex items-center gap-2">
+                  <Type size={14} /> {language === 'en' ? 'Typography & Brand' : '文字与品牌风格'}
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                   <div className="space-y-6">
+                      <div>
+                        <label className="block text-[10px] uppercase tracking-widest text-ink/40 mb-2 font-bold">{t.admin.heroTitle}</label>
+                        <input 
+                          value={settings.heroTitle}
+                          onChange={(e) => setSettings({ ...settings, heroTitle: e.target.value })}
+                          className="w-full p-4 bg-ink/5 rounded-xl outline-none focus:ring-1 ring-accent font-serif text-xl"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] uppercase tracking-widest text-ink/40 mb-2 font-bold">{t.admin.heroSubtitle}</label>
+                        <input 
+                          value={settings.heroSubtitle}
+                          onChange={(e) => setSettings({ ...settings, heroSubtitle: e.target.value })}
+                          className="w-full p-4 bg-ink/5 rounded-xl outline-none focus:ring-1 ring-accent text-sm"
+                        />
+                      </div>
+                   </div>
+                   <div className="grid grid-cols-1 gap-6">
+                      <div>
+                        <label className="block text-[10px] uppercase tracking-widest text-ink/40 mb-2 font-bold">{t.admin.accentColor}</label>
+                        <div className="flex gap-4">
+                          <input 
+                            type="color"
+                            value={settings.primaryColor}
+                            onChange={(e) => setSettings({ ...settings, primaryColor: e.target.value })}
+                            className="w-12 h-12 rounded-lg cursor-pointer border-0 p-0 overflow-hidden"
+                          />
+                          <input 
+                            value={settings.primaryColor}
+                            onChange={(e) => setSettings({ ...settings, primaryColor: e.target.value })}
+                            className="flex-1 p-3 bg-ink/5 rounded-lg outline-none font-mono text-[10px]"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] uppercase tracking-widest text-ink/40 mb-2 font-bold">{t.admin.fontFamily}</label>
+                        <div className="grid grid-cols-3 gap-2">
+                           {(['serif', 'sans', 'mono'] as const).map(font => (
+                             <button
+                               key={font}
+                               onClick={() => setSettings({ ...settings, fontFamily: font })}
+                               className={`py-3 rounded-lg text-[10px] uppercase tracking-widest font-medium border-2 transition-all ${settings.fontFamily === font ? 'border-accent bg-accent/5' : 'border-ink/5 hover:border-ink/10'}`}
+                             >
+                               {font}
+                             </button>
+                           ))}
+                        </div>
+                      </div>
+                   </div>
+                </div>
+              </section>
+
+              {/* Hero Image Selection */}
+              <section className="space-y-6">
+                <h3 className="text-[10px] uppercase tracking-[0.3em] text-ink/40 flex items-center gap-2">
+                   <ImageIcon size={14} /> {language === 'en' ? 'Hero Background' : '首页背景图设置'}
+                </h3>
+                <div className="p-6 bg-ink/5 rounded-2xl flex flex-col md:flex-row gap-8 items-center">
+                   <div className="w-full md:w-64 aspect-video rounded-xl overflow-hidden bg-white shadow-sm relative group">
+                      {settings.heroImageUrl ? (
+                        <img src={settings.heroImageUrl} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-ink/10 font-bold tracking-[0.5em] text-[8px] uppercase">No Background</div>
+                      )}
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                         <button onClick={() => setIsPhotoPickerOpen('hero')} className="p-2 bg-white text-ink rounded-full hover:bg-accent hover:text-white transition-all"><ImageIcon size={16} /></button>
+                         <button onClick={() => setSettings({ ...settings, heroImageUrl: '' })} className="p-2 bg-white text-red-500 rounded-full hover:bg-red-500 hover:text-white transition-all"><X size={16} /></button>
+                      </div>
+                   </div>
+                   <div className="flex-1 space-y-4 w-full">
+                      <div className="flex gap-4">
+                        <label className="cursor-pointer flex-1 bg-ink text-white text-[10px] uppercase tracking-widest font-bold py-4 rounded-xl text-center hover:opacity-80 transition-opacity">
+                          {language === 'en' ? 'Upload Local Image' : '上传本地图片'}
+                          <input type="file" className="hidden" onChange={(e) => handleFileUpload(e, 'hero')} />
+                        </label>
+                        <button 
+                          onClick={() => setIsPhotoPickerOpen('hero')}
+                          className="flex-1 bg-white border border-ink/10 text-[10px] uppercase tracking-widest font-bold py-4 rounded-xl hover:bg-ink/5 transition-colors"
+                        >
+                          {language === 'en' ? 'Select from Gallery' : '从图库中选择'}
+                        </button>
+                      </div>
+                      <div className="relative">
+                        <input 
+                          value={settings.heroImageUrl}
+                          onChange={(e) => setSettings({ ...settings, heroImageUrl: e.target.value })}
+                          className="w-full p-4 bg-white/60 rounded-xl outline-none focus:ring-1 ring-accent text-[10px] pr-12"
+                          placeholder="Or paste external URL..."
+                        />
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-ink/20 pointer-events-none text-[8px] uppercase tracking-widest font-bold">External URL</div>
+                      </div>
+                   </div>
+                </div>
+              </section>
+
+              {/* About Section Customization */}
+              <section className="space-y-6">
+                <h3 className="text-[10px] uppercase tracking-[0.3em] text-ink/40 flex items-center gap-2">
+                   <ImageIcon size={14} /> {language === 'en' ? 'About Section' : '关于板块设置'}
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                   <div className="space-y-6">
+                      <div className="space-y-2">
+                        <label className="block text-[10px] uppercase tracking-widest text-ink/40 font-bold">{t.admin.aboutTitle}</label>
+                        <input 
+                          value={settings.aboutTitle}
+                          onChange={(e) => setSettings({ ...settings, aboutTitle: e.target.value })}
+                          className="w-full p-4 bg-ink/5 rounded-xl outline-none focus:ring-1 ring-accent text-lg"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="block text-[10px] uppercase tracking-widest text-ink/40 font-bold">{t.admin.aboutDesc}</label>
+                        <textarea 
+                          value={settings.aboutDesc}
+                          onChange={(e) => setSettings({ ...settings, aboutDesc: e.target.value })}
+                          className="w-full p-4 bg-ink/5 rounded-xl outline-none focus:ring-1 ring-accent text-sm h-40 leading-relaxed"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <label className="block text-[10px] uppercase tracking-widest text-ink/40 font-bold">{t.admin.aboutYears}</label>
+                          <input 
+                            value={settings.aboutYears}
+                            onChange={(e) => setSettings({ ...settings, aboutYears: e.target.value })}
+                            className="w-full p-4 bg-ink/5 rounded-xl outline-none focus:ring-1 ring-accent text-sm"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="block text-[10px] uppercase tracking-widest text-ink/40 font-bold">{t.admin.aboutProjects}</label>
+                          <input 
+                            value={settings.aboutProjects}
+                            onChange={(e) => setSettings({ ...settings, aboutProjects: e.target.value })}
+                            className="w-full p-4 bg-ink/5 rounded-xl outline-none focus:ring-1 ring-accent text-sm"
+                          />
+                        </div>
+                      </div>
+                   </div>
+                   <div>
+                      <div className="w-full aspect-[4/5] bg-ink/5 rounded-2xl overflow-hidden mb-6 relative group border border-ink/5 shadow-sm">
+                        {settings.aboutImageUrl ? (
+                          <img src={settings.aboutImageUrl} className="w-full h-full object-cover grayscale" referrerPolicy="no-referrer" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-ink/10 uppercase tracking-widest font-bold text-[8px]">No Portrait</div>
+                        )}
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                           <button onClick={() => setIsPhotoPickerOpen('about')} className="p-2 bg-white text-ink rounded-full hover:bg-accent hover:text-white transition-all"><ImageIcon size={16} /></button>
+                           <button onClick={() => setSettings({ ...settings, aboutImageUrl: '' })} className="p-2 bg-white text-red-500 rounded-full hover:bg-red-500 hover:text-white transition-all"><X size={16} /></button>
+                        </div>
+                      </div>
+                      <button 
+                        onClick={() => setIsPhotoPickerOpen('about')}
+                        className="w-full bg-white border border-ink/10 text-[10px] uppercase tracking-widest font-bold py-4 rounded-xl hover:bg-ink/5 transition-colors mb-2"
+                      >
+                         {language === 'en' ? 'Choose from Gallery' : '从图库中选择'}
+                      </button>
+                      <label className="block cursor-pointer bg-ink/5 text-ink/40 text-[10px] uppercase tracking-widest font-bold py-4 rounded-xl text-center hover:bg-ink/10 transition-colors">
+                        {language === 'en' ? 'Or Upload Local' : '或上传本地图片'}
+                        <input type="file" className="hidden" onChange={(e) => handleFileUpload(e, 'about')} />
+                      </label>
+                   </div>
                 </div>
               </section>
             </div>
           </div>
         ) : null}
+
+        {/* Photo Gallery Picker Modal */}
+        <AnimatePresence>
+          {isPhotoPickerOpen && (
+            <motion.div 
+               initial={{ opacity: 0 }}
+               animate={{ opacity: 1 }}
+               exit={{ opacity: 0 }}
+               className="fixed inset-0 z-[100] flex items-center justify-center bg-ink/80 backdrop-blur-md p-4 md:p-8"
+            >
+               <motion.div 
+                 initial={{ scale: 0.95, opacity: 0 }}
+                 animate={{ scale: 1, opacity: 1 }}
+                 exit={{ scale: 0.95, opacity: 0 }}
+                 className="bg-white rounded-3xl w-full max-w-5xl h-[80vh] flex flex-col overflow-hidden shadow-2xl"
+               >
+                  <div className="p-6 border-b border-ink/5 flex justify-between items-center bg-white/80 backdrop-blur-md sticky top-0 z-10">
+                    <h3 className="text-2xl font-serif">{language === 'en' ? 'Select Photo from Gallery' : '从图库中选择照片'}</h3>
+                    <button onClick={() => setIsPhotoPickerOpen(null)} className="p-2 hover:bg-ink/5 rounded-full transition-colors"><X size={20} /></button>
+                  </div>
+                  <div className="flex-1 overflow-y-auto p-6 scrollbar-hide">
+                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                      {photos.map((photo) => (
+                        <div 
+                          key={photo.id} 
+                          onClick={() => {
+                            if (isPhotoPickerOpen === 'hero') setSettings({ ...settings, heroImageUrl: photo.url });
+                            else if (isPhotoPickerOpen === 'about') setSettings({ ...settings, aboutImageUrl: photo.url });
+                            setIsPhotoPickerOpen(null);
+                          }}
+                          className={`group aspect-[4/5] bg-ink/5 rounded-xl overflow-hidden cursor-pointer relative border-2 transition-all ${
+                            (isPhotoPickerOpen === 'hero' && settings.heroImageUrl === photo.url) || 
+                            (isPhotoPickerOpen === 'about' && settings.aboutImageUrl === photo.url)
+                            ? 'border-accent ring-4 ring-accent/10' : 'border-transparent hover:border-accent/40'
+                          }`}
+                        >
+                          <img 
+                            src={photo.url} 
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                            referrerPolicy="no-referrer"
+                          />
+                          <div className="absolute inset-0 bg-accent/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                             <span className="bg-white text-ink text-[10px] uppercase tracking-widest font-bold px-3 py-1 rounded-full shadow-lg">Select</span>
+                          </div>
+                        </div>
+                      ))}
+                      {photos.length === 0 && (
+                        <div className="col-span-full py-24 flex flex-col items-center gap-4 text-ink/20">
+                           <ImageIcon size={48} />
+                           <p className="text-[10px] uppercase tracking-widest font-bold">No photos found in gallery.</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+               </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Custom Toast */}
         <AnimatePresence>

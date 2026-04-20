@@ -8,7 +8,7 @@ import { X, Menu } from 'lucide-react';
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { t, language, setLanguage } = useLanguage();
+  const { t, language, setLanguage, settings } = useLanguage();
   const location = useLocation();
 
   useEffect(() => {
@@ -46,9 +46,9 @@ export default function Navbar() {
   };
 
   const navLinks = [
-    { id: 'cinematography', label: t.nav.films },
-    { id: 'photography', label: t.nav.stills },
-    { id: 'about', label: t.nav.about },
+    { id: 'cinematography', label: settings.navLabels['films'] || t.nav.films },
+    { id: 'photography', label: settings.navLabels['stills'] || t.nav.stills },
+    { id: 'about', label: settings.navLabels['about'] || t.nav.about },
   ];
 
   return (
@@ -77,7 +77,7 @@ export default function Navbar() {
               {link.label}
             </Link>
           ))}
-          <Link to="/gallery/All" className="hover:text-ink transition-colors">{t.nav.editorial}</Link>
+          <Link to="/gallery/All" className="hover:text-ink transition-colors">{settings.navLabels['journal'] || t.nav.editorial}</Link>
           
           <button 
             onClick={toggleLanguage}

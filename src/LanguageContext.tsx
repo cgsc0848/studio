@@ -15,6 +15,10 @@ interface SiteSettings {
   galleryLayout: 'masonry' | 'grid' | 'editorial';
   primaryColor: string;
   fontFamily: 'serif' | 'sans' | 'mono';
+  email: string;
+  socialLinks: { platform: string; url: string; }[];
+  categoryLabels: Record<string, string>;
+  navLabels: Record<string, string>;
 }
 
 interface LanguageContextType {
@@ -41,7 +45,15 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     aboutImageUrl: '',
     galleryLayout: 'masonry',
     primaryColor: '#1a1a1a',
-    fontFamily: 'serif'
+    fontFamily: 'serif',
+    email: 'cgsc0848@gmail.com',
+    socialLinks: [
+      { platform: 'Instagram', url: '#' },
+      { platform: 'Twitter', url: '#' },
+      { platform: 'Vimeo', url: '#' }
+    ],
+    categoryLabels: {},
+    navLabels: {}
   });
 
   useEffect(() => {

@@ -9,7 +9,7 @@ import { db, handleFirestoreError, OperationType } from '../firebase';
 import { collection, query, orderBy, onSnapshot, limit } from 'firebase/firestore';
 import { X, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 
-function PhotoItem({ photo, index, onSelect }: { photo: Photo, index: number, onSelect: (p: Photo) => void, key?: any }) {
+function PhotoItem({ photo, index, onSelect, getCategoryName }: { photo: Photo, index: number, onSelect: (p: Photo) => void, getCategoryName: (c: string) => string, key?: any }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState(false);
 
@@ -22,7 +22,7 @@ function PhotoItem({ photo, index, onSelect }: { photo: Photo, index: number, on
       className="relative group cursor-none"
     >
       <div className="mb-4">
-        <span className="text-[9px] uppercase tracking-[0.2em] text-accent font-medium">{photo.category}</span>
+        <span className="text-[9px] uppercase tracking-[0.2em] text-accent font-medium">{getCategoryName(photo.category)}</span>
       </div>
       <div 
         className="overflow-hidden bg-ink/5 relative aspect-[4/5] cursor-zoom-in"
@@ -91,6 +91,12 @@ export default function PhotoGallery() {
     if (nextIndex >= photos.length) nextIndex = 0;
     setSelectedPhoto(photos[nextIndex]);
   }, [photoIndex, photos]);
+
+  const getCategoryName = (cat: string) => {
+    const key = cat.toLowerCase();
+    if (settings.categoryLabels[key]) return settings.categoryLabels[key];
+    return (t.photography.categories as any)[key] || cat;
+  };
 
   useEffect(() => {
     if (selectedPhoto) {
@@ -179,15 +185,15 @@ export default function PhotoGallery() {
               <h2 className="text-4xl md:text-5xl font-serif leading-tight">{t.photography.title}</h2>
             </div>
             <div className="text-xs uppercase tracking-[0.2em] font-medium text-ink/60 flex gap-8">
-              <Link to="/gallery/All" className="text-ink border-b border-ink pb-1">{t.photography.categories.all}</Link>
-              <Link to="/gallery/Editorial" className="hover:text-ink transition-colors pb-1 border-b border-transparent">{t.photography.categories.editorial}</Link>
-              <Link to="/gallery/Personal" className="hover:text-ink transition-colors pb-1 border-b border-transparent">{t.photography.categories.personal}</Link>
+              <Link to="/gallery/All" className="text-ink border-b border-ink pb-1">{getCategoryName('All')}</Link>
+              <Link to="/gallery/Editorial" className="hover:text-ink transition-colors pb-1 border-b border-transparent">{getCategoryName('Editorial')}</Link>
+              <Link to="/gallery/Personal" className="hover:text-ink transition-colors pb-1 border-b border-transparent">{getCategoryName('Personal')}</Link>
             </div>
           </div>
 
           <div className={getLayoutClass()}>
             {photos.slice(0, 6).map((photo, index) => (
-              <PhotoItem key={photo.id} photo={photo} index={index} onSelect={setSelectedPhoto} />
+              <PhotoItem key={photo.id} photo={photo} index={index} onSelect={setSelectedPhoto} getCategoryName={getCategoryName} />
             ))}
           </div>
 

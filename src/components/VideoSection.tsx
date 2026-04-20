@@ -12,7 +12,7 @@ export default function VideoSection() {
   const [activeCategory, setActiveCategory] = useState<Category>('All');
   const [allVideos, setAllVideos] = useState<Video[]>([]);
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
-  const { t, language } = useLanguage();
+  const { t, language, settings } = useLanguage();
 
   useEffect(() => {
     const q = query(collection(db, 'videos'), orderBy('createdAt', 'desc'));
@@ -57,6 +57,8 @@ export default function VideoSection() {
   };
 
   const getCategoryName = (cat: Category) => {
+    const key = cat.toLowerCase();
+    if (settings.categoryLabels[key]) return settings.categoryLabels[key];
     switch(cat) {
       case 'All': return t.cinematography.categories.all;
       case 'Cinematic': return t.cinematography.categories.cinematic;
