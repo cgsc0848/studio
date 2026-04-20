@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { Photo } from '@/src/types';
 import { useLanguage } from '../LanguageContext';
 import { Link } from 'react-router-dom';
@@ -194,69 +195,71 @@ export default function PhotoGallery() {
         </div>
       </div>
 
-      {/* Image Zoom Modal */}
-      <AnimatePresence>
-        {selectedPhoto && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[2000] flex items-center justify-center p-2 md:p-8 transition-colors duration-700"
-            style={{ 
-              backgroundColor: modalBgColor,
-              height: '100dvh'
-            }}
-          >
-            <div className="absolute inset-0 cursor-zoom-out" onClick={() => setSelectedPhoto(null)} />
-            
-            <button 
-              onClick={() => setSelectedPhoto(null)}
-              className="absolute top-4 right-4 md:top-8 md:right-8 text-white/40 hover:text-white transition-colors z-[2010] bg-black/20 p-2 rounded-full backdrop-blur-md"
-            >
-              <X size={28} />
-            </button>
-
-            {photos.length > 1 && (
-              <>
-                <button 
-                  onClick={(e) => { e.stopPropagation(); navigatePhoto('prev'); }}
-                  className="absolute left-8 top-1/2 -translate-y-1/2 p-4 text-white/40 hover:text-white transition-colors z-[110] bg-black/10 hover:bg-black/20 rounded-full"
-                >
-                  <ChevronLeft size={48} />
-                </button>
-                <button 
-                  onClick={(e) => { e.stopPropagation(); navigatePhoto('next'); }}
-                  className="absolute right-8 top-1/2 -translate-y-1/2 p-4 text-white/40 hover:text-white transition-colors z-[110] bg-black/10 hover:bg-black/20 rounded-full"
-                >
-                  <ChevronRight size={48} />
-                </button>
-              </>
-            )}
-
+      {/* Image Zoom Modal (Portaled for precision centering) */}
+      {typeof document !== 'undefined' && createPortal(
+        <AnimatePresence>
+          {selectedPhoto && (
             <motion.div 
-              key={selectedPhoto.id}
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-              className="relative max-w-[98vw] max-h-[92dvh] w-fit flex flex-col items-center justify-center z-[2005] mx-auto"
-              onClick={(e) => e.stopPropagation()}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[9999] flex items-center justify-center p-2 md:p-8 transition-colors duration-700"
+              style={{ 
+                backgroundColor: modalBgColor,
+                height: '100dvh'
+              }}
             >
-              <img 
-                src={selectedPhoto.url || undefined} 
-                alt={selectedPhoto.title}
-                className="max-w-full max-h-[70dvh] md:max-h-[85dvh] object-contain shadow-[0_20px_50px_rgba(0,0,0,0.5)] select-none block mx-auto"
-                referrerPolicy="no-referrer"
-              />
-              <div className="mt-8 text-center">
-                <h3 className="text-lg font-medium tracking-tight text-white">{selectedPhoto.title}</h3>
-                <p className="text-[10px] uppercase tracking-widest text-white/60 mt-2">{selectedPhoto.category}</p>
-                <p className="text-[10px] text-white/20 mt-1">{photoIndex + 1} / {photos.length}</p>
-              </div>
+              <div className="absolute inset-0 cursor-zoom-out" onClick={() => setSelectedPhoto(null)} />
+              
+              <button 
+                onClick={() => setSelectedPhoto(null)}
+                className="absolute top-4 right-4 md:top-8 md:right-8 text-white/40 hover:text-white transition-colors z-[10005] bg-black/20 p-2 rounded-full backdrop-blur-md"
+              >
+                <X size={28} />
+              </button>
+
+              {photos.length > 1 && (
+                <>
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); navigatePhoto('prev'); }}
+                    className="absolute left-8 top-1/2 -translate-y-1/2 p-4 text-white/40 hover:text-white transition-colors z-[10005] bg-black/10 hover:bg-black/20 rounded-full"
+                  >
+                    <ChevronLeft size={48} />
+                  </button>
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); navigatePhoto('next'); }}
+                    className="absolute right-8 top-1/2 -translate-y-1/2 p-4 text-white/40 hover:text-white transition-colors z-[10005] bg-black/10 hover:bg-black/20 rounded-full"
+                  >
+                    <ChevronRight size={48} />
+                  </button>
+                </>
+              )}
+
+              <motion.div 
+                key={selectedPhoto.id}
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.95, opacity: 0 }}
+                transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+                className="relative max-w-[98vw] max-h-[92dvh] w-fit flex flex-col items-center justify-center z-[10000] mx-auto"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <img 
+                  src={selectedPhoto.url || undefined} 
+                  alt={selectedPhoto.title}
+                  className="max-w-full max-h-[70dvh] md:max-h-[85dvh] object-contain shadow-[0_20px_50px_rgba(0,0,0,0.5)] select-none block mx-auto"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="mt-8 text-center text-white">
+                  <h3 className="text-lg font-medium tracking-tight">{selectedPhoto.title}</h3>
+                  <p className="text-[10px] uppercase tracking-widest text-white/60 mt-1">{selectedPhoto.category}</p>
+                </div>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </section>
   );
 }
