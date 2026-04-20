@@ -1,0 +1,63 @@
+{
+  "entities": {
+    "Photo": {
+      "title": "Photo",
+      "description": "A photography work in the portfolio",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "url": { "type": "string" },
+        "title": { "type": "string" },
+        "category": { "type": "string", "enum": ["Editorial", "Personal", "Commercial"] },
+        "aspectRatio": { "type": "string", "enum": ["portrait", "landscape", "square"] },
+        "order": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["url", "title", "category"]
+    },
+    "Video": {
+      "title": "Video",
+      "description": "A cinematography work in the portfolio",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "thumbnail": { "type": "string" },
+        "videoUrl": { "type": "string" },
+        "title": { "type": "string" },
+        "category": { "type": "string", "enum": ["Cinematic", "Commercial", "Personal", "Editorial"] },
+        "description": { "type": "string" },
+        "order": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["thumbnail", "videoUrl", "title", "category"]
+    },
+    "Settings": {
+      "title": "Settings",
+      "description": "Global website settings and layout control",
+      "type": "object",
+      "properties": {
+        "heroTitle": { "type": "string" },
+        "heroSubtitle": { "type": "string" },
+        "aboutTitle": { "type": "string" },
+        "aboutDesc": { "type": "string" },
+        "galleryLayout": { "type": "string", "enum": ["masonry", "grid", "editorial"] },
+        "primaryColor": { "type": "string" },
+        "fontFamily": { "type": "string", "enum": ["serif", "sans", "mono"] }
+      }
+    }
+  },
+  "firestore": {
+    "/photos/{photoId}": {
+      "schema": "Photo",
+      "description": "Collection of photography works"
+    },
+    "/videos/{videoId}": {
+      "schema": "Video",
+      "description": "Collection of cinematography works"
+    },
+    "/settings/global": {
+      "schema": "Settings",
+      "description": "Global website configuration"
+    }
+  }
+}
