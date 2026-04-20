@@ -105,7 +105,9 @@ export default function GalleryPage() {
       if (url.includes('v=')) id = url.split('v=')[1].split('&')[0];
       else if (url.includes('shorts/')) id = url.split('shorts/')[1].split('?')[0];
       else id = url.split('/').pop()?.split('?')[0] || '';
-      return `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&rel=0&modestbranding=1&playsinline=1`;
+      // Improved parameters and origin for YouTube stability
+      const origin = typeof window !== 'undefined' ? window.location.origin : '';
+      return `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&origin=${origin}`;
     }
     if (url.includes('bilibili.com') || url.includes('b23.tv')) {
       let bvid = '';
@@ -311,61 +313,115 @@ export default function GalleryPage() {
         )}
       </AnimatePresence>
 
-      {/* Video Modal */}
+      {/* Video Modal - Theater Mode */}
       <AnimatePresence>
         {selectedVideo && (
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[2000] flex items-center justify-center bg-ink/98 p-2 md:p-8"
+            className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/98 p-4 md:p-8 overflow-hidden"
             style={{ height: '100dvh' }}
           >
-            <button 
-              onClick={() => setSelectedVideo(null)}
-              className="absolute top-4 right-4 md:top-8 md:right-8 text-white/60 hover:text-white transition-colors z-[2010] bg-black/20 p-2 rounded-full backdrop-blur-md"
-            >
-              <X size={28} />
-            </button>
-            <motion.div 
-              key={selectedVideo.id}
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-              className="w-full max-w-6xl h-fit max-h-[85dvh] shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative flex items-center justify-center z-[2005]"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="w-full aspect-video bg-black rounded-lg overflow-hidden border border-white/5">
-                {selectedVideo.videoUrl && (selectedVideo.videoUrl.includes('youtube.com') || selectedVideo.videoUrl.includes('youtu.be') || selectedVideo.videoUrl.includes('bilibili.com') || selectedVideo.videoUrl.includes('vimeo.com')) ? (
-                  <div className="w-full h-full">
-                    <iframe 
-                      src={getEmbedUrl(selectedVideo.videoUrl) || undefined}
-                      className="w-full h-full border-0"
-                      allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
-                      allowFullScreen
-                      referrerPolicy="no-referrer"
-                      sandbox="allow-top-navigation allow-same-origin allow-forms allow-scripts allow-popups allow-presentation allow-fullscreen"
+            {/* Background Backdrop Blur */}
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-3xl" onClick={() => setSelectedVideo(null)} />
+            
+            <div className="relative w-full max-w-[1600px] h-full max-h-[90dvh] flex flex-col lg:flex-row gap-8 z-[2010]">
+              {/* Main Player Area */}
+              <div className="flex-1 flex flex-col min-w-0">
+                <div className="flex justify-between items-center mb-4">
+                  <div className="flex items-center gap-4">
+                    <span className="text-[10px] uppercase tracking-widest text-white/40 bg-white/5 px-3 py-1 rounded-full border border-white/10">
+                      {selectedVideo.category}
+                    </span>
+                    <h3 className="text-xl font-serif text-white truncate max-w-md">{selectedVideo.title}</h3>
+                  </div>
+                  <button 
+                    onClick={() => setSelectedVideo(null)}
+                    className="p-3 bg-white/5 hover:bg-white/10 rounded-full text-white/60 hover:text-white transition-all border border-white/10"
+                  >
+                    <X size={24} />
+                  </button>
+                </div>
+
+                <motion.div 
+                   key={selectedVideo.id}
+                   initial={{ scale: 0.98, opacity: 0 }}
+                   animate={{ scale: 1, opacity: 1 }}
+                   transition={{ duration: 0.4 }}
+                   className="w-full aspect-video bg-black rounded-xl overflow-hidden shadow-2xl border border-white/5 relative"
+                >
+                  {selectedVideo.videoUrl && (selectedVideo.videoUrl.includes('youtube.com') || selectedVideo.videoUrl.includes('youtu.be') || selectedVideo.videoUrl.includes('bilibili.com') || selectedVideo.videoUrl.includes('vimeo.com')) ? (
+                    <div className="w-full h-full">
+                      <iframe 
+                        src={getEmbedUrl(selectedVideo.videoUrl) || undefined}
+                        className="w-full h-full border-0"
+                        allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer"
+                        allowFullScreen
+                        referrerPolicy="no-referrer"
+                        sandbox="allow-top-navigation allow-same-origin allow-forms allow-scripts allow-popups allow-presentation allow-fullscreen"
+                        title={selectedVideo.title}
+                      />
+                    </div>
+                  ) : selectedVideo.videoUrl ? (
+                    <video 
+                      src={selectedVideo.videoUrl || undefined} 
+                      controls 
+                      autoPlay 
+                      className="w-full h-full object-contain"
                     />
-                  </div>
-                ) : selectedVideo.videoUrl ? (
-                  <video 
-                    src={selectedVideo.videoUrl || undefined} 
-                    controls 
-                    autoPlay 
-                    className="w-full h-full object-contain"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-white/20 text-xs uppercase tracking-widest">
-                    {language === 'en' ? 'No video URL provided' : '未提供视频链接'}
-                  </div>
-                )}
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-white/20 text-xs uppercase tracking-widest">
+                      {language === 'en' ? 'No video URL provided' : '未提供视频链接'}
+                    </div>
+                  )}
+                </motion.div>
+                
+                <div className="mt-6 p-6 bg-white/[0.02] border border-white/[0.05] rounded-xl hidden lg:block overflow-y-auto max-h-[120px] custom-scrollbar">
+                  <p className="text-white/60 text-sm leading-relaxed">{selectedVideo.description}</p>
+                </div>
               </div>
-              <div className="absolute -bottom-16 left-0 right-0 text-center pointer-events-none">
-                <h3 className="text-lg font-medium tracking-tight text-white">{selectedVideo.title}</h3>
-                <p className="text-[10px] uppercase tracking-widest text-white/60 mt-1">{selectedVideo.category}</p>
-              </div>
-            </motion.div>
+
+              {/* Sidebar: All Videos */}
+              <aside className="w-full lg:w-80 h-full flex flex-col bg-white/[0.02] border border-white/10 rounded-2xl overflow-hidden">
+                <div className="p-6 border-b border-white/10 flex items-center justify-between">
+                  <h4 className="text-[10px] uppercase tracking-[0.3em] font-medium text-white/60">
+                    {language === 'en' ? 'Category Gallery' : '分类作品'}
+                  </h4>
+                  <span className="text-[10px] font-mono text-white/40">{videos.length}</span>
+                </div>
+                <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+                  {videos.filter(v => activeCategory === 'All' || v.category === activeCategory).map((video) => (
+                    <div 
+                      key={video.id}
+                      onClick={() => setSelectedVideo(video)}
+                      className={cn(
+                        "group flex gap-4 p-3 rounded-xl transition-all cursor-pointer border border-transparent hover:border-white/10 hover:bg-white/5",
+                        selectedVideo.id === video.id ? "bg-white/10 border-white/20" : ""
+                      )}
+                    >
+                      <div className="w-24 aspect-video rounded-lg overflow-hidden flex-shrink-0 relative">
+                        <img src={video.thumbnail} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
+                        {selectedVideo.id === video.id && (
+                          <div className="absolute inset-0 bg-white/10 flex items-center justify-center">
+                            <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0 text-left">
+                        <h5 className={cn(
+                          "text-xs font-medium truncate transition-colors",
+                          selectedVideo.id === video.id ? "text-white" : "text-white/80 group-hover:text-white"
+                        )}>
+                          {video.title}
+                        </h5>
+                        <p className="text-[9px] uppercase tracking-widest text-white/30 mt-1">{video.category}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </aside>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
