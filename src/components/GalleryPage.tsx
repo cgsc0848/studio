@@ -105,22 +105,17 @@ export default function GalleryPage() {
       if (url.includes('v=')) id = url.split('v=')[1].split('&')[0];
       else if (url.includes('shorts/')) id = url.split('shorts/')[1].split('?')[0];
       else id = url.split('/').pop()?.split('?')[0] || '';
-      return `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&modestbranding=1`;
+      return `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&rel=0&modestbranding=1&playsinline=1`;
     }
     if (url.includes('bilibili.com') || url.includes('b23.tv')) {
-      if (url.includes('player.bilibili.com')) {
-        if (!url.includes('high_quality')) url += '&high_quality=1';
-        if (!url.includes('as_wide')) url += '&as_wide=1';
-        return url;
-      }
       let bvid = '';
       const bvMatch = url.match(/BV[a-zA-Z0-9]+/);
       if (bvMatch) bvid = bvMatch[0];
-      if (bvid) return `https://player.bilibili.com/player.html?bvid=${bvid}&page=1&high_quality=1&as_wide=1&allowfullscreen=true&autoplay=1&danmaku=0`;
+      if (bvid) return `https://player.bilibili.com/player.html?bvid=${bvid}&page=1&high_quality=1&as_wide=1&allowfullscreen=true&autoplay=0&danmaku=0`;
     }
     if (url.includes('vimeo.com')) {
       const id = url.split('/').pop()?.split('?')[0];
-      return `https://player.vimeo.com/video/${id}?autoplay=1`;
+      return `https://player.vimeo.com/video/${id}?autoplay=1&muted=1`;
     }
     return url;
   };

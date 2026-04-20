@@ -81,14 +81,10 @@ export default function VideoSection() {
     // YouTube
     if (url.includes('youtube.com') || url.includes('youtu.be')) {
       let id = '';
-      if (url.includes('v=')) {
-        id = url.split('v=')[1].split('&')[0];
-      } else if (url.includes('shorts/')) {
-        id = url.split('shorts/')[1].split('?')[0];
-      } else {
-        id = url.split('/').pop()?.split('?')[0] || '';
-      }
-      return `https://www.youtube.com/embed/${id}?autoplay=1&rel=0&modestbranding=1`;
+      if (url.includes('v=')) id = url.split('v=')[1].split('&')[0];
+      else if (url.includes('shorts/')) id = url.split('shorts/')[1].split('?')[0];
+      else id = url.split('/').pop()?.split('?')[0] || '';
+      return `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&rel=0&modestbranding=1&playsinline=1`;
     }
     
     // Bilibili
@@ -108,7 +104,7 @@ export default function VideoSection() {
     // Vimeo
     if (url.includes('vimeo.com')) {
       const id = url.split('/').pop()?.split('?')[0];
-      return `https://player.vimeo.com/video/${id}?autoplay=1`;
+      return `https://player.vimeo.com/video/${id}?autoplay=1&muted=1`;
     }
     
     return url;

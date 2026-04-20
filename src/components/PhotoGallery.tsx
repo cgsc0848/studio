@@ -201,7 +201,7 @@ export default function PhotoGallery() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 transition-colors duration-700"
+            className="fixed inset-0 z-[2000] flex items-center justify-center p-2 md:p-8 transition-colors duration-700"
             style={{ 
               backgroundColor: modalBgColor,
               height: '100dvh'
@@ -211,9 +211,9 @@ export default function PhotoGallery() {
             
             <button 
               onClick={() => setSelectedPhoto(null)}
-              className="absolute top-8 right-8 text-white/40 hover:text-white transition-colors z-[110]"
+              className="absolute top-4 right-4 md:top-8 md:right-8 text-white/40 hover:text-white transition-colors z-[2010] bg-black/20 p-2 rounded-full backdrop-blur-md"
             >
-              <X size={32} />
+              <X size={28} />
             </button>
 
             {photos.length > 1 && (
@@ -239,13 +239,13 @@ export default function PhotoGallery() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-              className="relative max-w-[98vw] max-h-[95dvh] w-fit flex flex-col items-center justify-center z-[105]"
+              className="relative max-w-[98vw] max-h-[92dvh] w-fit flex flex-col items-center justify-center z-[2005]"
               onClick={(e) => e.stopPropagation()}
             >
               <img 
                 src={selectedPhoto.url || undefined} 
                 alt={selectedPhoto.title}
-                className="max-w-full max-h-[75dvh] md:max-h-[85dvh] object-contain shadow-[0_20px_50px_rgba(0,0,0,0.3)] select-none"
+                className="max-w-full max-h-[70dvh] md:max-h-[85dvh] object-contain shadow-[0_20px_50px_rgba(0,0,0,0.5)] select-none"
                 referrerPolicy="no-referrer"
               />
               <div className="mt-8 text-center">
