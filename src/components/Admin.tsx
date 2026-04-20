@@ -441,9 +441,7 @@ export default function Admin() {
           </div>
           <div className="flex items-center gap-4">
             <a 
-              href="/" 
-              target="_blank" 
-              rel="noopener noreferrer"
+              href="./#/" 
               className="px-4 py-2 border border-ink/10 rounded-full text-[10px] uppercase tracking-widest hover:bg-ink hover:text-white transition-all flex items-center gap-2"
             >
               {language === 'en' ? 'View Site' : '访问预览'}
