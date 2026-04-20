@@ -230,25 +230,27 @@ export default function VideoSection() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-ink/95 p-4 md:p-8"
+            className="fixed inset-0 z-[2000] flex items-center justify-center bg-ink/98 p-2 md:p-8"
             style={{ height: '100dvh' }}
           >
             <button 
               onClick={() => setSelectedVideo(null)}
-              className="absolute top-8 right-8 text-white/60 hover:text-white transition-colors"
+              className="absolute top-4 right-4 md:top-8 md:right-8 text-white/60 hover:text-white transition-colors z-[2010] bg-black/20 p-2 rounded-full backdrop-blur-md"
             >
-              <X size={32} />
+              <X size={28} />
             </button>
-            <div className="w-full max-w-6xl max-h-[75dvh] aspect-video bg-black shadow-2xl relative overflow-hidden flex items-center justify-center">
+            <div className="w-full max-w-6xl h-fit max-h-[85dvh] shadow-2xl relative flex items-center justify-center">
               {selectedVideo.videoUrl && (selectedVideo.videoUrl.includes('youtube.com') || selectedVideo.videoUrl.includes('youtu.be') || selectedVideo.videoUrl.includes('bilibili.com') || selectedVideo.videoUrl.includes('vimeo.com')) ? (
-                <iframe 
-                  src={getEmbedUrl(selectedVideo.videoUrl) || undefined}
-                  className="w-full h-full"
-                  allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
-                  allowFullScreen
-                  referrerPolicy={selectedVideo.videoUrl.includes('bilibili.com') ? "no-referrer" : "no-referrer-when-downgrade"}
-                  sandbox="allow-top-navigation allow-same-origin allow-forms allow-scripts allow-popups allow-presentation allow-fullscreen"
-                />
+                <div className="w-full aspect-video">
+                  <iframe 
+                    src={getEmbedUrl(selectedVideo.videoUrl) || undefined}
+                    className="w-full h-full border-0"
+                    allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
+                    allowFullScreen
+                    referrerPolicy={selectedVideo.videoUrl.includes('bilibili.com') ? "no-referrer" : "no-referrer-when-downgrade"}
+                    sandbox="allow-top-navigation allow-same-origin allow-forms allow-scripts allow-popups allow-presentation allow-fullscreen"
+                  />
+                </div>
               ) : selectedVideo.videoUrl ? (
                 <video 
                   src={selectedVideo.videoUrl || undefined} 
