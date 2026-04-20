@@ -142,21 +142,7 @@ export default function PhotoGallery() {
         id: doc.id,
         ...doc.data()
       } as Photo));
-      
-      // If no photos in DB, provide sample data
-      if (photoData.length === 0) {
-        const samples: Photo[] = [
-          { id: 's1', url: 'https://picsum.photos/seed/p1/800/1000', title: 'Urban Geometry', category: 'Editorial', aspectRatio: 'portrait', createdAt: new Date().toISOString() },
-          { id: 's2', url: 'https://picsum.photos/seed/p2/800/1000', title: 'Light Play', category: 'Personal', aspectRatio: 'portrait', createdAt: new Date().toISOString() },
-          { id: 's3', url: 'https://picsum.photos/seed/p3/800/1000', title: 'Soulful Portraits', category: 'Commercial', aspectRatio: 'portrait', createdAt: new Date().toISOString() },
-          { id: 's4', url: 'https://picsum.photos/seed/p4/800/1000', title: 'Minimalist Void', category: 'Editorial', aspectRatio: 'portrait', createdAt: new Date().toISOString() },
-          { id: 's5', url: 'https://picsum.photos/seed/p5/800/1000', title: 'Grit & Grace', category: 'Personal', aspectRatio: 'portrait', createdAt: new Date().toISOString() },
-          { id: 's6', url: 'https://picsum.photos/seed/p6/800/1000', title: 'Modern Muse', category: 'Editorial', aspectRatio: 'portrait', createdAt: new Date().toISOString() },
-        ];
-        setPhotos(samples);
-      } else {
-        setPhotos(photoData);
-      }
+      setPhotos(photoData);
     }, (error) => {
       handleFirestoreError(error, OperationType.LIST, 'photos');
       setPhotos([]);

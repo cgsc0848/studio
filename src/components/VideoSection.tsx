@@ -21,19 +21,7 @@ export default function VideoSection() {
         id: doc.id,
         ...doc.data()
       } as Video));
-      
-      // If no videos in DB, provide sample data
-      if (videoData.length === 0) {
-        const samples: Video[] = [
-          { id: 'v1', title: 'Urban Rhythms', category: 'Cinematic', thumbnail: 'https://picsum.photos/seed/v1/800/450', videoUrl: 'https://vimeo.com/22439234', description: 'Exploring the pulse of the city.', createdAt: new Date().toISOString() },
-          { id: 'v2', title: 'The Silent Muse', category: 'Editorial', thumbnail: 'https://picsum.photos/seed/v2/800/450', videoUrl: 'https://vimeo.com/76979871', description: 'A study in stillness and light.', createdAt: new Date().toISOString() },
-          { id: 'v3', title: 'Modern Commerce', category: 'Commercial', thumbnail: 'https://picsum.photos/seed/v3/800/450', videoUrl: 'https://vimeo.com/22439234', description: 'Visual energy for the modern brand.', createdAt: new Date().toISOString() },
-          { id: 'v4', title: 'Personal Diary', category: 'Personal', thumbnail: 'https://picsum.photos/seed/v4/800/450', videoUrl: 'https://vimeo.com/76979871', description: 'Quiet moments captured on film.', createdAt: new Date().toISOString() },
-        ];
-        setAllVideos(samples);
-      } else {
-        setAllVideos(videoData);
-      }
+      setAllVideos(videoData);
     }, (error) => {
       handleFirestoreError(error, OperationType.LIST, 'videos');
       setAllVideos([]);
@@ -105,14 +93,6 @@ export default function VideoSection() {
     
     // Bilibili
     if (url.includes('bilibili.com') || url.includes('b23.tv')) {
-      // If it's already a player URL, preserve its params but ensure it's https
-      if (url.includes('player.bilibili.com')) {
-        let finalUrl = url.startsWith('//') ? 'https:' + url : url;
-        if (!finalUrl.includes('high_quality')) finalUrl += '&high_quality=1';
-        if (!finalUrl.includes('as_wide')) finalUrl += '&as_wide=1';
-        return finalUrl;
-      }
-
       let bvid = '';
       const bvMatch = url.match(/BV[a-zA-Z0-9]+/);
       if (bvMatch) {
@@ -120,7 +100,8 @@ export default function VideoSection() {
       }
       
       if (bvid) {
-        return `https://player.bilibili.com/player.html?bvid=${bvid}&page=1&high_quality=1&as_wide=1&allowfullscreen=true&autoplay=1&danmaku=0`;
+        // Updated Bilibili embed URL parameters to prevent common playback errors
+        return `https://player.bilibili.com/player.html?bvid=${bvid}&page=1&high_quality=1&as_wide=1&allowfullscreen=true&autoplay=0&danmaku=0&autoplay=0`;
       }
     }
 
@@ -244,14 +225,14 @@ export default function VideoSection() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-              className="w-full max-w-6xl h-fit max-h-[85dvh] shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative flex items-center justify-center z-[2005]"
+              className="w-full max-w-6xl h-fit max-h-[90dvh] shadow-[0_20px_50px_rgba(0,0,0,0.8)] relative flex flex-col items-center justify-center z-[2005]"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="w-full aspect-video bg-black rounded-lg overflow-hidden border border-white/5">
+              <div className="w-full aspect-video bg-black rounded overflow-hidden">
                 {selectedVideo.videoUrl && (selectedVideo.videoUrl.includes('youtube.com') || selectedVideo.videoUrl.includes('youtu.be') || selectedVideo.videoUrl.includes('bilibili.com') || selectedVideo.videoUrl.includes('vimeo.com')) ? (
                   <iframe 
                     src={getEmbedUrl(selectedVideo.videoUrl) || undefined}
-                    className="w-full h-full border-0"
+                    className="w-full h-full border-0 absolute inset-0"
                     allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
                     allowFullScreen
                     referrerPolicy="no-referrer"
