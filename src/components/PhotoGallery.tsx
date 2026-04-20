@@ -92,6 +92,15 @@ export default function PhotoGallery() {
   }, [photoIndex, photos]);
 
   useEffect(() => {
+    if (selectedPhoto) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [selectedPhoto]);
+
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (selectedPhoto) {
         if (e.key === 'ArrowRight') navigatePhoto('next');
@@ -137,12 +146,12 @@ export default function PhotoGallery() {
       // If no photos in DB, provide sample data
       if (photoData.length === 0) {
         const samples: Photo[] = [
-          { id: 's1', url: 'https://picsum.photos/seed/p1/800/1000', title: 'Urban Geometry', category: 'Editorial', aspectRatio: '4/5', createdAt: new Date().toISOString() },
-          { id: 's2', url: 'https://picsum.photos/seed/p2/800/1000', title: 'Light Play', category: 'Personal', aspectRatio: '4/5', createdAt: new Date().toISOString() },
-          { id: 's3', url: 'https://picsum.photos/seed/p3/800/1000', title: 'Soulful Portraits', category: 'Commercial', aspectRatio: '4/5', createdAt: new Date().toISOString() },
-          { id: 's4', url: 'https://picsum.photos/seed/p4/800/1000', title: 'Minimalist Void', category: 'Editorial', aspectRatio: '4/5', createdAt: new Date().toISOString() },
-          { id: 's5', url: 'https://picsum.photos/seed/p5/800/1000', title: 'Grit & Grace', category: 'Personal', aspectRatio: '4/5', createdAt: new Date().toISOString() },
-          { id: 's6', url: 'https://picsum.photos/seed/p6/800/1000', title: 'Modern Muse', category: 'Editorial', aspectRatio: '4/5', createdAt: new Date().toISOString() },
+          { id: 's1', url: 'https://picsum.photos/seed/p1/800/1000', title: 'Urban Geometry', category: 'Editorial', aspectRatio: 'portrait', createdAt: new Date().toISOString() },
+          { id: 's2', url: 'https://picsum.photos/seed/p2/800/1000', title: 'Light Play', category: 'Personal', aspectRatio: 'portrait', createdAt: new Date().toISOString() },
+          { id: 's3', url: 'https://picsum.photos/seed/p3/800/1000', title: 'Soulful Portraits', category: 'Commercial', aspectRatio: 'portrait', createdAt: new Date().toISOString() },
+          { id: 's4', url: 'https://picsum.photos/seed/p4/800/1000', title: 'Minimalist Void', category: 'Editorial', aspectRatio: 'portrait', createdAt: new Date().toISOString() },
+          { id: 's5', url: 'https://picsum.photos/seed/p5/800/1000', title: 'Grit & Grace', category: 'Personal', aspectRatio: 'portrait', createdAt: new Date().toISOString() },
+          { id: 's6', url: 'https://picsum.photos/seed/p6/800/1000', title: 'Modern Muse', category: 'Editorial', aspectRatio: 'portrait', createdAt: new Date().toISOString() },
         ];
         setPhotos(samples);
       } else {
@@ -206,8 +215,11 @@ export default function PhotoGallery() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-12 transition-colors duration-700"
-            style={{ backgroundColor: modalBgColor }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 transition-colors duration-700"
+            style={{ 
+              backgroundColor: modalBgColor,
+              height: '100dvh'
+            }}
           >
             <div className="absolute inset-0 cursor-zoom-out" onClick={() => setSelectedPhoto(null)} />
             
@@ -237,20 +249,20 @@ export default function PhotoGallery() {
 
             <motion.div 
               key={selectedPhoto.id}
-              initial={{ scale: 0.9, opacity: 0 }}
+              initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="relative max-w-5xl max-h-[85vh] w-full flex flex-col items-center justify-center z-[105]"
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              className="relative max-w-[98vw] max-h-[95dvh] w-fit flex flex-col items-center justify-center z-[105]"
               onClick={(e) => e.stopPropagation()}
             >
               <img 
                 src={selectedPhoto.url || undefined} 
                 alt={selectedPhoto.title}
-                className="max-w-full max-h-[85vh] object-contain shadow-2xl select-none"
+                className="max-w-full max-h-[75dvh] md:max-h-[85dvh] object-contain shadow-[0_20px_50px_rgba(0,0,0,0.3)] select-none"
                 referrerPolicy="no-referrer"
               />
-              <div className="absolute -bottom-16 left-0 right-0 text-center">
+              <div className="mt-8 text-center">
                 <h3 className="text-lg font-medium tracking-tight text-white">{selectedPhoto.title}</h3>
                 <p className="text-[10px] uppercase tracking-widest text-white/60 mt-2">{selectedPhoto.category}</p>
                 <p className="text-[10px] text-white/20 mt-1">{photoIndex + 1} / {photos.length}</p>

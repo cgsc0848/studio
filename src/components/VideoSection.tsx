@@ -25,10 +25,10 @@ export default function VideoSection() {
       // If no videos in DB, provide sample data
       if (videoData.length === 0) {
         const samples: Video[] = [
-          { id: 'v1', title: 'Urban Rhythms', category: 'Cinematic', thumbnail: 'https://picsum.photos/seed/v1/800/450', videoUrl: 'https://vimeo.com/22439234', createdAt: new Date().toISOString() },
-          { id: 'v2', title: 'The Silent Muse', category: 'Editorial', thumbnail: 'https://picsum.photos/seed/v2/800/450', videoUrl: 'https://vimeo.com/76979871', createdAt: new Date().toISOString() },
-          { id: 'v3', title: 'Modern Commerce', category: 'Commercial', thumbnail: 'https://picsum.photos/seed/v3/800/450', videoUrl: 'https://vimeo.com/22439234', createdAt: new Date().toISOString() },
-          { id: 'v4', title: 'Personal Diary', category: 'Personal', thumbnail: 'https://picsum.photos/seed/v4/800/450', videoUrl: 'https://vimeo.com/76979871', createdAt: new Date().toISOString() },
+          { id: 'v1', title: 'Urban Rhythms', category: 'Cinematic', thumbnail: 'https://picsum.photos/seed/v1/800/450', videoUrl: 'https://vimeo.com/22439234', description: 'Exploring the pulse of the city.', createdAt: new Date().toISOString() },
+          { id: 'v2', title: 'The Silent Muse', category: 'Editorial', thumbnail: 'https://picsum.photos/seed/v2/800/450', videoUrl: 'https://vimeo.com/76979871', description: 'A study in stillness and light.', createdAt: new Date().toISOString() },
+          { id: 'v3', title: 'Modern Commerce', category: 'Commercial', thumbnail: 'https://picsum.photos/seed/v3/800/450', videoUrl: 'https://vimeo.com/22439234', description: 'Visual energy for the modern brand.', createdAt: new Date().toISOString() },
+          { id: 'v4', title: 'Personal Diary', category: 'Personal', thumbnail: 'https://picsum.photos/seed/v4/800/450', videoUrl: 'https://vimeo.com/76979871', description: 'Quiet moments captured on film.', createdAt: new Date().toISOString() },
         ];
         setAllVideos(samples);
       } else {
@@ -41,6 +41,15 @@ export default function VideoSection() {
 
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (selectedVideo) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [selectedVideo]);
 
   const CATEGORIES: Category[] = ['All', 'Editorial', 'Cinematic', 'Commercial', 'Personal'];
 
@@ -221,7 +230,8 @@ export default function VideoSection() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-ink/95 p-4 md:p-12"
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-ink/95 p-4 md:p-8"
+            style={{ height: '100dvh' }}
           >
             <button 
               onClick={() => setSelectedVideo(null)}
@@ -229,7 +239,7 @@ export default function VideoSection() {
             >
               <X size={32} />
             </button>
-            <div className="w-full max-w-[90vw] max-h-[85vh] aspect-video bg-black shadow-2xl relative overflow-hidden">
+            <div className="w-full max-w-6xl max-h-[75dvh] aspect-video bg-black shadow-2xl relative overflow-hidden flex items-center justify-center">
               {selectedVideo.videoUrl && (selectedVideo.videoUrl.includes('youtube.com') || selectedVideo.videoUrl.includes('youtu.be') || selectedVideo.videoUrl.includes('bilibili.com') || selectedVideo.videoUrl.includes('vimeo.com')) ? (
                 <iframe 
                   src={getEmbedUrl(selectedVideo.videoUrl) || undefined}

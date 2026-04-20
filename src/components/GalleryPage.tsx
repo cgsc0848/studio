@@ -63,6 +63,15 @@ export default function GalleryPage() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedPhoto, selectedVideo, navigatePhoto]);
 
+  useEffect(() => {
+    if (selectedPhoto || selectedVideo) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [selectedPhoto, selectedVideo]);
+
   // Extract color when photo changes
   useEffect(() => {
     if (selectedPhoto) {
@@ -250,8 +259,11 @@ export default function GalleryPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-12 transition-colors duration-700"
-            style={{ backgroundColor: modalBgColor }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 transition-colors duration-700"
+            style={{ 
+              backgroundColor: modalBgColor,
+              height: '100dvh'
+            }}
           >
             <div className="absolute inset-0 cursor-zoom-out" onClick={() => setSelectedPhoto(null)} />
             
@@ -281,21 +293,21 @@ export default function GalleryPage() {
 
             <motion.div 
               key={selectedPhoto.id}
-              initial={{ scale: 0.9, opacity: 0 }}
+              initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="relative max-w-7xl max-h-[80vh] w-full flex flex-col items-center justify-center z-[105]"
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+              className="relative max-w-[98vw] max-h-[95dvh] w-fit flex flex-col items-center justify-center z-[105]"
               onClick={(e) => e.stopPropagation()}
             >
               <img 
                 src={selectedPhoto.url} 
                 alt={selectedPhoto.title}
-                className="max-w-full max-h-[80vh] object-contain shadow-2xl select-none"
+                className="max-w-full max-h-[75dvh] md:max-h-[85dvh] object-contain shadow-[0_20px_50px_rgba(0,0,0,0.3)] select-none"
                 referrerPolicy="no-referrer"
               />
-              <div className="absolute -bottom-16 left-0 right-0 text-center">
-                <h3 className="text-lg font-medium tracking-tight text-white">{selectedPhoto.title}</h3>
+              <div className="mt-8 text-center text-white">
+                <h3 className="text-lg font-medium tracking-tight">{selectedPhoto.title}</h3>
                 <p className="text-[10px] uppercase tracking-widest text-white/60 mt-2">{selectedPhoto.category}</p>
                 <p className="text-[10px] text-white/20 mt-1">{photoIndex + 1} / {filteredItems.length}</p>
               </div>
@@ -311,15 +323,16 @@ export default function GalleryPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-ink/95 p-4 md:p-12"
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-ink/95 p-4 md:p-8"
+            style={{ height: '100dvh' }}
           >
             <button 
               onClick={() => setSelectedVideo(null)}
-              className="absolute top-8 right-8 text-white/60 hover:text-white transition-colors"
+              className="absolute top-8 right-8 text-white/60 hover:text-white transition-colors z-[110]"
             >
               <X size={32} />
             </button>
-            <div className="w-full max-w-[90vw] max-h-[85vh] aspect-video bg-black shadow-2xl relative overflow-hidden">
+            <div className="w-full max-w-6xl max-h-[75dvh] aspect-video bg-black shadow-2xl relative overflow-hidden flex items-center justify-center">
               {selectedVideo.videoUrl && (selectedVideo.videoUrl.includes('youtube.com') || selectedVideo.videoUrl.includes('youtu.be') || selectedVideo.videoUrl.includes('bilibili.com') || selectedVideo.videoUrl.includes('vimeo.com')) ? (
                 <iframe 
                   src={getEmbedUrl(selectedVideo.videoUrl) || undefined}
