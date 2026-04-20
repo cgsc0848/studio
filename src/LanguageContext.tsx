@@ -67,7 +67,13 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const unsubscribe = onSnapshot(doc(db, 'settings', 'global'), (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.data() as SiteSettings;
-        setSettings(data);
+        setSettings(prev => ({
+          ...prev,
+          ...data,
+          navLabels: data.navLabels || {},
+          categoryLabels: data.categoryLabels || {},
+          socialLinks: data.socialLinks || prev.socialLinks
+        }));
         
         // Apply global styles
         document.documentElement.style.setProperty('--accent', data.primaryColor || '#c4b095');

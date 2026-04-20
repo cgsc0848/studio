@@ -151,7 +151,7 @@ export default function GalleryPage() {
 
   const getCategoryLabel = (cat: string) => {
     const key = cat.toLowerCase();
-    if (settings.categoryLabels[key]) return settings.categoryLabels[key];
+    if (settings?.categoryLabels?.[key]) return settings.categoryLabels[key];
     
     // Check specific categories for translations
     if (activeType === 'photos') {

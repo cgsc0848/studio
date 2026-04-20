@@ -58,7 +58,7 @@ export default function VideoSection() {
 
   const getCategoryName = (cat: Category) => {
     const key = cat.toLowerCase();
-    if (settings.categoryLabels[key]) return settings.categoryLabels[key];
+    if (settings?.categoryLabels?.[key]) return settings.categoryLabels[key];
     switch(cat) {
       case 'All': return t.cinematography.categories.all;
       case 'Cinematic': return t.cinematography.categories.cinematic;

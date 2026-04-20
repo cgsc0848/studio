@@ -94,7 +94,7 @@ export default function PhotoGallery() {
 
   const getCategoryName = (cat: string) => {
     const key = cat.toLowerCase();
-    if (settings.categoryLabels[key]) return settings.categoryLabels[key];
+    if (settings?.categoryLabels?.[key]) return settings.categoryLabels[key];
     return (t.photography.categories as any)[key] || cat;
   };
 

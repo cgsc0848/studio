@@ -95,7 +95,14 @@ export default function Admin() {
 
         unsubscribeSettings = onSnapshot(doc(db, 'settings', 'global'), (snapshot) => {
           if (snapshot.exists()) {
-            setSettings(snapshot.data() as SiteSettings);
+            const data = snapshot.data() as SiteSettings;
+            setSettings(prev => ({
+              ...prev,
+              ...data,
+              navLabels: data.navLabels || {},
+              categoryLabels: data.categoryLabels || {},
+              socialLinks: data.socialLinks || prev.socialLinks
+            }));
           }
         });
       }

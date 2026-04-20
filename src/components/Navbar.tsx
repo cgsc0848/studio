@@ -46,9 +46,9 @@ export default function Navbar() {
   };
 
   const navLinks = [
-    { id: 'cinematography', label: settings.navLabels['films'] || t.nav.films },
-    { id: 'photography', label: settings.navLabels['stills'] || t.nav.stills },
-    { id: 'about', label: settings.navLabels['about'] || t.nav.about },
+    { id: 'cinematography', label: settings?.navLabels?.['films'] || t.nav.films },
+    { id: 'photography', label: settings?.navLabels?.['stills'] || t.nav.stills },
+    { id: 'about', label: settings?.navLabels?.['about'] || t.nav.about },
   ];
 
   return (

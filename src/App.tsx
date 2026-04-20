@@ -63,10 +63,10 @@ function SidebarNav() {
   };
 
   const sections = [
-    { id: 'hero', label: settings.navLabels['home'] || 'Home' },
-    { id: 'about', label: settings.navLabels['about'] || 'About' },
-    { id: 'cinematography', label: settings.navLabels['films'] || 'Films' },
-    { id: 'photography', label: settings.navLabels['stills'] || 'Stills' },
+    { id: 'hero', label: settings?.navLabels?.['home'] || 'Home' },
+    { id: 'about', label: settings?.navLabels?.['about'] || 'About' },
+    { id: 'cinematography', label: settings?.navLabels?.['films'] || 'Films' },
+    { id: 'photography', label: settings?.navLabels?.['stills'] || 'Stills' },
   ];
 
   return (
