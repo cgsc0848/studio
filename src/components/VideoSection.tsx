@@ -82,7 +82,7 @@ export default function VideoSection() {
     // YouTube
     if (url.includes('youtube.com') || url.includes('youtu.be')) {
       const ytIdMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
-      const id = ytIdMatch ? ytIdMatch[1] : '';
+      const id = ytIdMatch?.[1] || '';
       if (id) {
         return `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&rel=0&modestbranding=1&playsinline=1`;
       }
@@ -109,6 +109,16 @@ export default function VideoSection() {
     }
     
     return url;
+  };
+
+  const getSafeThumbnail = (thumbnail: string, videoUrl: string) => {
+    if (!thumbnail || !videoUrl) return thumbnail;
+    if (thumbnail.includes('img.youtube.com/vi/iframe') || thumbnail.includes('maxresdefault.jpg')) {
+       const ytIdMatch = videoUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
+       const id = ytIdMatch?.[1];
+       if (id) return `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+    }
+    return thumbnail;
   };
 
   return (
@@ -143,7 +153,7 @@ export default function VideoSection() {
                       onDragStart={(e) => e.preventDefault()}
                     />
                     <img 
-                      src={video.thumbnail || undefined} 
+                      src={getSafeThumbnail(video.thumbnail, video.videoUrl) || undefined} 
                       alt={video.title}
                       loading="lazy"
                       className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 opacity-60 group-hover:opacity-80 select-none"
@@ -247,7 +257,7 @@ export default function VideoSection() {
                         allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer"
                         allowFullScreen
                         referrerPolicy="strict-origin-when-cross-origin"
-                        sandbox="allow-top-navigation allow-same-origin allow-forms allow-scripts allow-popups allow-presentation allow-fullscreen"
+                        sandbox="allow-top-navigation allow-same-origin allow-forms allow-scripts allow-popups allow-presentation"
                         title={selectedVideo.title}
                       />
                     ) : selectedVideo.videoUrl ? (
@@ -288,7 +298,11 @@ export default function VideoSection() {
                         )}
                       >
                         <div className="w-24 aspect-video rounded-lg overflow-hidden flex-shrink-0 relative">
-                          <img src={video.thumbnail} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
+                          <img 
+                            src={getSafeThumbnail(video.thumbnail, video.videoUrl)} 
+                            className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" 
+                            referrerPolicy="no-referrer"
+                          />
                           {selectedVideo.id === video.id && (
                             <div className="absolute inset-0 bg-accent/20 flex items-center justify-center">
                               <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />

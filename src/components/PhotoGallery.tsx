@@ -116,17 +116,21 @@ export default function PhotoGallery() {
   useEffect(() => {
     if (selectedPhoto) {
       const img = new Image();
-      img.crossOrigin = "Anonymous";
       img.src = selectedPhoto.url;
       img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-        canvas.width = 1;
-        canvas.height = 1;
-        ctx.drawImage(img, 0, 0, 1, 1);
-        const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
-        setModalBgColor(`rgba(${r}, ${g}, ${b}, 0.98)`);
+        try {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d', { willReadFrequently: true });
+          if (!ctx) return;
+          canvas.width = 1;
+          canvas.height = 1;
+          ctx.drawImage(img, 0, 0, 1, 1);
+          const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
+          setModalBgColor(`rgba(${r}, ${g}, ${b}, 0.98)`);
+        } catch (e) {
+          // If tainted by CORS, use default
+          setModalBgColor('rgba(26, 26, 26, 0.95)');
+        }
       };
       img.onerror = () => setModalBgColor('rgba(26, 26, 26, 0.95)');
     }

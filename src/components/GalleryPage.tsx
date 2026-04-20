@@ -73,22 +73,23 @@ export default function GalleryPage() {
     return () => { document.body.style.overflow = ''; };
   }, [selectedPhoto, selectedVideo]);
 
-  // Extract color when photo changes
   useEffect(() => {
     if (selectedPhoto) {
       const img = new Image();
-      img.crossOrigin = "Anonymous";
       img.src = selectedPhoto.url;
       img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-        canvas.width = 1;
-        canvas.height = 1;
-        ctx.drawImage(img, 0, 0, 1, 1);
-        const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
-        // Darken the color for better text contrast if needed, or keep it as is
-        setModalBgColor(`rgba(${r}, ${g}, ${b}, 0.98)`);
+        try {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d', { willReadFrequently: true });
+          if (!ctx) return;
+          canvas.width = 1;
+          canvas.height = 1;
+          ctx.drawImage(img, 0, 0, 1, 1);
+          const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
+          setModalBgColor(`rgba(${r}, ${g}, ${b}, 0.98)`);
+        } catch (e) {
+          setModalBgColor('rgba(26, 26, 26, 0.95)');
+        }
       };
       img.onerror = () => setModalBgColor('rgba(26, 26, 26, 0.95)');
     }
@@ -103,7 +104,7 @@ export default function GalleryPage() {
     if (url.startsWith('//')) url = 'https:' + url;
     if (url.includes('youtube.com') || url.includes('youtu.be')) {
       const ytIdMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
-      const id = ytIdMatch ? ytIdMatch[1] : '';
+      const id = ytIdMatch?.[1] || '';
       if (id) {
         return `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&rel=0&modestbranding=1&playsinline=1`;
       }
@@ -119,6 +120,16 @@ export default function GalleryPage() {
       return `https://player.vimeo.com/video/${id}?autoplay=1&muted=1`;
     }
     return url;
+  };
+
+  const getSafeThumbnail = (thumbnail: string, videoUrl: string) => {
+    if (!thumbnail || !videoUrl) return thumbnail;
+    if (thumbnail.includes('img.youtube.com/vi/iframe') || thumbnail.includes('maxresdefault.jpg')) {
+       const ytIdMatch = videoUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
+       const id = ytIdMatch?.[1];
+       if (id) return `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+    }
+    return thumbnail;
   };
 
   useEffect(() => {
@@ -362,7 +373,7 @@ export default function GalleryPage() {
                           allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer"
                           allowFullScreen
                           referrerPolicy="strict-origin-when-cross-origin"
-                          sandbox="allow-top-navigation allow-same-origin allow-forms allow-scripts allow-popups allow-presentation allow-fullscreen"
+                          sandbox="allow-top-navigation allow-same-origin allow-forms allow-scripts allow-popups allow-presentation"
                           title={selectedVideo.title}
                         />
                       </div>
@@ -404,7 +415,11 @@ export default function GalleryPage() {
                         )}
                       >
                         <div className="w-24 aspect-video rounded-lg overflow-hidden flex-shrink-0 relative">
-                          <img src={video.thumbnail} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
+                          <img 
+                            src={getSafeThumbnail(video.thumbnail, video.videoUrl)} 
+                            className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" 
+                            referrerPolicy="no-referrer"
+                          />
                           {selectedVideo.id === video.id && (
                             <div className="absolute inset-0 bg-white/10 flex items-center justify-center">
                               <div className="w-2 h-2 rounded-full bg-white animate-pulse" />

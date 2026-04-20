@@ -127,18 +127,23 @@ export default function Admin() {
   };
 
   const getThumbnailFromUrl = (url: string) => {
+    if (!url) return '';
+    
+    // Extract src if an iframe tag is pasted
+    if (url.includes('<iframe')) {
+      const match = url.match(/src="([^"]+)"/);
+      if (match) url = match[1];
+    }
+
     if (url.includes('youtube.com') || url.includes('youtu.be')) {
-      let id = '';
-      if (url.includes('v=')) {
-        id = url.split('v=')[1].split('&')[0];
-      } else {
-        id = url.split('/').pop()?.split('?')[0] || '';
+      const ytIdMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
+      const id = ytIdMatch?.[1] || '';
+      if (id) {
+        // Use hqdefault as it's more reliable than maxresdefault
+        return `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
       }
-      return `https://img.youtube.com/vi/${id}/maxresdefault.jpg`;
     }
     
-    // Bilibili thumbnail logic can be complex without server-side proxy
-    // For now, return empty to allow manual entry or fallback to default
     return '';
   };
 
@@ -521,7 +526,7 @@ export default function Admin() {
                 {photos.map((photo) => (
                   <div key={photo.id} className="bg-white p-4 rounded-xl border border-ink/5 flex gap-6 group">
                     <div className="w-24 h-24 flex-shrink-0 overflow-hidden rounded-lg bg-ink/5 relative group/img">
-                      <img src={photo.url || undefined} className="w-full h-full object-cover" />
+                      <img src={photo.url || undefined} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 group-hover/img:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
                         <label className="text-white hover:text-accent cursor-pointer">
                           <Plus size={20} />
@@ -616,7 +621,7 @@ export default function Admin() {
                   <div key={video.id} className="bg-white p-4 rounded-xl border border-ink/5 flex flex-col gap-4 group">
                     <div className="flex gap-6">
                       <div className="w-32 h-20 flex-shrink-0 overflow-hidden rounded-lg bg-ink/5 relative group/img">
-                        <img src={video.thumbnail || undefined} className="w-full h-full object-cover" />
+                        <img src={video.thumbnail || undefined} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
                           <label className="text-white hover:text-accent cursor-pointer">
                             <Plus size={20} />
@@ -734,7 +739,7 @@ export default function Admin() {
                     <div className="flex flex-col gap-4 mb-2">
                       <div className="flex gap-4 items-center">
                         <div className="w-24 h-24 rounded-lg overflow-hidden bg-ink/5 border border-ink/10">
-                          <img src={settings.heroImageUrl} className="w-full h-full object-cover" />
+                          <img src={settings.heroImageUrl} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                         </div>
                         <div className="flex-1 space-y-3">
                           <div className="flex items-center gap-3">
@@ -795,7 +800,7 @@ export default function Admin() {
                     <div className="flex gap-6 items-start">
                       <div className="w-32 h-40 rounded-xl overflow-hidden bg-ink/5 border border-ink/10 flex-shrink-0">
                         {settings.aboutImageUrl ? (
-                          <img src={settings.aboutImageUrl} className="w-full h-full object-cover" />
+                          <img src={settings.aboutImageUrl} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-ink/20"><ImageIcon size={32} /></div>
                         )}
