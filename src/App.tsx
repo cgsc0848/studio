@@ -70,9 +70,21 @@ function SidebarNav() {
   ];
 
   return (
-    <div className="fixed right-6 md:right-12 top-1/2 -translate-y-1/2 z-40 hidden md:flex flex-col items-center gap-8">
-      <div className="flex flex-col gap-4">
-        {sections.map((section) => (
+    <>
+      {/* Mobile Back to Top */}
+      <motion.button
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: isVisible ? 1 : 0, scale: isVisible ? 1 : 0 }}
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        className="fixed bottom-10 right-6 z-40 md:hidden bg-bg-paper border border-ink/10 p-3 rounded-full shadow-lg text-ink"
+      >
+        <ChevronUp size={20} />
+      </motion.button>
+
+      {/* Desktop Sidebar Nav */}
+      <div className="fixed right-6 md:right-12 top-1/2 -translate-y-1/2 z-40 hidden md:flex flex-col items-center gap-8">
+        <div className="flex flex-col gap-4">
+          {sections.map((section) => (
           <button
             key={section.id}
             onClick={() => scrollToSection(section.id)}
@@ -101,6 +113,7 @@ function SidebarNav() {
         <ChevronUp size={20} />
       </motion.button>
     </div>
+    </>
   );
 }
 
