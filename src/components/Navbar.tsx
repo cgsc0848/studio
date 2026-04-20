@@ -77,7 +77,7 @@ export default function Navbar() {
               {link.label}
             </Link>
           ))}
-          <Link to="/gallery/All" className="hover:text-ink transition-colors">{settings.navLabels['journal'] || t.nav.editorial}</Link>
+          <Link to="/gallery/All" className="hover:text-ink transition-colors">{settings?.navLabels?.['journal'] || t.nav.editorial}</Link>
           
           <button 
             onClick={toggleLanguage}

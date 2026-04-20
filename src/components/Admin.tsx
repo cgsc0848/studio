@@ -152,7 +152,7 @@ export default function Admin() {
     }
 
     if (url.includes('youtube.com') || url.includes('youtu.be')) {
-      const ytIdMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
+      const ytIdMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/|youtube\.com\/live\/)([^"&?\/\s]{11})/i);
       const id = ytIdMatch?.[1] || '';
       if (id) {
         // Use hqdefault as it's more reliable than maxresdefault
@@ -183,9 +183,16 @@ export default function Admin() {
     if (!urlInput) return;
     
     try {
+      let finalUrl = urlInput;
+      // Extract src if an iframe tag is pasted
+      if (finalUrl.includes('<iframe')) {
+        const match = finalUrl.match(/src="([^"]+)"/);
+        if (match) finalUrl = match[1];
+      }
+
       if (isAddingByUrl === 'photo') {
         await addDoc(collection(db, 'photos'), {
-          url: urlInput,
+          url: finalUrl,
           title: titleInput || 'New Photo',
           category: 'Editorial',
           aspectRatio: 'portrait',
@@ -194,10 +201,10 @@ export default function Admin() {
         });
         showToast(language === 'en' ? 'Photo added' : '照片已添加');
       } else if (isAddingByUrl === 'video') {
-        const thumb = getThumbnailFromUrl(urlInput) || '';
+        const thumb = getThumbnailFromUrl(finalUrl) || '';
         await addDoc(collection(db, 'videos'), {
           thumbnail: thumb,
-          videoUrl: urlInput,
+          videoUrl: finalUrl,
           title: titleInput || 'New Video',
           category: 'Cinematic',
           description: 'New video description',
@@ -793,10 +800,10 @@ export default function Admin() {
                       <label className="block text-[9px] uppercase tracking-widest text-ink/40 mb-1.5 font-bold">{key}</label>
                       <input 
                         placeholder={(t.nav as any)[key]}
-                        value={settings.navLabels[key] || ''}
+                        value={settings?.navLabels?.[key] || ''}
                         onChange={(e) => setSettings({
                           ...settings,
-                          navLabels: { ...settings.navLabels, [key]: e.target.value }
+                          navLabels: { ...(settings?.navLabels || {}), [key]: e.target.value }
                         })}
                         className="w-full p-3 bg-ink/5 rounded-lg outline-none focus:ring-1 ring-accent text-[10px] tracking-widest font-medium"
                       />
@@ -816,10 +823,10 @@ export default function Admin() {
                       <label className="block text-[9px] uppercase tracking-widest text-ink/40 mb-1.5 font-bold">{key}</label>
                       <input 
                         placeholder={(t.cinematography.categories as any)[key]}
-                        value={settings.categoryLabels[key] || ''}
+                        value={settings?.categoryLabels?.[key] || ''}
                         onChange={(e) => setSettings({
                           ...settings,
-                          categoryLabels: { ...settings.categoryLabels, [key]: e.target.value }
+                          categoryLabels: { ...(settings?.categoryLabels || {}), [key]: e.target.value }
                         })}
                         className="w-full p-3 bg-ink/5 rounded-lg outline-none focus:ring-1 ring-accent text-[10px] tracking-widest font-medium"
                       />

@@ -124,11 +124,20 @@ export default function GalleryPage() {
 
   const getSafeThumbnail = (thumbnail: string, videoUrl: string) => {
     if (!thumbnail || !videoUrl) return thumbnail;
-    if (thumbnail.includes('img.youtube.com/vi/iframe') || thumbnail.includes('maxresdefault.jpg')) {
-       const ytIdMatch = videoUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
-       const id = ytIdMatch?.[1];
-       if (id) return `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+    
+    // Check for YouTube specifically
+    if (thumbnail.includes('youtube.com') || videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
+      let url = videoUrl;
+      if (url.includes('<iframe')) {
+        const match = url.match(/src="([^"]+)"/);
+        if (match) url = match[1];
+      }
+      
+      const ytIdMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/|youtube\.com\/live\/)([^"&?\/\s]{11})/i);
+      const id = ytIdMatch?.[1];
+      if (id) return `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
     }
+    
     return thumbnail;
   };
 
