@@ -108,6 +108,14 @@ export default function VideoSection() {
       }
     }
 
+    // Xinpianchang
+    if (url.includes('xinpianchang.com')) {
+      const match = url.match(/a(\d+)/);
+      if (match) {
+        return `https://www.xinpianchang.com/player/v1/a${match[1]}`;
+      }
+    }
+
     // Vimeo
     if (url.includes('vimeo.com')) {
       const id = url.split('/').pop()?.split('?')[0];
@@ -212,7 +220,7 @@ export default function VideoSection() {
                   )}
                 >
                   <div className="font-serif text-2xl flex items-baseline gap-3">
-                    {getCategoryName(cat)} <span className="text-[10px] font-sans opacity-50">/ 0{allVideos.filter(v => v.category === cat).length}</span>
+                    {getCategoryName(cat)} <span className="text-[10px] font-sans opacity-50">/ {(categoryCounts[cat] || 0) < 10 ? `0${categoryCounts[cat] || 0}` : categoryCounts[cat]}</span>
                   </div>
                   <p className="text-xs mt-2 text-white/60 leading-relaxed max-w-[240px]">
                     {getCategoryDesc(cat)}

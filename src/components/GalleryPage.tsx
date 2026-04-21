@@ -115,6 +115,10 @@ export default function GalleryPage() {
       if (bvMatch) bvid = bvMatch[0];
       if (bvid) return `https://player.bilibili.com/player.html?bvid=${bvid}&page=1&high_quality=1&as_wide=1&allowfullscreen=true&autoplay=0&danmaku=0`;
     }
+    if (url.includes('xinpianchang.com')) {
+      const match = url.match(/a(\d+)/);
+      if (match) return `https://www.xinpianchang.com/player/v1/a${match[1]}`;
+    }
     if (url.includes('vimeo.com')) {
       const id = url.split('/').pop()?.split('?')[0];
       return `https://player.vimeo.com/video/${id}?autoplay=1&muted=1`;

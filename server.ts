@@ -114,6 +114,37 @@ async function startServer() {
       res.status(500).json({ error: 'Failed to fetch Bilibili info' });
     }
   });
+
+  app.get('/api/xinpianchang-info', async (req, res) => {
+    const { url } = req.query;
+    if (!url || typeof url !== 'string') {
+      return res.status(400).json({ error: 'Missing url parameter' });
+    }
+
+    try {
+      const response = await axios.get(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        }
+      });
+
+      const html = response.data;
+      
+      // Basic meta tag scraping
+      const titleMatch = html.match(/<meta property="og:title" content="([^"]+)"/) || html.match(/<title>([^<]+)<\/title>/);
+      const thumbMatch = html.match(/<meta property="og:image" content="([^"]+)"/) || html.match(/<img[^>]+src="([^"]+)"[^>]+class="cover"/);
+      const descMatch = html.match(/<meta property="og:description" content="([^"]+)"/);
+
+      res.json({
+        title: titleMatch ? titleMatch[1].replace(' - 新片场', '') : 'Xinpianchang Video',
+        thumbnail: thumbMatch ? thumbMatch[1] : '',
+        description: descMatch ? descMatch[1] : ''
+      });
+    } catch (error) {
+      console.error('Xinpianchang scrape error:', error);
+      res.status(500).json({ error: 'Failed to fetch Xinpianchang info' });
+    }
+  });
   app.post('/api/upload', upload.single('file'), (req, res) => {
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
     res.json({ 

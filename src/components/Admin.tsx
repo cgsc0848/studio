@@ -64,6 +64,7 @@ export default function Admin() {
   const [isAddingByUrl, setIsAddingByUrl] = useState<'photo' | 'video' | null>(null);
   const [urlInput, setUrlInput] = useState('');
   const [titleInput, setTitleInput] = useState('');
+  const [categoryInput, setCategoryInput] = useState('');
   const { t, language, setLanguage } = useLanguage();
 
   const ADMIN_EMAIL = 'cgsc0848@gmail.com';
@@ -189,7 +190,13 @@ export default function Admin() {
   };
 
   const fetchBilibiliInfo = async (url: string) => {
-    const bvMatch = url.match(/BV[a-zA-Z0-9]+/);
+    // Standardize URL
+    let finalUrl = url;
+    if (finalUrl.includes('b23.tv')) {
+      // Short URLs might need resolving, but we can try extracting BV directly first
+    }
+    
+    const bvMatch = url.match(/BV[a-zA-Z0-9]+/i);
     if (!bvMatch) return null;
     const bvid = bvMatch[0];
     try {
@@ -199,6 +206,18 @@ export default function Admin() {
       }
     } catch (e) {
       console.error('Failed to fetch Bilibili info:', e);
+    }
+    return null;
+  };
+
+  const fetchXinpianchangInfo = async (url: string) => {
+    try {
+      const resp = await fetch(`/api/xinpianchang-info?url=${encodeURIComponent(url)}`);
+      if (resp.ok) {
+        return await resp.json();
+      }
+    } catch (e) {
+      console.error('Failed to fetch Xinpianchang info:', e);
     }
     return null;
   };
@@ -218,7 +237,7 @@ export default function Admin() {
         await addDoc(collection(db, 'photos'), {
           url: finalUrl,
           title: titleInput || 'New Photo',
-          category: settings.photoCategories[0] || 'Editorial',
+          category: categoryInput || settings.photoCategories[0] || 'Editorial',
           aspectRatio: 'portrait',
           order: photos.length,
           createdAt: new Date().toISOString()
@@ -236,13 +255,20 @@ export default function Admin() {
             thumbnail = info.thumbnail.replace('http://', 'https://');
             description = info.description || description;
           }
+        } else if (finalUrl.includes('xinpianchang.com')) {
+          const info = await fetchXinpianchangInfo(finalUrl);
+          if (info) {
+            title = titleInput || info.title;
+            thumbnail = info.thumbnail;
+            description = info.description || description;
+          }
         }
 
         await addDoc(collection(db, 'videos'), {
           thumbnail: thumbnail || 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&q=80&w=800',
           videoUrl: finalUrl,
           title,
-          category: settings.videoCategories[0] || 'Cinematic',
+          category: categoryInput || settings.videoCategories[0] || 'Cinematic',
           description,
           order: videos.length,
           createdAt: new Date().toISOString(),
@@ -253,6 +279,7 @@ export default function Admin() {
       setIsAddingByUrl(null);
       setUrlInput('');
       setTitleInput('');
+      setCategoryInput('');
     } catch (error) {
       handleFirestoreError(error, OperationType.CREATE, isAddingByUrl === 'photo' ? 'photos' : 'videos');
     }
@@ -530,6 +557,14 @@ export default function Admin() {
                 {t.admin.settings}
               </button>
             </div>
+            {activeTab === 'settings' && (
+              <button 
+                onClick={saveSettings}
+                className="px-6 py-2 bg-accent text-white rounded-full text-[10px] uppercase tracking-widest hover:opacity-90 transition-all flex items-center gap-2 shadow-sm"
+              >
+                <Save size={14} /> {t.admin.saveSettings}
+              </button>
+            )}
             <button onClick={handleLogout} className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-ink/60 hover:text-red-500 transition-colors ml-4">
               <LogOut size={14} />
             </button>
@@ -569,7 +604,10 @@ export default function Admin() {
                 </h2>
                 <div className="flex gap-2">
                   <button 
-                    onClick={() => setIsAddingByUrl('photo')}
+                    onClick={() => {
+                      setIsAddingByUrl('photo');
+                      setCategoryInput(settings.photoCategories[0] || '');
+                    }}
                     className="text-[10px] uppercase tracking-widest bg-accent text-white px-4 py-2 rounded-full hover:opacity-80 transition-opacity flex items-center gap-2"
                   >
                     <Plus size={12} /> {language === 'en' ? 'Add by URL' : '通过链接添加'}
@@ -651,7 +689,10 @@ export default function Admin() {
                 </h2>
                 <div className="flex gap-2">
                   <button 
-                    onClick={() => setIsAddingByUrl('video')}
+                    onClick={() => {
+                      setIsAddingByUrl('video');
+                      setCategoryInput(settings.videoCategories[0] || '');
+                    }}
                     className="text-[10px] uppercase tracking-widest bg-accent text-white px-4 py-2 rounded-full hover:opacity-80 transition-opacity flex items-center gap-2"
                   >
                     <Plus size={12} /> {language === 'en' ? 'Add by URL' : '通过链接添加'}
@@ -934,6 +975,58 @@ export default function Admin() {
                   </div>
                 </div>
               </section>
+
+               {/* Navigation Customization */}
+               <section className="space-y-6">
+                <h3 className="text-[10px] uppercase tracking-[0.3em] text-ink/40 flex items-center gap-2">
+                   <Menu size={14} /> {language === 'en' ? 'Navigation Labels' : '导航版块自定义'}
+                </h3>
+                <div className="bg-ink/5 p-8 rounded-2xl space-y-10">
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                      <div className="space-y-6">
+                        <label className="block text-[11px] uppercase tracking-[0.2em] text-ink/60 font-bold border-b border-ink/5 pb-2">English Labels</label>
+                        <div className="space-y-4">
+                           {Object.keys(settings.navLabels_en || {}).map(key => (
+                             <div key={key} className="flex items-center gap-4">
+                               <label className="w-16 text-[9px] uppercase tracking-widest text-ink/30">{key}</label>
+                               <input 
+                                 value={(settings.navLabels_en as any)[key] || ''}
+                                 onChange={(e) => setSettings({ 
+                                   ...settings, 
+                                   navLabels_en: { ...(settings.navLabels_en || {}), [key]: e.target.value } 
+                                 })}
+                                 className="flex-1 p-3 bg-white rounded-xl text-xs outline-none focus:ring-1 ring-accent border border-ink/5"
+                               />
+                             </div>
+                           ))}
+                        </div>
+                      </div>
+                      <div className="space-y-6">
+                        <label className="block text-[11px] uppercase tracking-[0.2em] text-ink/60 font-bold border-b border-ink/5 pb-2">中文名称 (ZH)</label>
+                        <div className="space-y-4">
+                           {Object.keys(settings.navLabels_zh || {}).map(key => (
+                             <div key={key} className="flex items-center gap-4">
+                               <label className="w-16 text-[9px] uppercase tracking-widest text-ink/30">{key}</label>
+                               <input 
+                                 value={(settings.navLabels_zh as any)[key] || ''}
+                                 onChange={(e) => setSettings({ 
+                                   ...settings, 
+                                   navLabels_zh: { ...(settings.navLabels_zh || {}), [key]: e.target.value } 
+                                 })}
+                                 className="flex-1 p-3 bg-white rounded-xl text-xs outline-none focus:ring-1 ring-accent border border-ink/5"
+                               />
+                             </div>
+                           ))}
+                        </div>
+                      </div>
+                   </div>
+                   <div className="bg-accent/5 p-4 rounded-xl border border-accent/10">
+                      <p className="text-[10px] text-accent/60 leading-relaxed italic">
+                        Tip: You can customize names for "home", "about", "films", "stills", and "editorial" sections in both languages.
+                      </p>
+                   </div>
+                </div>
+               </section>
 
               {/* Categories & Tags Management */}
                <section className="space-y-6">
@@ -1337,8 +1430,21 @@ export default function Admin() {
                       value={urlInput}
                       onChange={(e) => setUrlInput(e.target.value)}
                       className="w-full p-3 bg-ink/5 rounded-lg text-sm outline-none focus:ring-1 ring-accent"
-                      placeholder={isAddingByUrl === 'photo' ? "https://..." : "YouTube, Bilibili, or MP4 URL..."}
+                      placeholder={isAddingByUrl === 'photo' ? "https://..." : "YouTube, Bilibili, Xinpianchang, or MP4 URL..."}
                     />
+                  </div>
+                  <div>
+                    <label className="text-[10px] uppercase tracking-widest text-ink/40 mb-1 block">Category / Tag</label>
+                    <select 
+                      value={categoryInput}
+                      onChange={(e) => setCategoryInput(e.target.value)}
+                      className="w-full p-3 bg-ink/5 rounded-lg text-sm outline-none focus:ring-1 ring-accent"
+                    >
+                      <option value="">{language === 'en' ? 'Select category...' : '选择分类...'}</option>
+                      {(isAddingByUrl === 'photo' ? settings.photoCategories : settings.videoCategories).map(cat => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
                 <div className="flex gap-4">

@@ -29,7 +29,8 @@ function LoadingFallback() {
 function SidebarNav() {
   const [isVisible, setIsVisible] = useState(false);
   const [activeSection, setActiveSection] = useState('hero');
-  const { settings } = useLanguage();
+  const { settings, language } = useLanguage();
+  const labels = language === 'en' ? settings.navLabels_en : settings.navLabels_zh;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -63,10 +64,10 @@ function SidebarNav() {
   };
 
   const sections = [
-    { id: 'hero', label: settings?.navLabels?.['home'] || 'Home' },
-    { id: 'about', label: settings?.navLabels?.['about'] || 'About' },
-    { id: 'cinematography', label: settings?.navLabels?.['films'] || 'Films' },
-    { id: 'photography', label: settings?.navLabels?.['stills'] || 'Stills' },
+    { id: 'hero', label: labels?.['home'] || 'Home' },
+    { id: 'about', label: labels?.['about'] || 'About' },
+    { id: 'cinematography', label: labels?.['films'] || 'Films' },
+    { id: 'photography', label: labels?.['stills'] || 'Stills' },
   ];
 
   return (

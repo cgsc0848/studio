@@ -45,10 +45,12 @@ export default function Navbar() {
     }
   };
 
+  const labels = language === 'en' ? settings.navLabels_en : settings.navLabels_zh;
+
   const navLinks = [
-    { id: 'cinematography', label: settings?.navLabels?.['films'] || t.nav.films },
-    { id: 'photography', label: settings?.navLabels?.['stills'] || t.nav.stills },
-    { id: 'about', label: settings?.navLabels?.['about'] || t.nav.about },
+    { id: 'cinematography', label: labels?.['films'] || t.nav.films },
+    { id: 'photography', label: labels?.['stills'] || t.nav.stills },
+    { id: 'about', label: labels?.['about'] || t.nav.about },
   ];
 
   return (
@@ -64,7 +66,6 @@ export default function Navbar() {
         <Link to="/" onClick={handleLogoClick} className="flex items-baseline gap-2 relative z-50">
           <span className="text-2xl font-serif tracking-[2px] uppercase">0848</span>
         </Link>
-
         {/* Desktop Nav */}
         <div className="hidden md:flex items-center gap-10 text-[11px] uppercase tracking-[1.5px] font-medium text-ink/60">
           {navLinks.map(link => (
@@ -77,7 +78,7 @@ export default function Navbar() {
               {link.label}
             </Link>
           ))}
-          <Link to="/gallery/All" className="hover:text-ink transition-colors">{settings?.navLabels?.['journal'] || t.nav.editorial}</Link>
+          <Link to="/gallery/All" className="hover:text-ink transition-colors">{labels?.['editorial'] || t.nav.editorial}</Link>
           
           <button 
             onClick={toggleLanguage}

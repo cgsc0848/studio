@@ -19,6 +19,8 @@ interface SiteSettings {
   socialLinks: { platform: string; url: string; }[];
   categoryLabels: Record<string, string>;
   navLabels: Record<string, string>;
+  navLabels_en: Record<string, string>;
+  navLabels_zh: Record<string, string>;
   famousCars?: string;
   remarks?: string;
   photoCategories?: string[];
@@ -58,6 +60,20 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     ],
     categoryLabels: {},
     navLabels: {},
+    navLabels_en: {
+      home: 'Home',
+      about: 'About',
+      films: 'Films',
+      stills: 'Stills',
+      editorial: 'Editorial'
+    },
+    navLabels_zh: {
+      home: '首页',
+      about: '关于',
+      films: '影片',
+      stills: '摄影',
+      editorial: '社论'
+    },
     famousCars: '',
     remarks: '',
     photoCategories: ['Editorial', 'Personal'],
@@ -79,6 +95,8 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           ...prev,
           ...data,
           navLabels: data.navLabels || {},
+          navLabels_en: data.navLabels_en || prev.navLabels_en,
+          navLabels_zh: data.navLabels_zh || prev.navLabels_zh,
           categoryLabels: data.categoryLabels || {},
           socialLinks: data.socialLinks || prev.socialLinks,
           photoCategories: data.photoCategories || prev.photoCategories,
