@@ -30,16 +30,16 @@ service cloud.firestore {
     function isValidPhoto(data) {
       return data.keys().hasAll(['url', 'title', 'category']) &&
              data.url is string && data.url.size() < 2000 &&
-             data.title is string && data.title.size() < 200 &&
-             data.category is string && data.category.size() < 100;
+             data.title is string && data.title.size() < 500 &&
+             data.category is string && data.category.size() < 200;
     }
 
     function isValidVideo(data) {
       return data.keys().hasAll(['thumbnail', 'videoUrl', 'title', 'category']) &&
-             data.thumbnail is string && data.thumbnail.size() < 2000 &&
-             data.videoUrl is string && data.videoUrl.size() < 2000 &&
-             data.title is string && data.title.size() < 200 &&
-             data.category is string && data.category.size() < 100;
+             data.thumbnail is string && data.thumbnail.size() < 3000 &&
+             data.videoUrl is string && data.videoUrl.size() < 3000 &&
+             data.title is string && data.title.size() < 1000 &&
+             data.category is string && data.category.size() < 500;
     }
 
     // Rules

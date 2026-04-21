@@ -159,19 +159,23 @@ export default function Admin() {
   const getThumbnailFromUrl = (url: string) => {
     if (!url) return '';
     
+    let cleanUrl = url.trim();
     // Extract src if an iframe tag is pasted
-    if (url.includes('<iframe')) {
-      const match = url.match(/src="([^"]+)"/);
-      if (match) url = match[1];
+    if (cleanUrl.includes('<iframe')) {
+      const match = cleanUrl.match(/src="([^"]+)"/);
+      if (match) cleanUrl = match[1];
     }
+    
+    // Clean trailing characters if URL was part of a larger paste/iframe
+    cleanUrl = cleanUrl.split('"')[0].split("'")[0].split('>')[0].split(' ')[0];
 
-      if (url.includes('youtube.com') || url.includes('youtu.be')) {
-        const ytIdMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/|youtube\.com\/live\/)([^"&?\/\s]{11})/i);
-        const id = ytIdMatch?.[1] || '';
-        if (id && id.length === 11) {
-          return `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
-        }
+    if (cleanUrl.includes('youtube.com') || cleanUrl.includes('youtu.be')) {
+      const ytIdMatch = cleanUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/|youtube\.com\/live\/)([^"&?\/\s]{11})/i);
+      const id = ytIdMatch?.[1];
+      if (id && id.length === 11) {
+        return `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
       }
+    }
     
     return '';
   };
@@ -185,7 +189,8 @@ export default function Admin() {
         category: settings.videoCategories[0] || 'Cinematic',
         description: 'New video description',
         order: videos.length,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        fileSize: 0
       });
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, 'videos');
@@ -199,8 +204,8 @@ export default function Admin() {
       // Short URLs might need resolving, but we can try extracting BV directly first
     }
     
-    const bvMatch = url.match(/BV[a-zA-Z0-9]+/i);
-    const avMatch = url.match(/av(\d+)/i);
+    const bvMatch = url.match(/\bBV[a-zA-Z0-9]{10}\b/i);
+    const avMatch = url.match(/\bav(\d+)\b/i);
     
     if (!bvMatch && !avMatch) return null;
     
@@ -246,7 +251,8 @@ export default function Admin() {
           category: categoryInput || settings.photoCategories[0] || 'Editorial',
           aspectRatio: 'portrait',
           order: photos.length,
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          fileSize: 0
         });
         showToast(language === 'en' ? 'Photo added' : '照片已添加');
       } else if (isAddingByUrl === 'video') {
@@ -286,8 +292,13 @@ export default function Admin() {
       setUrlInput('');
       setTitleInput('');
       setCategoryInput('');
-    } catch (error) {
-      handleFirestoreError(error, OperationType.CREATE, isAddingByUrl === 'photo' ? 'photos' : 'videos');
+    } catch (error: any) {
+      console.error('Add by URL Error:', error);
+      let msg = language === 'en' ? 'Failed to add content. Permission denied or invalid data.' : '添加内容失败。权限不足或数据无效。';
+      if (error?.message?.includes('permission')) {
+        msg = language === 'en' ? 'Permission denied. Only admin can add content.' : '权限不足。仅限管理员添加内容。';
+      }
+      showToast(msg, 'error');
     }
   };
 
