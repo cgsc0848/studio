@@ -168,7 +168,8 @@ export default function Admin() {
     }
     
     // Clean trailing characters if URL was part of a larger paste/iframe
-    cleanUrl = cleanUrl.split('"')[0].split("'")[0].split('>')[0].split(' ')[0];
+    // Split by common delimiters that might appear after a URL in an iframe
+    cleanUrl = cleanUrl.split('"')[0].split("'")[0].split('>')[0].split(' ')[0].split('\\')[0];
 
     if (cleanUrl.includes('youtube.com') || cleanUrl.includes('youtu.be')) {
       const ytIdMatch = cleanUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/|youtube\.com\/live\/)([^"&?\/\s]{11})/i);
