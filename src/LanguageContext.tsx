@@ -19,6 +19,10 @@ interface SiteSettings {
   socialLinks: { platform: string; url: string; }[];
   categoryLabels: Record<string, string>;
   navLabels: Record<string, string>;
+  famousCars?: string;
+  remarks?: string;
+  photoCategories?: string[];
+  videoCategories?: string[];
 }
 
 interface LanguageContextType {
@@ -53,7 +57,11 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       { platform: 'Vimeo', url: '#' }
     ],
     categoryLabels: {},
-    navLabels: {}
+    navLabels: {},
+    famousCars: '',
+    remarks: '',
+    photoCategories: ['Editorial', 'Personal'],
+    videoCategories: ['Cinematic', 'Commercial', 'Personal', 'Editorial']
   });
 
   useEffect(() => {
@@ -72,7 +80,9 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           ...data,
           navLabels: data.navLabels || {},
           categoryLabels: data.categoryLabels || {},
-          socialLinks: data.socialLinks || prev.socialLinks
+          socialLinks: data.socialLinks || prev.socialLinks,
+          photoCategories: data.photoCategories || prev.photoCategories,
+          videoCategories: data.videoCategories || prev.videoCategories
         }));
         
         // Apply global styles

@@ -92,10 +92,20 @@ export default function PhotoGallery() {
     setSelectedPhoto(photos[nextIndex]);
   }, [photoIndex, photos]);
 
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = { All: photos.length };
+    photos.forEach(p => {
+      counts[p.category] = (counts[p.category] || 0) + 1;
+    });
+    return counts;
+  }, [photos]);
+
   const getCategoryName = (cat: string) => {
+    if (cat === 'All') return language === 'en' ? 'All' : '全部';
     const key = cat.toLowerCase();
     if (settings?.categoryLabels?.[key]) return settings.categoryLabels[key];
-    return (t.photography.categories as any)[key] || cat;
+    const trans = (t.photography.categories as any)[key];
+    return trans || cat;
   };
 
   useEffect(() => {
@@ -184,10 +194,19 @@ export default function PhotoGallery() {
               <span className="text-[10px] uppercase tracking-[0.3em] text-ink/40 mb-4 block">{t.photography.label}</span>
               <h2 className="text-4xl md:text-5xl font-serif leading-tight">{t.photography.title}</h2>
             </div>
-            <div className="text-xs uppercase tracking-[0.2em] font-medium text-ink/60 flex gap-8">
-              <Link to="/gallery/All" className="text-ink border-b border-ink pb-1">{getCategoryName('All')}</Link>
-              <Link to="/gallery/Editorial" className="hover:text-ink transition-colors pb-1 border-b border-transparent">{getCategoryName('Editorial')}</Link>
-              <Link to="/gallery/Personal" className="hover:text-ink transition-colors pb-1 border-b border-transparent">{getCategoryName('Personal')}</Link>
+            <div className="text-xs uppercase tracking-[0.2em] font-medium text-ink/60 flex flex-wrap justify-end gap-x-8 gap-y-4">
+              <Link to="/gallery/All" className="text-ink border-b border-ink pb-1">
+                {getCategoryName('All')} <span className="opacity-40 text-[10px] ml-1">({categoryCounts.All})</span>
+              </Link>
+              {(settings.photoCategories || []).map(cat => (
+                <Link 
+                  key={cat}
+                  to={`/gallery/${cat}`} 
+                  className="hover:text-ink transition-colors pb-1 border-b border-transparent"
+                >
+                  {getCategoryName(cat)} <span className="opacity-40 text-[10px] ml-1">({categoryCounts[cat] || 0})</span>
+                </Link>
+              ))}
             </div>
           </div>
 

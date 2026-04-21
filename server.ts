@@ -8,6 +8,7 @@ import admin from 'firebase-admin';
 import { getFirestore } from 'firebase-admin/firestore';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import axios from 'axios';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -85,6 +86,32 @@ async function startServer() {
     } catch (error) {
       console.error('Error fetching content from Firestore:', error);
       res.json({ photos: [], videos: [], error: 'Database access error' });
+    }
+  });
+
+  app.get('/api/bilibili-info', async (req, res) => {
+    const { bvid } = req.query;
+    if (!bvid || typeof bvid !== 'string') {
+      return res.status(400).json({ error: 'Missing bvid parameter' });
+    }
+
+    try {
+      // Use Bilibili public API
+      const response = await axios.get(`https://api.bilibili.com/x/web-interface/view?bvid=${bvid}`, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+      });
+
+      if (response.data && response.data.code === 0) {
+        const { title, pic, desc } = response.data.data;
+        res.json({ title, thumbnail: pic, description: desc });
+      } else {
+        res.status(404).json({ error: 'Video not found' });
+      }
+    } catch (error) {
+      console.error('Bilibili API error:', error);
+      res.status(500).json({ error: 'Failed to fetch Bilibili info' });
     }
   });
   app.post('/api/upload', upload.single('file'), (req, res) => {

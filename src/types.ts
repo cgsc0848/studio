@@ -1,4 +1,4 @@
-export type Category = 'Editorial' | 'Cinematic' | 'Personal' | 'Commercial' | 'All';
+export type Category = string;
 
 export interface Photo {
   id: string;

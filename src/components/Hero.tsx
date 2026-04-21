@@ -59,7 +59,14 @@ export default function Hero() {
           </div>
           <h1 className="text-6xl md:text-8xl text-ink font-serif italic leading-[1.1] bg-bg-paper/40 backdrop-blur-xl border border-white/10 p-6 md:p-10 shadow-[20px_20px_60px_rgba(0,0,0,0.1)]">
             {settings.heroTitle || t.hero.title}<br />
-            (01)
+            {settings.famousCars && (
+              <span className="block text-2xl md:text-3xl not-italic font-sans font-light tracking-widest mt-4 opacity-80 uppercase">
+                {settings.famousCars}
+              </span>
+            )}
+            <span className="text-sm md:text-lg not-italic font-sans font-light tracking-normal mt-2 block opacity-60">
+              {settings.remarks || settings.heroSubtitle || t.hero.subtitle}
+            </span>
           </h1>
         </motion.div>
       </div>

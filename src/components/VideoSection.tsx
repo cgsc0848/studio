@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'motion/react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { Video, Category } from '@/src/types';
 import { Play, X } from 'lucide-react';
@@ -40,33 +40,37 @@ export default function VideoSection() {
     return () => { document.body.style.overflow = ''; };
   }, [selectedVideo]);
 
-  const CATEGORIES: Category[] = ['All', 'Editorial', 'Cinematic', 'Commercial', 'Personal'];
+  const CATEGORIES = useMemo(() => ['All', ...(settings.videoCategories || [])], [settings.videoCategories]);
+
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = { All: allVideos.length };
+    allVideos.forEach(v => {
+      counts[v.category] = (counts[v.category] || 0) + 1;
+    });
+    return counts;
+  }, [allVideos]);
 
   const filteredVideos = activeCategory === 'All' 
     ? allVideos 
     : allVideos.filter(v => v.category === activeCategory);
 
   const getCategoryDesc = (cat: Category) => {
-    switch(cat) {
-      case 'Cinematic': return t.cinematography.desc.cinematic;
-      case 'Commercial': return t.cinematography.desc.commercial;
-      case 'Personal': return t.cinematography.desc.personal;
-      case 'Editorial': return t.cinematography.desc.editorial;
-      default: return '';
+    if (cat === 'All') return '';
+    const key = cat.toLowerCase();
+    if (t.cinematography.desc[key as keyof typeof t.cinematography.desc]) {
+      return t.cinematography.desc[key as keyof typeof t.cinematography.desc];
     }
+    return '';
   };
 
   const getCategoryName = (cat: Category) => {
+    if (cat === 'All') return t.cinematography.categories.all;
     const key = cat.toLowerCase();
     if (settings?.categoryLabels?.[key]) return settings.categoryLabels[key];
-    switch(cat) {
-      case 'All': return t.cinematography.categories.all;
-      case 'Cinematic': return t.cinematography.categories.cinematic;
-      case 'Commercial': return t.cinematography.categories.commercial;
-      case 'Personal': return t.cinematography.categories.personal;
-      case 'Editorial': return t.cinematography.categories.editorial;
-      default: return cat;
+    if (t.cinematography.categories[key as keyof typeof t.cinematography.categories]) {
+      return t.cinematography.categories[key as keyof typeof t.cinematography.categories];
     }
+    return cat;
   };
 
   const getEmbedUrl = (url: string) => {
@@ -116,8 +120,11 @@ export default function VideoSection() {
   const getSafeThumbnail = (thumbnail: string, videoUrl: string) => {
     if (!thumbnail || !videoUrl) return thumbnail;
     
+    // Ensure https for any thumbnail
+    let safeThumb = thumbnail.replace('http://', 'https://');
+
     // Check for YouTube specifically
-    if (thumbnail.includes('youtube.com') || videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
+    if (safeThumb.includes('youtube.com') || videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
       let url = videoUrl;
       if (url.includes('<iframe')) {
         const match = url.match(/src="([^"]+)"/);
@@ -126,10 +133,10 @@ export default function VideoSection() {
       
       const ytIdMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/|youtube\.com\/live\/)([^"&?\/\s]{11})/i);
       const id = ytIdMatch?.[1];
-      if (id) return `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+      if (id && id.length === 11) return `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
     }
     
-    return thumbnail;
+    return safeThumb;
   };
 
   return (

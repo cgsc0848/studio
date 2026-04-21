@@ -24,6 +24,10 @@ interface SiteSettings {
   socialLinks: { platform: string; url: string; }[];
   categoryLabels: Record<string, string>;
   navLabels: Record<string, string>;
+  famousCars: string;
+  remarks: string;
+  photoCategories: string[];
+  videoCategories: string[];
 }
 
 export default function Admin() {
@@ -45,7 +49,11 @@ export default function Admin() {
     email: 'cgsc0848@gmail.com',
     socialLinks: [],
     categoryLabels: {},
-    navLabels: {}
+    navLabels: {},
+    famousCars: '',
+    remarks: '',
+    photoCategories: ['Editorial', 'Personal'],
+    videoCategories: ['Cinematic', 'Commercial', 'Personal', 'Editorial']
   });
   const [isPhotoPickerOpen, setIsPhotoPickerOpen] = useState<'hero' | 'about' | null>(null);
   const [activeTab, setActiveTab] = useState<'content' | 'settings'>('content');
@@ -101,7 +109,9 @@ export default function Admin() {
               ...data,
               navLabels: data.navLabels || {},
               categoryLabels: data.categoryLabels || {},
-              socialLinks: data.socialLinks || prev.socialLinks
+              socialLinks: data.socialLinks || prev.socialLinks,
+              photoCategories: data.photoCategories || prev.photoCategories,
+              videoCategories: data.videoCategories || prev.videoCategories
             }));
           }
         });
@@ -151,14 +161,13 @@ export default function Admin() {
       if (match) url = match[1];
     }
 
-    if (url.includes('youtube.com') || url.includes('youtu.be')) {
-      const ytIdMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/|youtube\.com\/live\/)([^"&?\/\s]{11})/i);
-      const id = ytIdMatch?.[1] || '';
-      if (id) {
-        // Use hqdefault as it's more reliable than maxresdefault
-        return `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+      if (url.includes('youtube.com') || url.includes('youtu.be')) {
+        const ytIdMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/|youtube\.com\/live\/)([^"&?\/\s]{11})/i);
+        const id = ytIdMatch?.[1] || '';
+        if (id && id.length === 11) {
+          return `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+        }
       }
-    }
     
     return '';
   };
@@ -169,7 +178,7 @@ export default function Admin() {
         thumbnail: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&q=80&w=800',
         videoUrl: '',
         title: 'New Video',
-        category: 'Cinematic',
+        category: settings.videoCategories[0] || 'Cinematic',
         description: 'New video description',
         order: videos.length,
         createdAt: new Date().toISOString()
@@ -177,6 +186,21 @@ export default function Admin() {
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, 'videos');
     }
+  };
+
+  const fetchBilibiliInfo = async (url: string) => {
+    const bvMatch = url.match(/BV[a-zA-Z0-9]+/);
+    if (!bvMatch) return null;
+    const bvid = bvMatch[0];
+    try {
+      const resp = await fetch(`/api/bilibili-info?bvid=${bvid}`);
+      if (resp.ok) {
+        return await resp.json();
+      }
+    } catch (e) {
+      console.error('Failed to fetch Bilibili info:', e);
+    }
+    return null;
   };
 
   const handleConfirmAddByUrl = async () => {
@@ -194,20 +218,32 @@ export default function Admin() {
         await addDoc(collection(db, 'photos'), {
           url: finalUrl,
           title: titleInput || 'New Photo',
-          category: 'Editorial',
+          category: settings.photoCategories[0] || 'Editorial',
           aspectRatio: 'portrait',
           order: photos.length,
           createdAt: new Date().toISOString()
         });
         showToast(language === 'en' ? 'Photo added' : '照片已添加');
       } else if (isAddingByUrl === 'video') {
-        const thumb = getThumbnailFromUrl(finalUrl) || '';
+        let title = titleInput || 'New Video';
+        let thumbnail = getThumbnailFromUrl(finalUrl) || '';
+        let description = 'New video description';
+
+        if (finalUrl.includes('bilibili.com') || finalUrl.includes('b23.tv')) {
+          const info = await fetchBilibiliInfo(finalUrl);
+          if (info) {
+            title = titleInput || info.title;
+            thumbnail = info.thumbnail.replace('http://', 'https://');
+            description = info.description || description;
+          }
+        }
+
         await addDoc(collection(db, 'videos'), {
-          thumbnail: thumb,
+          thumbnail: thumbnail || 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&q=80&w=800',
           videoUrl: finalUrl,
-          title: titleInput || 'New Video',
-          category: 'Cinematic',
-          description: 'New video description',
+          title,
+          category: settings.videoCategories[0] || 'Cinematic',
+          description,
           order: videos.length,
           createdAt: new Date().toISOString(),
           fileSize: 0
@@ -309,7 +345,7 @@ export default function Admin() {
                 await addDoc(collection(db, 'photos'), {
                   url: downloadURL,
                   title: file.name.split('.')[0],
-                  category: 'Editorial',
+                  category: settings.photoCategories[0] || 'Editorial',
                   aspectRatio: 'portrait',
                   order: photos.length,
                   createdAt: new Date().toISOString(),
@@ -320,7 +356,7 @@ export default function Admin() {
                   thumbnail: downloadURL,
                   videoUrl: '',
                   title: file.name.split('.')[0],
-                  category: 'Cinematic',
+                  category: settings.videoCategories[0] || 'Cinematic',
                   description: 'New video description',
                   order: videos.length,
                   createdAt: new Date().toISOString(),
@@ -567,12 +603,12 @@ export default function Admin() {
                         />
                         <select 
                           value={photo.category}
-                          onChange={(e) => updatePhoto(photo.id, { category: e.target.value as any })}
-                          className="w-full p-2 text-[10px] uppercase tracking-widest text-ink/60 outline-none"
+                          onChange={(e) => updatePhoto(photo.id, { category: e.target.value })}
+                          className="w-full p-2 text-[10px] uppercase tracking-widest text-ink/60 outline-none hover:bg-ink/5 rounded"
                         >
-                          <option value="Editorial">{t.photography.categories.editorial}</option>
-                          <option value="Personal">{t.photography.categories.personal}</option>
-                          <option value="Commercial">{language === 'en' ? 'Commercial' : '商业'}</option>
+                          {settings.photoCategories.map(cat => (
+                            <option key={cat} value={cat}>{cat}</option>
+                          ))}
                         </select>
                         <input 
                           value={photo.url}
@@ -661,13 +697,12 @@ export default function Admin() {
                         />
                         <select 
                           value={video.category}
-                          onChange={(e) => updateVideo(video.id, { category: e.target.value as any })}
-                          className="w-full p-2 text-[10px] uppercase tracking-widest text-ink/60 outline-none"
+                          onChange={(e) => updateVideo(video.id, { category: e.target.value })}
+                          className="w-full p-2 text-[10px] uppercase tracking-widest text-ink/60 outline-none hover:bg-ink/5 rounded"
                         >
-                          <option value="Cinematic">{t.cinematography.categories.cinematic}</option>
-                          <option value="Commercial">{t.cinematography.categories.commercial}</option>
-                          <option value="Personal">{t.cinematography.categories.personal}</option>
-                          <option value="Editorial">{t.cinematography.categories.editorial}</option>
+                          {settings.videoCategories.map(cat => (
+                            <option key={cat} value={cat}>{cat}</option>
+                          ))}
                         </select>
                         <div className="flex justify-between items-center text-[9px] text-ink/30 mt-1">
                           {video.createdAt && (
@@ -900,8 +935,110 @@ export default function Admin() {
                 </div>
               </section>
 
-              {/* Visual Style & Typography */}
-              <section className="space-y-6">
+              {/* Categories & Tags Management */}
+               <section className="space-y-6">
+                 <h3 className="text-[10px] uppercase tracking-[0.3em] text-ink/40 flex items-center gap-2">
+                   <SettingsIcon size={14} /> {language === 'en' ? 'Categories & Tags Management' : '分类与标签管理'}
+                 </h3>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {/* Photo Tags */}
+                    <div className="space-y-4 p-6 bg-ink/5 rounded-2xl">
+                       <label className="block text-[10px] uppercase tracking-widest text-ink/40 font-bold mb-4">{language === 'en' ? 'Photo Categories' : '图库分类标签'}</label>
+                       <div className="flex flex-wrap gap-2 mb-4">
+                          {(settings.photoCategories || []).map((cat, i) => (
+                            <div key={i} className="flex items-center gap-2 bg-white px-3 py-1 pb-1.5 rounded-full text-[10px] uppercase tracking-widest border border-ink/10 group">
+                               {cat}
+                               <button 
+                                 onClick={() => setSettings({ ...settings, photoCategories: (settings.photoCategories || []).filter((_, idx) => idx !== i) })} 
+                                 className="text-ink/20 group-hover:text-red-500 transition-colors"
+                               >
+                                  <X size={10} />
+                               </button>
+                            </div>
+                          ))}
+                       </div>
+                       <div className="flex gap-2">
+                          <input 
+                            id="newPhotoCat"
+                            placeholder={language === 'en' ? 'New Tag...' : '新增标签...'}
+                            className="flex-1 bg-white border border-ink/10 rounded-lg p-2 text-xs outline-none focus:ring-1 ring-accent"
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                const val = (e.currentTarget as HTMLInputElement).value.trim();
+                                if (val && !(settings.photoCategories || []).includes(val)) {
+                                  setSettings({ ...settings, photoCategories: [...(settings.photoCategories || []), val] });
+                                  (e.currentTarget as HTMLInputElement).value = '';
+                                }
+                              }
+                            }}
+                          />
+                          <button 
+                            onClick={() => {
+                              const input = document.getElementById('newPhotoCat') as HTMLInputElement;
+                              const val = input.value.trim();
+                              if (val && !(settings.photoCategories || []).includes(val)) {
+                                setSettings({ ...settings, photoCategories: [...(settings.photoCategories || []), val] });
+                                input.value = '';
+                              }
+                            }}
+                            className="bg-ink text-white px-3 rounded-lg hover:opacity-80 transition-opacity"
+                          >
+                             <Plus size={14} />
+                          </button>
+                       </div>
+                    </div>
+
+                    {/* Video Tags */}
+                    <div className="space-y-4 p-6 bg-ink/5 rounded-2xl">
+                       <label className="block text-[10px] uppercase tracking-widest text-ink/40 font-bold mb-4">{language === 'en' ? 'Video Categories' : '视频分类标签'}</label>
+                       <div className="flex flex-wrap gap-2 mb-4">
+                          {(settings.videoCategories || []).map((cat, i) => (
+                            <div key={i} className="flex items-center gap-2 bg-white px-3 py-1 pb-1.5 rounded-full text-[10px] uppercase tracking-widest border border-ink/10 group">
+                               {cat}
+                               <button 
+                                 onClick={() => setSettings({ ...settings, videoCategories: (settings.videoCategories || []).filter((_, idx) => idx !== i) })} 
+                                 className="text-ink/20 group-hover:text-red-500 transition-colors"
+                               >
+                                  <X size={10} />
+                               </button>
+                            </div>
+                          ))}
+                       </div>
+                       <div className="flex gap-2">
+                          <input 
+                            id="newVideoCat"
+                            placeholder={language === 'en' ? 'New Tag...' : '新增标签...'}
+                            className="flex-1 bg-white border border-ink/10 rounded-lg p-2 text-xs outline-none focus:ring-1 ring-accent"
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                const val = (e.currentTarget as HTMLInputElement).value.trim();
+                                if (val && !(settings.videoCategories || []).includes(val)) {
+                                  setSettings({ ...settings, videoCategories: [...(settings.videoCategories || []), val] });
+                                  (e.currentTarget as HTMLInputElement).value = '';
+                                }
+                              }
+                            }}
+                          />
+                          <button 
+                            onClick={() => {
+                              const input = document.getElementById('newVideoCat') as HTMLInputElement;
+                              const val = input.value.trim();
+                              if (val && !(settings.videoCategories || []).includes(val)) {
+                                setSettings({ ...settings, videoCategories: [...(settings.videoCategories || []), val] });
+                                input.value = '';
+                              }
+                            }}
+                            className="bg-ink text-white px-3 rounded-lg hover:opacity-80 transition-opacity"
+                          >
+                             <Plus size={14} />
+                          </button>
+                       </div>
+                    </div>
+                 </div>
+               </section>
+
+               {/* Visual Style & Typography */}
+               <section className="space-y-6">
                 <h3 className="text-[10px] uppercase tracking-[0.3em] text-ink/40 flex items-center gap-2">
                   <Type size={14} /> {language === 'en' ? 'Typography & Brand' : '文字与品牌风格'}
                 </h3>
@@ -921,6 +1058,22 @@ export default function Admin() {
                           value={settings.heroSubtitle}
                           onChange={(e) => setSettings({ ...settings, heroSubtitle: e.target.value })}
                           className="w-full p-4 bg-ink/5 rounded-xl outline-none focus:ring-1 ring-accent text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] uppercase tracking-widest text-ink/40 mb-2 font-bold">{language === 'en' ? 'Famous Cars' : '名车设置'}</label>
+                        <input 
+                          value={settings.famousCars}
+                          onChange={(e) => setSettings({ ...settings, famousCars: e.target.value })}
+                          className="w-full p-4 bg-ink/5 rounded-xl outline-none focus:ring-1 ring-accent text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] uppercase tracking-widest text-ink/40 mb-2 font-bold">{language === 'en' ? 'Remarks' : '备注描述'}</label>
+                        <textarea 
+                          value={settings.remarks}
+                          onChange={(e) => setSettings({ ...settings, remarks: e.target.value })}
+                          className="w-full p-4 bg-ink/5 rounded-xl outline-none focus:ring-1 ring-accent text-sm h-24"
                         />
                       </div>
                    </div>

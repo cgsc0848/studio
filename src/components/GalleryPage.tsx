@@ -125,8 +125,11 @@ export default function GalleryPage() {
   const getSafeThumbnail = (thumbnail: string, videoUrl: string) => {
     if (!thumbnail || !videoUrl) return thumbnail;
     
+    // Ensure https for any thumbnail
+    let safeThumb = thumbnail.replace('http://', 'https://');
+
     // Check for YouTube specifically
-    if (thumbnail.includes('youtube.com') || videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
+    if (safeThumb.includes('youtube.com') || videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
       let url = videoUrl;
       if (url.includes('<iframe')) {
         const match = url.match(/src="([^"]+)"/);
@@ -135,10 +138,10 @@ export default function GalleryPage() {
       
       const ytIdMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/|youtube\.com\/live\/)([^"&?\/\s]{11})/i);
       const id = ytIdMatch?.[1];
-      if (id) return `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+      if (id && id.length === 11) return `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
     }
     
-    return thumbnail;
+    return safeThumb;
   };
 
   useEffect(() => {
@@ -169,9 +172,12 @@ export default function GalleryPage() {
     return (t.cinematography.categories as any)[key] || cat;
   };
 
-  const categories = activeType === 'photos' 
-    ? ['All', 'Editorial', 'Personal', 'Commercial']
-    : ['All', 'Cinematic', 'Commercial', 'Personal', 'Editorial'];
+  const categories = useMemo(() => {
+    if (activeType === 'photos') {
+      return ['All', ...(settings.photoCategories || [])];
+    }
+    return ['All', ...(settings.videoCategories || [])];
+  }, [activeType, settings.photoCategories, settings.videoCategories]);
 
   return (
     <div className="min-h-screen bg-bg-paper pt-32 pb-24 px-6 md:px-12">
