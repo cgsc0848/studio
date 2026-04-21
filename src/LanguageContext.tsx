@@ -82,7 +82,24 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     const unsubscribe = onSnapshot(doc(db, 'settings', 'global'), (snapshot) => {
       if (snapshot.exists()) {
-        const data = snapshot.data() as SiteSettings;
+        const rawData = snapshot.data();
+        
+        // Helper to force https on strings
+        const forceHttps = (url: any) => {
+          if (typeof url !== 'string') return url;
+          return url.replace(/^http:\/\//i, 'https://');
+        };
+
+        const data: SiteSettings = {
+          ...rawData,
+          heroImageUrl: forceHttps(rawData.heroImageUrl),
+          aboutImageUrl: forceHttps(rawData.aboutImageUrl),
+          socialLinks: (rawData.socialLinks || []).map((link: any) => ({
+            ...link,
+            url: forceHttps(link.url)
+          }))
+        } as SiteSettings;
+
         setSettings(prev => ({
           ...prev,
           ...data,
