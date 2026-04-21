@@ -420,8 +420,6 @@ export default function GalleryPage() {
                           src={getEmbedUrl(selectedVideo.videoUrl) || undefined}
                           className="w-full h-full border-0"
                           allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer"
-                          allowFullScreen
-                          referrerPolicy="strict-origin-when-cross-origin"
                           title={selectedVideo.title}
                         />
                       </div>

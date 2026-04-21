@@ -128,7 +128,7 @@ async function startServer() {
 
         res.json({ 
           title, 
-          thumbnail: pic, 
+          thumbnail: pic ? pic.replace('http://', 'https://') : '', 
           description: desc,
           aid: resultAid,
           bvid: resultBvid,
