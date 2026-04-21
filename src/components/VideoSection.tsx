@@ -88,7 +88,7 @@ export default function VideoSection() {
     
     // YouTube
     if (url.includes('youtube.com') || url.includes('youtu.be')) {
-      const ytIdMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
+      const ytIdMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/|youtube\.com\/live\/)([a-zA-Z0-9_-]{11})/i);
       const id = ytIdMatch?.[1] || '';
       if (id) {
         return `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&rel=0&modestbranding=1&playsinline=1`;
@@ -143,7 +143,7 @@ export default function VideoSection() {
         if (match) url = match[1];
       }
       
-      const ytIdMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/|youtube\.com\/live\/)([^"&?\/\s]{11})/i);
+      const ytIdMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/|youtube\.com\/live\/)([a-zA-Z0-9_-]{11})/i);
       const id = ytIdMatch?.[1];
       if (id && id.length === 11) return `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
     }
@@ -291,8 +291,8 @@ export default function VideoSection() {
                         src={getEmbedUrl(selectedVideo.videoUrl) || undefined}
                         className="w-full h-full border-0 absolute inset-0"
                         allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer"
+                        allowFullScreen
                         referrerPolicy="strict-origin-when-cross-origin"
-                        sandbox="allow-top-navigation allow-same-origin allow-forms allow-scripts allow-popups allow-presentation"
                         title={selectedVideo.title}
                       />
                     ) : selectedVideo.videoUrl ? (

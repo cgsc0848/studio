@@ -172,7 +172,7 @@ export default function Admin() {
     cleanUrl = cleanUrl.split('"')[0].split("'")[0].split('>')[0].split(' ')[0].split('\\')[0];
 
     if (cleanUrl.includes('youtube.com') || cleanUrl.includes('youtu.be')) {
-      const ytIdMatch = cleanUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/|youtube\.com\/live\/)([^"&?\/\s]{11})/i);
+      const ytIdMatch = cleanUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/|youtube\.com\/live\/)([a-zA-Z0-9_-]{11})/i);
       const id = ytIdMatch?.[1];
       if (id && id.length === 11) {
         return `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
