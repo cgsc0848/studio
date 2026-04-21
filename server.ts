@@ -90,28 +90,82 @@ async function startServer() {
   });
 
   app.get('/api/bilibili-info', async (req, res) => {
-    const { bvid } = req.query;
-    if (!bvid || typeof bvid !== 'string') {
-      return res.status(400).json({ error: 'Missing bvid parameter' });
+    const { bvid, aid } = req.query;
+    if (!bvid && !aid) {
+      return res.status(400).json({ error: 'Missing bvid or aid parameter' });
     }
 
     try {
-      // Use Bilibili public API
-      const response = await axios.get(`https://api.bilibili.com/x/web-interface/view?bvid=${bvid}`, {
+      const url = bvid 
+        ? `https://api.bilibili.com/x/web-interface/view?bvid=${bvid}`
+        : `https://api.bilibili.com/x/web-interface/view?aid=${aid}`;
+
+      // Use Bilibili public API with better headers to avoid 403/Referer issues
+      const response = await axios.get(url, {
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Referer': 'https://www.bilibili.com'
         }
       });
 
       if (response.data && response.data.code === 0) {
-        const { title, pic, desc } = response.data.data;
-        res.json({ title, thumbnail: pic, description: desc });
+        const { title, pic, desc, aid: resultAid, bvid: resultBvid, cid } = response.data.data;
+        
+        let videoshot = null;
+        try {
+          const shotResp = await axios.get(`https://api.bilibili.com/x/player/videoshot?aid=${resultAid}&cid=${cid}&index=1`, {
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+              'Referer': 'https://www.bilibili.com'
+            }
+          });
+          if (shotResp.data && shotResp.data.code === 0) {
+            videoshot = shotResp.data.data;
+          }
+        } catch (shotErr) {
+          console.error('Failed to fetch Bilibili videoshot:', shotErr);
+        }
+
+        res.json({ 
+          title, 
+          thumbnail: pic, 
+          description: desc,
+          aid: resultAid,
+          bvid: resultBvid,
+          cid,
+          videoshot
+        });
       } else {
-        res.status(404).json({ error: 'Video not found' });
+        res.status(404).json({ error: response.data?.message || 'Video not found' });
       }
     } catch (error) {
       console.error('Bilibili API error:', error);
       res.status(500).json({ error: 'Failed to fetch Bilibili info' });
+    }
+  });
+
+  app.get('/api/bilibili-videoshot', async (req, res) => {
+    const { aid, cid } = req.query;
+    if (!aid || !cid) {
+      return res.status(400).json({ error: 'Missing aid or cid parameter' });
+    }
+
+    try {
+      const response = await axios.get(`https://api.bilibili.com/x/player/videoshot?aid=${aid}&cid=${cid}&index=1`, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Referer': 'https://www.bilibili.com'
+        }
+      });
+
+      if (response.data && response.data.code === 0) {
+        res.json(response.data.data);
+      } else {
+        res.status(404).json({ error: 'Videoshot not found' });
+      }
+    } catch (error) {
+      console.error('Bilibili videoshot API error:', error);
+      res.status(500).json({ error: 'Failed to fetch Bilibili videoshot' });
     }
   });
 
@@ -124,21 +178,35 @@ async function startServer() {
     try {
       const response = await axios.get(url, {
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Referer': 'https://www.xinpianchang.com/'
         }
       });
 
       const html = response.data;
       
-      // Basic meta tag scraping
-      const titleMatch = html.match(/<meta property="og:title" content="([^"]+)"/) || html.match(/<title>([^<]+)<\/title>/);
-      const thumbMatch = html.match(/<meta property="og:image" content="([^"]+)"/) || html.match(/<img[^>]+src="([^"]+)"[^>]+class="cover"/);
-      const descMatch = html.match(/<meta property="og:description" content="([^"]+)"/);
+      // Meta tag scraping with multiple fallbacks
+      const titleMatch = html.match(/<meta property="og:title" content="([^"]+)"/) || 
+                        html.match(/<title>([^<]+)<\/title>/) ||
+                        html.match(/<h1[^>]*>([^<]+)<\/h1>/);
+
+      const thumbMatch = html.match(/<meta property="og:image" content="([^"]+)"/) || 
+                        html.match(/<img[^>]+src="([^"]+)"[^>]+class="cover"/) ||
+                        html.match(/data-src="([^"]+)"[^>]+class="video-cover"/) ||
+                        html.match(/"cover":"([^"]+)"/);
+
+      const descMatch = html.match(/<meta property="og:description" content="([^"]+)"/) ||
+                       html.match(/<meta name="description" content="([^"]+)"/);
+
+      let thumbnail = thumbMatch ? thumbMatch[1].replace(/\\/g, '') : '';
+      if (thumbnail && !thumbnail.startsWith('http')) {
+        thumbnail = thumbnail.startsWith('//') ? `https:${thumbnail}` : `https://www.xinpianchang.com${thumbnail}`;
+      }
 
       res.json({
-        title: titleMatch ? titleMatch[1].replace(' - 新片场', '') : 'Xinpianchang Video',
-        thumbnail: thumbMatch ? thumbMatch[1] : '',
-        description: descMatch ? descMatch[1] : ''
+        title: titleMatch ? titleMatch[1].replace(' - 新片场', '').trim() : 'Xinpianchang Video',
+        thumbnail,
+        description: descMatch ? descMatch[1].trim() : ''
       });
     } catch (error) {
       console.error('Xinpianchang scrape error:', error);

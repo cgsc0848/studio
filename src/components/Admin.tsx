@@ -23,7 +23,8 @@ interface SiteSettings {
   email: string;
   socialLinks: { platform: string; url: string; }[];
   categoryLabels: Record<string, string>;
-  navLabels: Record<string, string>;
+  navLabels_en: Record<string, string>;
+  navLabels_zh: Record<string, string>;
   famousCars: string;
   remarks: string;
   photoCategories: string[];
@@ -49,7 +50,8 @@ export default function Admin() {
     email: 'cgsc0848@gmail.com',
     socialLinks: [],
     categoryLabels: {},
-    navLabels: {},
+    navLabels_en: { home: 'Home', about: 'About', films: 'Films', stills: 'Stills', editorial: 'Editorial' },
+    navLabels_zh: { home: '首页', about: '关于', films: '影片', stills: '摄影', editorial: '作品' },
     famousCars: '',
     remarks: '',
     photoCategories: ['Editorial', 'Personal'],
@@ -108,7 +110,8 @@ export default function Admin() {
             setSettings(prev => ({
               ...prev,
               ...data,
-              navLabels: data.navLabels || {},
+              navLabels_en: data.navLabels_en || prev.navLabels_en,
+              navLabels_zh: data.navLabels_zh || prev.navLabels_zh,
               categoryLabels: data.categoryLabels || {},
               socialLinks: data.socialLinks || prev.socialLinks,
               photoCategories: data.photoCategories || prev.photoCategories,
@@ -197,10 +200,13 @@ export default function Admin() {
     }
     
     const bvMatch = url.match(/BV[a-zA-Z0-9]+/i);
-    if (!bvMatch) return null;
-    const bvid = bvMatch[0];
+    const avMatch = url.match(/av(\d+)/i);
+    
+    if (!bvMatch && !avMatch) return null;
+    
     try {
-      const resp = await fetch(`/api/bilibili-info?bvid=${bvid}`);
+      const queryParams = bvMatch ? `bvid=${bvMatch[0]}` : `aid=${avMatch?.[1]}`;
+      const resp = await fetch(`/api/bilibili-info?${queryParams}`);
       if (resp.ok) {
         return await resp.json();
       }
@@ -302,7 +308,7 @@ export default function Admin() {
     setTimeout(() => setToast(null), 3000);
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'photo' | 'video' | 'about' | 'hero', existingId?: string) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'photo' | 'video' | 'about' | 'hero' | 'videoFile', existingId?: string) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -311,9 +317,12 @@ export default function Admin() {
       return;
     }
 
-    // Check file size (limit to 20MB for safety)
-    if (file.size > 20 * 1024 * 1024) {
-      showToast(language === 'en' ? 'File too large (max 20MB)' : '文件太大（最大 20MB）', 'error');
+    // Check file size (limit to 100MB for videos, 20MB for others)
+    const sizeLimit = (type === 'video' || type === 'videoFile') ? 100 * 1024 * 1024 : 20 * 1024 * 1024;
+    if (file.size > sizeLimit) {
+      showToast(language === 'en' 
+        ? `File too large (max ${sizeLimit / 1024 / 1024}MB)` 
+        : `文件太大（最大 ${sizeLimit / 1024 / 1024}MB）`, 'error');
       return;
     }
 
@@ -366,6 +375,8 @@ export default function Admin() {
                 await updateDoc(doc(db, 'photos', existingId), { url: downloadURL, fileSize, createdAt: updatedAt });
               } else if (type === 'video') {
                 await updateDoc(doc(db, 'videos', existingId), { thumbnail: downloadURL, fileSize, createdAt: updatedAt });
+              } else if (type === 'videoFile') {
+                await updateDoc(doc(db, 'videos', existingId), { videoUrl: downloadURL, fileSize, createdAt: updatedAt });
               }
             } else {
               if (type === 'photo') {
@@ -378,10 +389,10 @@ export default function Admin() {
                   createdAt: new Date().toISOString(),
                   fileSize: fileSize
                 });
-              } else if (type === 'video') {
+              } else if (type === 'video' || type === 'videoFile') {
                 await addDoc(collection(db, 'videos'), {
-                  thumbnail: downloadURL,
-                  videoUrl: '',
+                  thumbnail: type === 'video' ? downloadURL : 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&q=80&w=800',
+                  videoUrl: type === 'videoFile' ? downloadURL : '',
                   title: file.name.split('.')[0],
                   category: settings.videoCategories[0] || 'Cinematic',
                   description: 'New video description',
@@ -699,7 +710,11 @@ export default function Admin() {
                   </button>
                   <label className="cursor-pointer text-[10px] uppercase tracking-widest bg-ink text-white px-4 py-2 rounded-full hover:opacity-80 transition-opacity flex items-center gap-2">
                     <Plus size={12} /> {language === 'en' ? 'Upload Thumbnail' : '上传封面图'}
-                    <input type="file" className="hidden" onChange={(e) => handleFileUpload(e, 'video')} />
+                    <input type="file" accept="image/*" className="hidden" onChange={(e) => handleFileUpload(e, 'video')} />
+                  </label>
+                  <label className="cursor-pointer text-[10px] uppercase tracking-widest bg-black text-white px-4 py-2 rounded-full hover:opacity-80 transition-opacity flex items-center gap-2 shadow-lg">
+                    <VideoIcon size={12} /> {language === 'en' ? 'Upload Video File' : '上传视频文件'}
+                    <input type="file" accept="video/*" className="hidden" onChange={(e) => handleFileUpload(e, 'videoFile')} />
                   </label>
                 </div>
               </div>

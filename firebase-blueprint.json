@@ -8,7 +8,7 @@
         "id": { "type": "string" },
         "url": { "type": "string" },
         "title": { "type": "string" },
-        "category": { "type": "string", "enum": ["Editorial", "Personal", "Commercial"] },
+        "category": { "type": "string" },
         "aspectRatio": { "type": "string", "enum": ["portrait", "landscape", "square"] },
         "order": { "type": "number" },
         "createdAt": { "type": "string", "format": "date-time" }
@@ -24,7 +24,7 @@
         "thumbnail": { "type": "string" },
         "videoUrl": { "type": "string" },
         "title": { "type": "string" },
-        "category": { "type": "string", "enum": ["Cinematic", "Commercial", "Personal", "Editorial"] },
+        "category": { "type": "string" },
         "description": { "type": "string" },
         "order": { "type": "number" },
         "createdAt": { "type": "string", "format": "date-time" }
