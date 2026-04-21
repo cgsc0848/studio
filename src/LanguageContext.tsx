@@ -41,23 +41,19 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [language, setLanguage] = useState<Language>('en');
   const [loading, setLoading] = useState(true);
   const [settings, setSettings] = useState<SiteSettings>({
-    heroTitle: '0848 Studio',
-    heroSubtitle: 'Visual Storytelling through Light & Motion',
+    heroTitle: '',
+    heroSubtitle: '',
     heroImageUrl: '',
-    aboutTitle: 'The Vision Behind the Lens',
-    aboutDesc: 'Capturing the essence of moments through a unique lens, blending traditional techniques with modern visual storytelling.',
-    aboutYears: '10+',
-    aboutProjects: '200+',
+    aboutTitle: '',
+    aboutDesc: '',
+    aboutYears: '',
+    aboutProjects: '',
     aboutImageUrl: '',
     galleryLayout: 'masonry',
     primaryColor: '#1a1a1a',
     fontFamily: 'serif',
     email: 'cgsc0848@gmail.com',
-    socialLinks: [
-      { platform: 'Instagram', url: '#' },
-      { platform: 'Twitter', url: '#' },
-      { platform: 'Vimeo', url: '#' }
-    ],
+    socialLinks: [],
     categoryLabels: {},
     navLabels: {},
     navLabels_en: {
@@ -74,10 +70,8 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       stills: '摄影',
       editorial: '社论'
     },
-    famousCars: '',
-    remarks: '',
-    photoCategories: ['Editorial', 'Personal'],
-    videoCategories: ['Cinematic', 'Commercial', 'Personal', 'Editorial']
+    photoCategories: [],
+    videoCategories: []
   });
 
   useEffect(() => {

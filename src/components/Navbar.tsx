@@ -118,7 +118,9 @@ export default function Navbar() {
                   {link.label}
                 </Link>
               ))}
-              <Link to="/gallery/All" className="text-3xl font-serif italic hover:text-accent transition-colors">{t.nav.editorial}</Link>
+              <Link to="/gallery/All" className="text-3xl font-serif italic hover:text-accent transition-colors">
+                {labels?.['editorial'] || t.nav.editorial}
+              </Link>
             </div>
 
             <button 
