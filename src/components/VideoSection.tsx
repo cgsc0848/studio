@@ -111,6 +111,9 @@ export default function VideoSection() {
 
     // Xinpianchang
     if (url.includes('xinpianchang.com')) {
+      if (url.includes('player.xinpianchang.com')) {
+        return url.replace(/&amp;/g, '&');
+      }
       const match = url.match(/a(\d+)/);
       if (match) {
         return `https://www.xinpianchang.com/player/v1/a${match[1]}`;
@@ -277,7 +280,13 @@ export default function VideoSection() {
                      transition={{ duration: 0.4 }}
                      className="w-full aspect-video bg-black rounded-xl overflow-hidden shadow-2xl border border-white/5 relative"
                   >
-                    {selectedVideo.videoUrl && (selectedVideo.videoUrl.includes('youtube.com') || selectedVideo.videoUrl.includes('youtu.be') || selectedVideo.videoUrl.includes('bilibili.com') || selectedVideo.videoUrl.includes('vimeo.com')) ? (
+                    {selectedVideo.videoUrl && (
+                      selectedVideo.videoUrl.includes('youtube.com') || 
+                      selectedVideo.videoUrl.includes('youtu.be') || 
+                      selectedVideo.videoUrl.includes('bilibili.com') || 
+                      selectedVideo.videoUrl.includes('vimeo.com') ||
+                      selectedVideo.videoUrl.includes('xinpianchang.com')
+                    ) ? (
                       <iframe 
                         src={getEmbedUrl(selectedVideo.videoUrl) || undefined}
                         className="w-full h-full border-0 absolute inset-0"

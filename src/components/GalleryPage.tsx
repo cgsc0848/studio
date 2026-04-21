@@ -123,6 +123,9 @@ export default function GalleryPage() {
       if (bvid) return `https://player.bilibili.com/player.html?bvid=${bvid}&page=1&high_quality=1&as_wide=1&allowfullscreen=true&autoplay=0&danmaku=0`;
     }
     if (url.includes('xinpianchang.com')) {
+      if (url.includes('player.xinpianchang.com')) {
+        return url.replace(/&amp;/g, '&');
+      }
       const match = url.match(/a(\d+)/);
       if (match) return `https://www.xinpianchang.com/player/v1/a${match[1]}`;
     }
@@ -405,7 +408,13 @@ export default function GalleryPage() {
                      transition={{ duration: 0.4 }}
                      className="w-full aspect-video bg-black rounded-xl overflow-hidden shadow-2xl border border-white/5 relative"
                   >
-                    {selectedVideo.videoUrl && (selectedVideo.videoUrl.includes('youtube.com') || selectedVideo.videoUrl.includes('youtu.be') || selectedVideo.videoUrl.includes('bilibili.com') || selectedVideo.videoUrl.includes('vimeo.com')) ? (
+                    {selectedVideo.videoUrl && (
+                      selectedVideo.videoUrl.includes('youtube.com') || 
+                      selectedVideo.videoUrl.includes('youtu.be') || 
+                      selectedVideo.videoUrl.includes('bilibili.com') || 
+                      selectedVideo.videoUrl.includes('vimeo.com') ||
+                      selectedVideo.videoUrl.includes('xinpianchang.com')
+                    ) ? (
                       <div className="w-full h-full">
                         <iframe 
                           src={getEmbedUrl(selectedVideo.videoUrl) || undefined}

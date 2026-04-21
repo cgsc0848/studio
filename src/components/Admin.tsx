@@ -283,6 +283,8 @@ export default function Admin() {
             description = info.description || description;
           }
         } else if (finalUrl.includes('xinpianchang.com')) {
+          // Clean HTML entities if present
+          finalUrl = finalUrl.replace(/&amp;/g, '&');
           const info = await fetchXinpianchangInfo(finalUrl);
           if (info) {
             title = titleInput || info.title;
