@@ -252,12 +252,16 @@ export default function Admin() {
     if (!urlInput) return;
     
     try {
-      let finalUrl = urlInput;
+      let finalUrl = urlInput.trim();
+      
       // Extract src if an iframe tag is pasted
       if (finalUrl.includes('<iframe')) {
         const match = finalUrl.match(/src="([^"]+)"/);
         if (match) finalUrl = match[1];
       }
+
+      // Force HTTPS
+      finalUrl = finalUrl.replace(/^http:\/\//i, 'https://');
 
       if (isAddingByUrl === 'photo') {
         await addDoc(collection(db, 'photos'), {
@@ -279,7 +283,7 @@ export default function Admin() {
           const info = await fetchBilibiliInfo(finalUrl);
           if (info) {
             title = titleInput || info.title;
-            thumbnail = info.thumbnail.replace('http://', 'https://');
+            thumbnail = info.thumbnail.replace(/^http:\/\//i, 'https://');
             description = info.description || description;
           }
         } else if (finalUrl.includes('xinpianchang.com')) {
@@ -288,10 +292,13 @@ export default function Admin() {
           const info = await fetchXinpianchangInfo(finalUrl);
           if (info) {
             title = titleInput || info.title;
-            thumbnail = info.thumbnail;
+            thumbnail = info.thumbnail.replace(/^http:\/\//i, 'https://');
             description = info.description || description;
           }
         }
+        
+        // Final thumbnail cleanup
+        thumbnail = thumbnail.replace(/^http:\/\//i, 'https://');
 
         await addDoc(collection(db, 'videos'), {
           thumbnail: thumbnail || 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&q=80&w=800',

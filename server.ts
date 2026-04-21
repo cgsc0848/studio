@@ -202,6 +202,7 @@ async function startServer() {
       if (thumbnail && !thumbnail.startsWith('http')) {
         thumbnail = thumbnail.startsWith('//') ? `https:${thumbnail}` : `https://www.xinpianchang.com${thumbnail}`;
       }
+      thumbnail = thumbnail.replace('http://', 'https://');
 
       res.json({
         title: titleMatch ? titleMatch[1].replace(' - 新片场', '').trim() : 'Xinpianchang Video',

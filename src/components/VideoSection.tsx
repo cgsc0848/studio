@@ -105,7 +105,7 @@ export default function VideoSection() {
       
       if (bvid) {
         // Updated Bilibili embed URL parameters to prevent common playback errors
-        return `https://player.bilibili.com/player.html?bvid=${bvid}&page=1&high_quality=1&as_wide=1&allowfullscreen=true&autoplay=0&danmaku=0&autoplay=0`;
+        return `https://player.bilibili.com/player.html?bvid=${bvid}&page=1&high_quality=1&as_wide=1&allowfullscreen=true&autoplay=0&danmaku=0`;
       }
     }
 
@@ -290,8 +290,10 @@ export default function VideoSection() {
                       <iframe 
                         src={getEmbedUrl(selectedVideo.videoUrl) || undefined}
                         className="w-full h-full border-0 absolute inset-0"
-                        allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; compute-pressure"
+                        allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; compute-pressure"
                         title={selectedVideo.title}
+                        referrerPolicy="strict-origin-when-cross-origin"
+                        loading="lazy"
                       />
                     ) : selectedVideo.videoUrl ? (
                       <video 
