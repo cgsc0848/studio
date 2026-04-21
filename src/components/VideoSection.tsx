@@ -43,16 +43,17 @@ export default function VideoSection() {
   const CATEGORIES = useMemo(() => ['All', ...(settings.videoCategories || [])], [settings.videoCategories]);
 
   const categoryCounts = useMemo(() => {
-    const counts: Record<string, number> = { All: allVideos.length };
+    const counts: Record<string, number> = { all: allVideos.length };
     allVideos.forEach(v => {
-      counts[v.category] = (counts[v.category] || 0) + 1;
+      const cat = (v.category || '').toLowerCase();
+      counts[cat] = (counts[cat] || 0) + 1;
     });
     return counts;
   }, [allVideos]);
 
-  const filteredVideos = activeCategory === 'All' 
+  const filteredVideos = activeCategory.toLowerCase() === 'all' 
     ? allVideos 
-    : allVideos.filter(v => v.category === activeCategory);
+    : allVideos.filter(v => v.category.toLowerCase() === activeCategory.toLowerCase());
 
   const getCategoryDesc = (cat: Category) => {
     if (cat === 'All') return '';
@@ -216,11 +217,11 @@ export default function VideoSection() {
                   onClick={() => setActiveCategory(cat)}
                   className={cn(
                     "cursor-pointer transition-all duration-300 group",
-                    activeCategory === cat ? "opacity-100" : "opacity-40 hover:opacity-70"
+                    activeCategory.toLowerCase() === cat.toLowerCase() ? "opacity-100" : "opacity-40 hover:opacity-70"
                   )}
                 >
                   <div className="font-serif text-2xl flex items-baseline gap-3">
-                    {getCategoryName(cat)} <span className="text-[10px] font-sans opacity-50">/ {(categoryCounts[cat] || 0) < 10 ? `0${categoryCounts[cat] || 0}` : categoryCounts[cat]}</span>
+                    {getCategoryName(cat)} <span className="text-[10px] font-sans opacity-50">/ {(categoryCounts[cat.toLowerCase()] || 0) < 10 ? `0${categoryCounts[cat.toLowerCase()] || 0}` : categoryCounts[cat.toLowerCase()]}</span>
                   </div>
                   <p className="text-xs mt-2 text-white/60 leading-relaxed max-w-[240px]">
                     {getCategoryDesc(cat)}

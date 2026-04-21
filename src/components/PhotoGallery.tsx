@@ -93,15 +93,16 @@ export default function PhotoGallery() {
   }, [photoIndex, photos]);
 
   const categoryCounts = useMemo(() => {
-    const counts: Record<string, number> = { All: photos.length };
+    const counts: Record<string, number> = { all: photos.length };
     photos.forEach(p => {
-      counts[p.category] = (counts[p.category] || 0) + 1;
+      const cat = (p.category || '').toLowerCase();
+      counts[cat] = (counts[cat] || 0) + 1;
     });
     return counts;
   }, [photos]);
 
   const getCategoryName = (cat: string) => {
-    if (cat === 'All') return language === 'en' ? 'All' : '全部';
+    if (cat.toLowerCase() === 'all') return language === 'en' ? 'All' : '全部';
     const key = cat.toLowerCase();
     if (settings?.categoryLabels?.[key]) return settings.categoryLabels[key];
     const trans = (t.photography.categories as any)[key];
@@ -196,7 +197,7 @@ export default function PhotoGallery() {
             </div>
             <div className="text-xs uppercase tracking-[0.2em] font-medium text-ink/60 flex flex-wrap justify-end gap-x-8 gap-y-4">
               <Link to="/gallery/All" className="text-ink border-b border-ink pb-1">
-                {getCategoryName('All')} <span className="opacity-40 text-[10px] ml-1">({categoryCounts.All})</span>
+                {getCategoryName('All')} <span className="opacity-40 text-[10px] ml-1">({categoryCounts.all || 0})</span>
               </Link>
               {(settings.photoCategories || []).map(cat => (
                 <Link 
@@ -204,7 +205,7 @@ export default function PhotoGallery() {
                   to={`/gallery/${cat}`} 
                   className="hover:text-ink transition-colors pb-1 border-b border-transparent"
                 >
-                  {getCategoryName(cat)} <span className="opacity-40 text-[10px] ml-1">({categoryCounts[cat] || 0})</span>
+                  {getCategoryName(cat)} <span className="opacity-40 text-[10px] ml-1">({categoryCounts[cat.toLowerCase()] || 0})</span>
                 </Link>
               ))}
             </div>

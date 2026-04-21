@@ -60,7 +60,8 @@ export default function Admin() {
   const [isPhotoPickerOpen, setIsPhotoPickerOpen] = useState<'hero' | 'about' | null>(null);
   const [activeTab, setActiveTab] = useState<'content' | 'settings'>('content');
   const [loading, setLoading] = useState(true);
-  const [uploadProgress, setUploadProgress] = useState<{ [key: string]: number } | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<{ [id: string]: number } | null>(null);
+  const [uploadResult, setUploadResult] = useState<{ id: string; name: string; success: boolean; url?: string; error?: string } | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<{ id: string; type: 'photo' | 'video' } | null>(null);
   const [isAddingByUrl, setIsAddingByUrl] = useState<'photo' | 'video' | null>(null);
@@ -198,6 +199,16 @@ export default function Admin() {
   };
 
   const fetchBilibiliInfo = async (url: string) => {
+    // Check if we're in the AI Studio environment (or localhost)
+    const isDev = window.location.hostname.includes('ais-dev-') || 
+                  window.location.hostname.includes('ais-pre-') || 
+                  window.location.hostname.includes('localhost') || 
+                  window.location.hostname.includes('127.0.0.1');
+    if (!isDev) {
+      showToast(language === 'en' ? 'Auto-fetch is only available in AI Studio Preview. Please use manual entry on published sites.' : '自动抓取仅在预览环境可用。正式站请手动输入信息。', 'error');
+      return null;
+    }
+
     // Standardize URL
     let finalUrl = url;
     if (finalUrl.includes('b23.tv')) {
@@ -222,6 +233,9 @@ export default function Admin() {
   };
 
   const fetchXinpianchangInfo = async (url: string) => {
+    const isDev = window.location.hostname.includes('ais-dev-') || window.location.hostname.includes('localhost') || window.location.hostname.includes('127.0.0.1');
+    if (!isDev) return null;
+    
     try {
       const resp = await fetch(`/api/xinpianchang-info?url=${encodeURIComponent(url)}`);
       if (resp.ok) {
@@ -413,10 +427,11 @@ export default function Admin() {
                 });
               }
             }
-            setUploadProgress(null);
+            setUploadResult({ id: uploadId, name: file.name, success: true, url: downloadURL });
             showToast(language === 'en' ? 'Upload successful' : '上传成功');
-          } catch (dbError) {
+          } catch (dbError: any) {
             console.error('Firestore post-upload error:', dbError);
+            setUploadResult({ id: uploadId, name: file.name, success: false, error: dbError.message });
             showToast(language === 'en' ? 'Upload saved, but failed to update database.' : '文件上传成功，但数据库更新失败。', 'error');
           } finally {
             setUploadProgress(prev => {
@@ -1399,6 +1414,50 @@ export default function Admin() {
                     </div>
                   </div>
                </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Upload Result Modal */}
+        <AnimatePresence>
+          {uploadResult && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[110] flex items-center justify-center bg-ink/60 backdrop-blur-sm p-6"
+            >
+              <motion.div 
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="bg-white p-8 rounded-2xl shadow-2xl max-w-sm w-full text-center"
+              >
+                <div className={`w-16 h-16 rounded-full mx-auto flex items-center justify-center mb-6 ${
+                  uploadResult.success ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
+                }`}>
+                  {uploadResult.success ? <CheckCircle size={32} /> : <AlertCircle size={32} />}
+                </div>
+                <h3 className="text-xl font-serif mb-2">
+                  {uploadResult.success 
+                    ? (language === 'en' ? 'Upload Complete' : '上传已完成') 
+                    : (language === 'en' ? 'Upload Failed' : '上传失败')}
+                </h3>
+                <p className="text-xs text-ink/60 mb-6 line-clamp-2">
+                  {uploadResult.name}
+                </p>
+                {!uploadResult.success && uploadResult.error && (
+                  <div className="bg-red-50 p-4 rounded-xl mb-6 text-left">
+                    <p className="text-[10px] text-red-600 font-mono break-words">{uploadResult.error}</p>
+                  </div>
+                )}
+                <button 
+                  onClick={() => setUploadResult(null)}
+                  className="w-full py-4 bg-ink text-white rounded-xl text-[10px] uppercase tracking-widest font-bold hover:opacity-90 transition-all"
+                >
+                  {language === 'en' ? 'Close' : '关闭'}
+                </button>
+              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>

@@ -31,11 +31,18 @@ export default function GalleryPage() {
     }
   };
 
+  const categories = useMemo(() => {
+    if (activeType === 'photos') {
+      return ['All', ...(settings.photoCategories || [])];
+    }
+    return ['All', ...(settings.videoCategories || [])];
+  }, [activeType, settings.photoCategories, settings.videoCategories]);
+
   const filteredItems = useMemo(() => {
     if (activeType === 'photos') {
-      return activeCategory === 'All' ? photos : photos.filter(p => p.category === activeCategory);
+      return activeCategory.toLowerCase() === 'all' ? photos : photos.filter(p => p.category.toLowerCase() === activeCategory.toLowerCase());
     }
-    return activeCategory === 'All' ? videos : videos.filter(v => v.category === activeCategory);
+    return activeCategory.toLowerCase() === 'all' ? videos : videos.filter(v => v.category.toLowerCase() === activeCategory.toLowerCase());
   }, [activeType, activeCategory, photos, videos]);
 
   const photoIndex = useMemo(() => {
@@ -176,12 +183,15 @@ export default function GalleryPage() {
     return (t.cinematography.categories as any)[key] || cat;
   };
 
-  const categories = useMemo(() => {
-    if (activeType === 'photos') {
-      return ['All', ...(settings.photoCategories || [])];
-    }
-    return ['All', ...(settings.videoCategories || [])];
-  }, [activeType, settings.photoCategories, settings.videoCategories]);
+  const categoryCounts = useMemo(() => {
+    const items = activeType === 'photos' ? photos : videos;
+    const counts: Record<string, number> = { all: items.length };
+    items.forEach(item => {
+      const cat = (item.category || '').toLowerCase();
+      counts[cat] = (counts[cat] || 0) + 1;
+    });
+    return counts;
+  }, [activeType, photos, videos]);
 
   return (
     <div className="min-h-screen bg-bg-paper pt-32 pb-24 px-6 md:px-12">
@@ -230,10 +240,10 @@ export default function GalleryPage() {
                   onClick={() => setActiveCategory(cat)}
                   className={cn(
                     "text-[10px] uppercase tracking-widest pb-1 border-b transition-all",
-                    activeCategory === cat ? "text-ink border-ink" : "text-ink/40 border-transparent hover:text-ink"
+                    activeCategory.toLowerCase() === cat.toLowerCase() ? "text-ink border-ink" : "text-ink/40 border-transparent hover:text-ink"
                   )}
                 >
-                  {getCategoryLabel(cat)}
+                  {getCategoryLabel(cat)} <span className="opacity-40 text-[9px] ml-0.5">({cat.toLowerCase() === 'all' ? categoryCounts.all : (categoryCounts[cat.toLowerCase()] || 0)})</span>
                 </button>
               ))}
             </div>
