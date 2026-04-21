@@ -18,7 +18,6 @@ interface SiteSettings {
   email: string;
   socialLinks: { platform: string; url: string; }[];
   categoryLabels: Record<string, string>;
-  navLabels: Record<string, string>;
   navLabels_en: Record<string, string>;
   navLabels_zh: Record<string, string>;
   famousCars?: string;
@@ -55,7 +54,6 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     email: 'cgsc0848@gmail.com',
     socialLinks: [],
     categoryLabels: {},
-    navLabels: {},
     navLabels_en: {
       home: 'Home',
       about: 'About',
@@ -88,7 +86,6 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setSettings(prev => ({
           ...prev,
           ...data,
-          navLabels: data.navLabels || {},
           navLabels_en: data.navLabels_en || prev.navLabels_en,
           navLabels_zh: data.navLabels_zh || prev.navLabels_zh,
           categoryLabels: data.categoryLabels || {},

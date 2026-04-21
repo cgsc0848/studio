@@ -508,7 +508,17 @@ export default function Admin() {
 
   const saveSettings = async () => {
     try {
-      await setDoc(doc(db, 'settings', 'global'), settings);
+      // Force HTTPS for critical settings URLs to prevent mixed content
+      const sanitizedSettings = {
+        ...settings,
+        heroImageUrl: settings.heroImageUrl?.replace(/^http:\/\//i, 'https://'),
+        aboutImageUrl: settings.aboutImageUrl?.replace(/^http:\/\//i, 'https://'),
+        socialLinks: settings.socialLinks.map(link => ({
+          ...link,
+          url: link.url.replace(/^http:\/\//i, 'https://')
+        }))
+      };
+      await setDoc(doc(db, 'settings', 'global'), sanitizedSettings);
       showToast(language === 'en' ? 'Settings saved successfully' : '设置保存成功');
     } catch (error) {
       showToast(language === 'en' ? 'Failed to save settings' : '保存设置失败', 'error');
@@ -909,29 +919,6 @@ export default function Admin() {
                 </div>
               </section>
 
-              {/* Navigation Labels */}
-              <section className="space-y-6">
-                <h3 className="text-[10px] uppercase tracking-[0.3em] text-ink/40 flex items-center gap-2">
-                  <Menu size={14} /> {language === 'en' ? 'Navigation Labels' : '导航标签设置'}
-                </h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {['home', 'about', 'films', 'stills', 'journal'].map((key) => (
-                    <div key={key}>
-                      <label className="block text-[9px] uppercase tracking-widest text-ink/40 mb-1.5 font-bold">{key}</label>
-                      <input 
-                        placeholder={(t.nav as any)[key]}
-                        value={settings?.navLabels?.[key] || ''}
-                        onChange={(e) => setSettings({
-                          ...settings,
-                          navLabels: { ...(settings?.navLabels || {}), [key]: e.target.value }
-                        })}
-                        className="w-full p-3 bg-ink/5 rounded-lg outline-none focus:ring-1 ring-accent text-[10px] tracking-widest font-medium"
-                      />
-                    </div>
-                  ))}
-                </div>
-              </section>
-
               {/* Video Category Labels */}
               <section className="space-y-6">
                 <h3 className="text-[10px] uppercase tracking-[0.3em] text-ink/40 flex items-center gap-2">
@@ -1030,7 +1017,7 @@ export default function Admin() {
                       <div className="space-y-6">
                         <label className="block text-[11px] uppercase tracking-[0.2em] text-ink/60 font-bold border-b border-ink/5 pb-2">English Labels</label>
                         <div className="space-y-4">
-                           {Object.keys(settings.navLabels_en || {}).map(key => (
+                           {['home', 'about', 'films', 'stills', 'editorial'].map(key => (
                              <div key={key} className="flex items-center gap-4">
                                <label className="w-16 text-[9px] uppercase tracking-widest text-ink/30">{key}</label>
                                <input 
@@ -1048,7 +1035,7 @@ export default function Admin() {
                       <div className="space-y-6">
                         <label className="block text-[11px] uppercase tracking-[0.2em] text-ink/60 font-bold border-b border-ink/5 pb-2">中文名称 (ZH)</label>
                         <div className="space-y-4">
-                           {Object.keys(settings.navLabels_zh || {}).map(key => (
+                           {['home', 'about', 'films', 'stills', 'editorial'].map(key => (
                              <div key={key} className="flex items-center gap-4">
                                <label className="w-16 text-[9px] uppercase tracking-widest text-ink/30">{key}</label>
                                <input 
