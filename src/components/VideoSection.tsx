@@ -335,6 +335,7 @@ export default function VideoSection() {
                         <div className="w-24 aspect-video rounded-lg overflow-hidden flex-shrink-0 relative">
                           <img 
                             src={getSafeThumbnail(video.thumbnail, video.videoUrl)} 
+                            alt={video.title}
                             className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" 
                             referrerPolicy="no-referrer"
                           />

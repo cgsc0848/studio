@@ -201,8 +201,7 @@ export default function Admin() {
 
   const fetchBilibiliInfo = async (url: string) => {
     // Check if we're in the AI Studio environment (or localhost)
-    const isDev = window.location.hostname.includes('ais-dev-') || 
-                  window.location.hostname.includes('ais-pre-') || 
+    const isDev = window.location.hostname.includes('ais-') || 
                   window.location.hostname.includes('localhost') || 
                   window.location.hostname.includes('127.0.0.1');
     if (!isDev) {
@@ -234,7 +233,7 @@ export default function Admin() {
   };
 
   const fetchXinpianchangInfo = async (url: string) => {
-    const isDev = window.location.hostname.includes('ais-dev-') || window.location.hostname.includes('localhost') || window.location.hostname.includes('127.0.0.1');
+    const isDev = window.location.hostname.includes('ais-') || window.location.hostname.includes('localhost') || window.location.hostname.includes('127.0.0.1');
     if (!isDev) return null;
     
     try {
