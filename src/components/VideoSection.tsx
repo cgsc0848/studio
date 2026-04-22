@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
+import { Link } from 'react-router-dom';
 import { Video, Category } from '@/src/types';
 import { Play, X } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
@@ -168,7 +169,7 @@ export default function VideoSection() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
               <AnimatePresence mode="popLayout">
-                {filteredVideos.map((video) => (
+                {allVideos.slice(0, 4).map((video) => (
                   <motion.div
                     key={video.id}
                     layout
@@ -214,29 +215,33 @@ export default function VideoSection() {
                 ))}
               </AnimatePresence>
             </div>
+            
+            <div className="mt-12 text-center md:text-left">
+              <Link 
+                to="/gallery/All?type=videos" 
+                className="inline-block text-[10px] uppercase tracking-[0.3em] border border-white/20 px-8 py-4 hover:bg-white hover:text-ink transition-all"
+              >
+                {language === 'en' ? 'View All Films' : '查看全部影片'}
+              </Link>
+            </div>
           </div>
 
           <aside className="flex flex-col">
             <h3 className="text-[10px] uppercase tracking-[2px] mb-8 border-b border-white/10 pb-2 text-white/60">{t.cinematography.sidebarTitle}</h3>
             <ul className="space-y-10">
               {CATEGORIES.map((cat) => (
-                <li 
-                  key={cat} 
-                  onClick={() => {
-                    setActiveCategory(cat);
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }}
-                  className={cn(
-                    "cursor-pointer transition-all duration-300 group",
-                    activeCategory.toLowerCase() === cat.toLowerCase() ? "opacity-100" : "opacity-40 hover:opacity-70"
-                  )}
-                >
-                  <div className="font-serif text-2xl flex items-baseline gap-3">
-                    {getCategoryName(cat)} <span className="text-[10px] font-sans opacity-50">/ {(categoryCounts[cat.toLowerCase()] || 0) < 10 ? `0${categoryCounts[cat.toLowerCase()] || 0}` : categoryCounts[cat.toLowerCase()]}</span>
-                  </div>
-                  <p className="text-xs mt-2 text-white/60 leading-relaxed max-w-[240px]">
-                    {getCategoryDesc(cat)}
-                  </p>
+                <li key={cat}>
+                  <Link 
+                    to={`/gallery/${cat}?type=videos`}
+                    className="cursor-pointer transition-all duration-300 group block"
+                  >
+                    <div className="font-serif text-2xl flex items-baseline gap-3 group-hover:text-white transition-colors">
+                      {getCategoryName(cat)} <span className="text-[10px] font-sans opacity-50">/ {(categoryCounts[cat.toLowerCase()] || 0) < 10 ? `0${categoryCounts[cat.toLowerCase()] || 0}` : categoryCounts[cat.toLowerCase()]}</span>
+                    </div>
+                    <p className="text-xs mt-2 text-white/40 group-hover:text-white/60 leading-relaxed max-w-[240px] transition-colors">
+                      {getCategoryDesc(cat)}
+                    </p>
+                  </Link>
                 </li>
               ))}
             </ul>

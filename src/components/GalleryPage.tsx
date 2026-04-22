@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Photo, Video } from '@/src/types';
 import { useLanguage } from '../LanguageContext';
@@ -11,6 +11,8 @@ import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 
 export default function GalleryPage() {
   const { category: initialCategory } = useParams<{ category: string }>();
+  const location = useLocation();
+  const { t, language, settings } = useLanguage();
   const [activeType, setActiveType] = useState<'photos' | 'videos'>('photos');
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [videos, setVideos] = useState<Video[]>([]);
@@ -18,7 +20,23 @@ export default function GalleryPage() {
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
   const [modalBgColor, setModalBgColor] = useState('rgba(26, 26, 26, 0.95)');
   const [activeCategory, setActiveCategory] = useState<string>(initialCategory || 'All');
-  const { t, language, settings } = useLanguage();
+  
+  // Set initial type based on category or query param
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const typeParam = searchParams.get('type');
+    
+    if (typeParam === 'videos') {
+      setActiveType('videos');
+    } else if (initialCategory && initialCategory !== 'All') {
+      const isVideoCat = settings.videoCategories?.some(
+        c => c.toLowerCase() === initialCategory.toLowerCase()
+      );
+      if (isVideoCat) {
+        setActiveType('videos');
+      }
+    }
+  }, [initialCategory, settings.videoCategories, location.search]);
 
   const getLayoutClass = () => {
     if (activeType === 'videos') return 'grid grid-cols-1 md:grid-cols-2 gap-8';
