@@ -64,10 +64,11 @@ function SidebarNav() {
   };
 
   const sections = [
-    { id: 'hero', label: labels?.['home'] || 'Home' },
-    { id: 'about', label: labels?.['about'] || 'About' },
-    { id: 'cinematography', label: labels?.['films'] || 'Films' },
-    { id: 'photography', label: labels?.['stills'] || 'Stills' },
+    { id: 'hero', label: labels?.['home'] || (language === 'en' ? 'Home' : '首页') },
+    { id: 'cinematography', label: labels?.['films'] || (language === 'en' ? 'Films' : '影像') },
+    { id: 'photography', label: labels?.['stills'] || (language === 'en' ? 'Stills' : '摄影') },
+    { id: 'about', label: labels?.['about'] || (language === 'en' ? 'About' : '关于') },
+    { id: 'contact', label: language === 'en' ? 'Contact' : '联系' },
   ];
 
   return (

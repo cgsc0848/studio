@@ -17,6 +17,10 @@ interface SiteSettings {
   aboutYears: string;
   aboutProjects: string;
   aboutImageUrl: string;
+  photoTitle: string;
+  photoSubtitle: string;
+  videoTitle: string;
+  videoSubtitle: string;
   galleryLayout: 'masonry' | 'grid' | 'editorial';
   primaryColor: string;
   fontFamily: 'serif' | 'sans' | 'mono';
@@ -44,6 +48,10 @@ export default function Admin() {
     aboutProjects: '200+',
     aboutImageUrl: '',
     heroImageUrl: '',
+    photoTitle: '',
+    photoSubtitle: '',
+    videoTitle: '',
+    videoSubtitle: '',
     galleryLayout: 'masonry',
     primaryColor: '#1a1a1a',
     fontFamily: 'serif',
@@ -1239,6 +1247,58 @@ export default function Admin() {
                         </div>
                       </div>
                    </div>
+                </div>
+              </section>
+
+              {/* Photography Section Customization */}
+              <section className="space-y-6">
+                <h3 className="text-[10px] uppercase tracking-[0.3em] text-ink/40 flex items-center gap-2">
+                   <ImageIcon size={14} /> {language === 'en' ? 'Stills Section' : '摄影板块设置'}
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-4">
+                    <label className="block text-[10px] uppercase tracking-widest text-ink/40 font-bold">{language === 'en' ? 'Section Title' : '板块大标题'}</label>
+                    <input 
+                      value={settings.photoTitle}
+                      onChange={(e) => setSettings({ ...settings, photoTitle: e.target.value })}
+                      placeholder={t.photography.title}
+                      className="w-full p-4 bg-ink/5 rounded-xl outline-none focus:ring-1 ring-accent text-lg"
+                    />
+                  </div>
+                  <div className="space-y-4">
+                    <label className="block text-[10px] uppercase tracking-widest text-ink/40 font-bold">{language === 'en' ? 'Section Subtitle / Desc' : '板块副标题 / 描述'}</label>
+                    <textarea 
+                      value={settings.photoSubtitle}
+                      onChange={(e) => setSettings({ ...settings, photoSubtitle: e.target.value })}
+                      className="w-full p-4 bg-ink/5 rounded-xl outline-none focus:ring-1 ring-accent text-sm h-16"
+                    />
+                  </div>
+                </div>
+              </section>
+
+              {/* Video Section Customization */}
+              <section className="space-y-6">
+                <h3 className="text-[10px] uppercase tracking-[0.3em] text-ink/40 flex items-center gap-2">
+                   <VideoIcon size={14} /> {language === 'en' ? 'Films Section' : '影像板块设置'}
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-4">
+                    <label className="block text-[10px] uppercase tracking-widest text-ink/40 font-bold">{language === 'en' ? 'Section Title' : '板块大标题'}</label>
+                    <input 
+                      value={settings.videoTitle}
+                      onChange={(e) => setSettings({ ...settings, videoTitle: e.target.value })}
+                      placeholder={t.cinematography.title}
+                      className="w-full p-4 bg-ink/5 rounded-xl outline-none focus:ring-1 ring-accent text-lg text-ink"
+                    />
+                  </div>
+                  <div className="space-y-4">
+                    <label className="block text-[10px] uppercase tracking-widest text-ink/40 font-bold">{language === 'en' ? 'Section Subtitle' : '板块副标题'}</label>
+                    <textarea 
+                      value={settings.videoSubtitle}
+                      onChange={(e) => setSettings({ ...settings, videoSubtitle: e.target.value })}
+                      className="w-full p-4 bg-ink/5 rounded-xl outline-none focus:ring-1 ring-accent text-sm h-16"
+                    />
+                  </div>
                 </div>
               </section>
 

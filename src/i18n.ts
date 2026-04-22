@@ -3,6 +3,7 @@ export type Language = 'en' | 'zh';
 export const translations = {
   en: {
     nav: {
+      home: 'Home',
       films: 'Films',
       stills: 'Stills',
       editorial: 'Editorial',
@@ -32,6 +33,7 @@ export const translations = {
     photography: {
       label: 'Selected Works',
       title: 'Capturing the essence of stillness in a moving world.',
+      subtitle: 'A collection of editorial and personal photography exploring the interaction of light and shadow.',
       categories: {
         all: 'All',
         editorial: 'Editorial',
@@ -42,6 +44,7 @@ export const translations = {
     cinematography: {
       label: 'Moving Images',
       title: 'Cinematography & Film',
+      subtitle: 'Visual narratives and cinematic explorations across commercial and independent projects.',
       sidebarTitle: 'Cinematography Categories',
       categories: {
         all: 'All',
@@ -91,6 +94,7 @@ export const translations = {
   },
   zh: {
     nav: {
+      home: '首页',
       films: '影片',
       stills: '摄影',
       editorial: '社论',
@@ -120,6 +124,7 @@ export const translations = {
     photography: {
       label: '精选作品',
       title: '在变幻的世界中，捕捉静止的本质。',
+      subtitle: '探索光影互动的一系列社论与个人摄影作品。',
       categories: {
         all: '全部',
         editorial: '社论',
@@ -130,6 +135,7 @@ export const translations = {
     cinematography: {
       label: '动态影像',
       title: '电影摄影与影片',
+      subtitle: '贯穿商业项目与独立创作的视觉叙事与影像探索。',
       sidebarTitle: '影片分类',
       categories: {
         all: '全部',

@@ -193,7 +193,12 @@ export default function PhotoGallery() {
           <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
             <div className="max-w-md">
               <span className="text-[10px] uppercase tracking-[0.3em] text-ink/40 mb-4 block">{t.photography.label}</span>
-              <h2 className="text-4xl md:text-5xl font-serif leading-tight">{t.photography.title}</h2>
+              <h2 className="text-4xl md:text-5xl font-serif leading-tight">{settings.photoTitle || t.photography.title}</h2>
+              {settings.photoSubtitle && (
+                <p className="text-ink/60 text-sm mt-4 leading-relaxed italic">
+                  {settings.photoSubtitle}
+                </p>
+              )}
             </div>
             <div className="text-xs uppercase tracking-[0.2em] font-medium text-ink/60 flex flex-wrap justify-end gap-x-8 gap-y-4">
               <Link to="/gallery/All" className="text-ink border-b border-ink pb-1">

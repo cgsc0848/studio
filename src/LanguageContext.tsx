@@ -11,7 +11,10 @@ interface SiteSettings {
   aboutDesc: string;
   aboutYears: string;
   aboutProjects: string;
-  aboutImageUrl: string;
+  photoTitle: string;
+  photoSubtitle: string;
+  videoTitle: string;
+  videoSubtitle: string;
   galleryLayout: 'masonry' | 'grid' | 'editorial';
   primaryColor: string;
   fontFamily: 'serif' | 'sans' | 'mono';
@@ -48,6 +51,10 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     aboutYears: '',
     aboutProjects: '',
     aboutImageUrl: '',
+    photoTitle: '',
+    photoSubtitle: '',
+    videoTitle: '',
+    videoSubtitle: '',
     galleryLayout: 'masonry',
     primaryColor: '#1a1a1a',
     fontFamily: 'serif',

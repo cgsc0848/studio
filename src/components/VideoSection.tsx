@@ -158,7 +158,12 @@ export default function VideoSection() {
           <div>
             <div className="mb-16">
               <span className="text-[10px] uppercase tracking-[0.3em] text-white/40 mb-4 block">{t.cinematography.label}</span>
-              <h2 className="text-4xl md:text-6xl font-serif mb-8">{t.cinematography.title}</h2>
+              <h2 className="text-4xl md:text-6xl font-serif mb-8">{settings.videoTitle || t.cinematography.title}</h2>
+              {settings.videoSubtitle && (
+                <p className="text-white/60 max-w-md leading-relaxed -mt-4 mb-8">
+                  {settings.videoSubtitle}
+                </p>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
