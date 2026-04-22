@@ -97,15 +97,15 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           return url.replace(/^http:\/\//i, 'https://');
         };
 
-        const data: SiteSettings = {
+        const data = {
           ...rawData,
-          heroImageUrl: forceHttps(rawData.heroImageUrl),
-          aboutImageUrl: forceHttps(rawData.aboutImageUrl),
-          socialLinks: (rawData.socialLinks || []).map((link: any) => ({
+          heroImageUrl: forceHttps(rawData?.heroImageUrl),
+          aboutImageUrl: forceHttps(rawData?.aboutImageUrl),
+          socialLinks: (rawData?.socialLinks || []).map((link: any) => ({
             ...link,
             url: forceHttps(link.url)
           }))
-        } as SiteSettings;
+        } as unknown as SiteSettings;
 
         setSettings(prev => ({
           ...prev,

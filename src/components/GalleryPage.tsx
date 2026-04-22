@@ -217,7 +217,11 @@ export default function GalleryPage() {
           <div className="flex flex-col gap-6">
             <div className="flex bg-ink/5 p-1 rounded-full">
               <button 
-                onClick={() => { setActiveType('photos'); setActiveCategory('All'); }}
+                onClick={() => { 
+                  setActiveType('photos'); 
+                  setActiveCategory('All'); 
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
                 className={cn(
                   "px-6 py-2 rounded-full text-[10px] uppercase tracking-widest transition-all",
                   activeType === 'photos' ? "bg-ink text-white" : "text-ink/40 hover:text-ink"
@@ -226,7 +230,11 @@ export default function GalleryPage() {
                 {language === 'en' ? 'Stills' : '摄影'}
               </button>
               <button 
-                onClick={() => { setActiveType('videos'); setActiveCategory('All'); }}
+                onClick={() => { 
+                  setActiveType('videos'); 
+                  setActiveCategory('All'); 
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
                 className={cn(
                   "px-6 py-2 rounded-full text-[10px] uppercase tracking-widest transition-all",
                   activeType === 'videos' ? "bg-ink text-white" : "text-ink/40 hover:text-ink"
@@ -240,7 +248,10 @@ export default function GalleryPage() {
               {categories.map(cat => (
                 <button
                   key={cat}
-                  onClick={() => setActiveCategory(cat)}
+                  onClick={() => {
+                    setActiveCategory(cat);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
                   className={cn(
                     "text-[10px] uppercase tracking-widest pb-1 border-b transition-all",
                     activeCategory.toLowerCase() === cat.toLowerCase() ? "text-ink border-ink" : "text-ink/40 border-transparent hover:text-ink"

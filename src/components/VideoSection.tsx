@@ -219,10 +219,13 @@ export default function VideoSection() {
           <aside className="flex flex-col">
             <h3 className="text-[10px] uppercase tracking-[2px] mb-8 border-b border-white/10 pb-2 text-white/60">{t.cinematography.sidebarTitle}</h3>
             <ul className="space-y-10">
-              {CATEGORIES.filter(c => c !== 'All').map((cat) => (
+              {CATEGORIES.map((cat) => (
                 <li 
                   key={cat} 
-                  onClick={() => setActiveCategory(cat)}
+                  onClick={() => {
+                    setActiveCategory(cat);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
                   className={cn(
                     "cursor-pointer transition-all duration-300 group",
                     activeCategory.toLowerCase() === cat.toLowerCase() ? "opacity-100" : "opacity-40 hover:opacity-70"

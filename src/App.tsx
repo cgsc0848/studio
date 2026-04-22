@@ -6,6 +6,7 @@ import VideoSection from './components/VideoSection';
 import Footer from './components/Footer';
 import CustomCursor from './components/CustomCursor';
 import GalleryPage from './components/GalleryPage';
+import ScrollToTop from './components/ScrollToTop';
 import { cn } from './lib/utils';
 import { motion, useScroll, useSpring } from 'motion/react';
 import { LanguageProvider, useLanguage } from './LanguageContext';
@@ -199,6 +200,7 @@ function AppContent() {
 
   return (
     <div className="min-h-screen selection:bg-ink selection:text-bg-paper">
+      <ScrollToTop />
       <CustomCursor />
       <Navbar />
       <SidebarNav />
