@@ -153,14 +153,22 @@ export default function GalleryPage() {
   useEffect(() => {
     if (selectedPhoto) {
       const img = new Image();
-      img.crossOrigin = 'anonymous'; // Set before src
-      img.src = `${selectedPhoto.url}${selectedPhoto.url.includes('?') ? '&' : '?'}t=${Date.now()}`;
+      img.crossOrigin = 'anonymous'; 
+      const url = selectedPhoto.url;
+      img.src = `${url}${url.includes('?') ? '&' : '?'}v=${Date.now()}`;
       
       img.onload = () => {
         const color = getDominantColor(img);
-        setModalBgColor(`rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.75)`);
+        
+        // Boost vibrancy
+        const boost = (val: number, factor = 1.2) => Math.min(255, Math.round(val * factor));
+        const r = boost(color[0]);
+        const g = boost(color[1]);
+        const b = boost(color[2]);
+        
+        setModalBgColor(`rgba(${r}, ${g}, ${b}, 0.7)`);
       };
-      img.onerror = () => setModalBgColor('rgba(20, 20, 20, 0.9)');
+      img.onerror = () => setModalBgColor('rgba(30, 30, 30, 0.85)');
     }
   }, [selectedPhoto]);
 
@@ -409,17 +417,29 @@ export default function GalleryPage() {
       {typeof document !== 'undefined' && createPortal(
         <AnimatePresence>
           {selectedPhoto && (
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[9999] flex items-center justify-center p-2 md:p-8 transition-colors duration-700 backdrop-blur-xl"
-              style={{ 
-                backgroundColor: modalBgColor,
-                height: '100dvh'
-              }}
-            >
-              <div className="absolute inset-0 cursor-zoom-out" onClick={() => setSelectedPhoto(null)} />
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center p-2 md:p-8 overflow-hidden" style={{ height: '100dvh' }}>
+              {/* Blurred Image Background (Vibrant Layer) */}
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 z-0 overflow-hidden"
+              >
+                <div 
+                  className="absolute inset-[-15%] bg-cover bg-center blur-[120px] scale-110 opacity-50 transition-all duration-1000"
+                  style={{ backgroundImage: `url(${selectedPhoto.url})` }}
+                />
+              </motion.div>
+
+              {/* Tint Surface Layer with Backdrop Blur */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 z-[1] backdrop-blur-2xl transition-colors duration-1000"
+                style={{ backgroundColor: modalBgColor }}
+                onClick={() => setSelectedPhoto(null)}
+              />
               
               <button 
                 onClick={() => setSelectedPhoto(null)}
@@ -453,11 +473,12 @@ export default function GalleryPage() {
                 transition={{ type: 'spring', damping: 30, stiffness: 300 }}
                 className="relative max-w-[98vw] max-h-[92dvh] w-fit flex flex-col items-center justify-center z-[10000] mx-auto"
                 onClick={(e) => e.stopPropagation()}
+                style={{ filter: 'drop-shadow(0 20px 60px rgba(0,0,0,0.4))' }}
               >
                 <img 
                   src={selectedPhoto.url} 
                   alt={selectedPhoto.title}
-                  className="max-w-full max-h-[70dvh] md:max-h-[85dvh] object-contain shadow-[0_20px_50px_rgba(0,0,0,0.5)] select-none block mx-auto"
+                  className="max-w-full max-h-[70dvh] md:max-h-[85dvh] object-contain select-none block mx-auto rounded-sm border border-white/5"
                   referrerPolicy={getReferrerPolicy(selectedPhoto.url)}
                 />
                 <div className="mt-8 text-center text-white">
@@ -466,7 +487,7 @@ export default function GalleryPage() {
                   <p className="text-[10px] text-white/20 mt-1">{photoIndex + 1} / {filteredItems.length}</p>
                 </div>
               </motion.div>
-            </motion.div>
+            </div>
           )}
         </AnimatePresence>,
         document.body
