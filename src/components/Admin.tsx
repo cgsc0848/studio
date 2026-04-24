@@ -35,6 +35,8 @@ interface SiteSettings {
   remarks: string;
   photoCategories: string[];
   videoCategories: string[];
+  photoLayout: 'masonry' | 'grid' | 'editorial';
+  videoLayout: 'masonry' | 'grid' | 'editorial';
 }
 
 export default function Admin() {
@@ -65,7 +67,9 @@ export default function Admin() {
     famousCars: '',
     remarks: '',
     photoCategories: ['Editorial', 'Personal'],
-    videoCategories: ['Cinematic', 'Commercial', 'Personal', 'Editorial']
+    videoCategories: ['Cinematic', 'Commercial', 'Personal', 'Editorial'],
+    photoLayout: 'masonry',
+    videoLayout: 'masonry'
   });
   const [isPhotoPickerOpen, setIsPhotoPickerOpen] = useState<'hero' | 'about' | null>(null);
   const [activeTab, setActiveTab] = useState<'content' | 'settings'>('content');
@@ -151,7 +155,9 @@ export default function Admin() {
               categoryLabels: data.categoryLabels || {},
               socialLinks: data.socialLinks || prev.socialLinks,
               photoCategories: data.photoCategories || prev.photoCategories,
-              videoCategories: data.videoCategories || prev.videoCategories
+              videoCategories: data.videoCategories || prev.videoCategories,
+              photoLayout: data.photoLayout || prev.photoLayout || 'masonry',
+              videoLayout: data.videoLayout || prev.videoLayout || 'masonry'
             }));
           }
         });
@@ -1198,17 +1204,17 @@ export default function Admin() {
             </div>
 
             <div className="space-y-16">
-              {/* Layout Control */}
+              {/* Photo Layout Control */}
               <section className="space-y-6">
                 <h3 className="text-[10px] uppercase tracking-[0.3em] text-ink/40 flex items-center gap-2">
-                  <Layout size={14} /> {t.admin.layout}
+                  <ImageIcon size={14} /> {language === 'en' ? 'Photography Layout' : '图库布局样式'}
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {(['masonry', 'grid', 'editorial'] as const).map((mode) => (
                     <button
                       key={mode}
-                      onClick={() => setSettings({ ...settings, galleryLayout: mode })}
-                      className={`group relative p-4 rounded-xl border-2 transition-all text-left ${settings.galleryLayout === mode ? 'border-accent bg-accent/[0.02]' : 'border-ink/5 hover:border-ink/10'}`}
+                      onClick={() => setSettings({ ...settings, photoLayout: mode })}
+                      className={`group relative p-4 rounded-xl border-2 transition-all text-left ${settings.photoLayout === mode ? 'border-accent bg-accent/[0.02]' : 'border-ink/5 hover:border-ink/10'}`}
                     >
                       <div className="aspect-[4/3] bg-ink/5 rounded-lg mb-4 overflow-hidden relative">
                          {/* Visual Representation */}
@@ -1236,16 +1242,54 @@ export default function Admin() {
                               </div>
                            </div>
                          )}
-                         {settings.galleryLayout === mode && (
+                         {settings.photoLayout === mode && (
                            <div className="absolute inset-0 bg-accent/10 flex items-center justify-center">
                               <div className="bg-accent text-white p-1 rounded-full"><CheckCircle size={12} /></div>
                            </div>
                          )}
                       </div>
                       <span className="block text-[10px] uppercase tracking-widest font-bold text-ink mb-1">{mode}</span>
-                      <p className="text-[9px] text-ink/40 leading-relaxed uppercase tracking-widest">
-                         {mode === 'masonry' ? 'Dynamic mosaic layout' : mode === 'grid' ? 'Perfectly uniform grid' : 'Story-driven focus'}
-                      </p>
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              {/* Video Layout Control */}
+              <section className="space-y-6">
+                <h3 className="text-[10px] uppercase tracking-[0.3em] text-ink/40 flex items-center gap-2">
+                  <VideoIcon size={14} /> {language === 'en' ? 'Cinematography Layout' : '视频板块布局'}
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {(['masonry', 'grid'] as const).map((mode) => (
+                    <button
+                      key={mode}
+                      onClick={() => setSettings({ ...settings, videoLayout: mode })}
+                      className={`group relative p-4 rounded-xl border-2 transition-all text-left ${settings.videoLayout === mode ? 'border-accent bg-accent/[0.02]' : 'border-ink/5 hover:border-ink/10'}`}
+                    >
+                      <div className="aspect-[4/3] bg-ink/5 rounded-lg mb-4 overflow-hidden relative">
+                         {/* Visual Representation */}
+                         {mode === 'masonry' && (
+                           <div className="p-2 grid grid-cols-3 gap-1 h-full">
+                              <div className="bg-ink/10 rounded-sm h-12" />
+                              <div className="bg-ink/10 rounded-sm h-8" />
+                              <div className="bg-ink/10 rounded-sm h-10" />
+                              <div className="bg-ink/10 rounded-sm h-6" />
+                              <div className="bg-ink/10 rounded-sm h-14" />
+                              <div className="bg-ink/10 rounded-sm h-9" />
+                           </div>
+                         )}
+                         {mode === 'grid' && (
+                           <div className="p-2 grid grid-cols-3 gap-1 h-full">
+                              {[...Array(9)].map((_, i) => <div key={i} className="bg-ink/10 rounded-sm aspect-square" />)}
+                           </div>
+                         )}
+                         {settings.videoLayout === mode && (
+                           <div className="absolute inset-0 bg-accent/10 flex items-center justify-center">
+                              <div className="bg-accent text-white p-1 rounded-full"><CheckCircle size={12} /></div>
+                           </div>
+                         )}
+                      </div>
+                      <span className="block text-[10px] uppercase tracking-widest font-bold text-ink mb-1">{mode}</span>
                     </button>
                   ))}
                 </div>

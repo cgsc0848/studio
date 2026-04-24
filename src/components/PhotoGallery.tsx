@@ -188,7 +188,7 @@ export default function PhotoGallery() {
   }, []);
 
   const getLayoutClass = () => {
-    switch(settings.galleryLayout) {
+    switch(settings.photoLayout || settings.galleryLayout) {
       case 'grid': return 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8';
       case 'editorial': return 'flex flex-col gap-24';
       case 'masonry': 

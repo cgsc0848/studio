@@ -198,7 +198,12 @@ export default function VideoSection() {
               )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-16">
+            <div className={cn(
+              "grid gap-x-8 gap-y-16",
+              (settings.videoLayout || 'masonry') === 'grid' 
+                ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" 
+                : "grid-cols-1 md:grid-cols-2"
+            )}>
               <AnimatePresence mode="popLayout">
                 {allVideos.slice(0, 4).map((video, index) => (
                   <motion.div
@@ -210,7 +215,9 @@ export default function VideoSection() {
                     transition={{ duration: 0.8, delay: index * 0.1, ease: [0.21, 0, 0.07, 1] }}
                     className={cn(
                       "group relative flex flex-col cursor-pointer",
-                      index % 3 === 0 ? "md:col-span-2 aspect-[21/9]" : "aspect-video"
+                      (settings.videoLayout || 'masonry') === 'masonry' && index % 3 === 0 
+                        ? "md:col-span-2 aspect-[21/9]" 
+                        : "aspect-video"
                     )}
                     onClick={() => setSelectedVideo(video)}
                   >
