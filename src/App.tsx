@@ -64,6 +64,42 @@ function SidebarNav() {
     }
   };
 
+  const [isNavVisible, setIsNavVisible] = useState(true);
+
+  useEffect(() => {
+    let timeout: NodeJS.Timeout;
+    
+    const handleScroll = () => {
+      setIsNavVisible(true);
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        setIsNavVisible(false);
+      }, 3000); // 3秒无操作后隐藏
+    };
+
+    const handleMouseMove = () => {
+      setIsNavVisible(true);
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        setIsNavVisible(false);
+      }, 3000);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('mousemove', handleMouseMove);
+    
+    // 初始化计时器
+    timeout = setTimeout(() => {
+      setIsNavVisible(false);
+    }, 3000);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('mousemove', handleMouseMove);
+      clearTimeout(timeout);
+    };
+  }, []);
+
   const sections = [
     { id: 'hero', label: labels?.['home'] || (language === 'en' ? 'Home' : '首页') },
     { id: 'about', label: labels?.['about'] || (language === 'en' ? 'About' : '关于') },
@@ -86,10 +122,10 @@ function SidebarNav() {
 
       {/* Desktop Sidebar Nav */}
       <div className={cn(
-        "fixed right-6 md:right-12 top-1/2 -translate-y-1/2 z-[100] hidden md:flex flex-col items-center gap-10 transition-all duration-300",
-        document.body.style.overflow === 'hidden' ? "opacity-0 pointer-events-none" : "opacity-100"
+        "fixed right-6 md:right-12 top-1/2 -translate-y-1/2 z-[100] hidden md:flex flex-col items-center gap-10 transition-all duration-700",
+        (document.body.style.overflow === 'hidden' || !isNavVisible) ? "opacity-0 translate-x-4 pointer-events-none" : "opacity-100 translate-x-0"
       )}>
-        <div className="flex flex-col gap-8 bg-black/5 backdrop-blur-sm p-3 rounded-full border border-white/10 shadow-sm transition-colors hover:bg-black/10">
+        <div className="flex flex-col gap-8 mix-blend-difference">
           {sections.map((section) => (
           <button
             key={section.id}
@@ -97,28 +133,28 @@ function SidebarNav() {
             className="group relative flex items-center justify-center p-2"
           >
             <span className={cn(
-              "w-2 h-2 rounded-full transition-all duration-500 shadow-sm",
+              "w-2 h-2 rounded-full transition-all duration-500 bg-white",
               activeSection === section.id 
-                ? "bg-accent scale-[2.2] shadow-[0_0_12px_rgba(var(--accent-rgb),0.5)]" 
-                : "bg-ink/20 group-hover:bg-accent/60 scale-100"
+                ? "scale-[2.8]" 
+                : "opacity-40 group-hover:opacity-100 scale-125"
             )} />
-            <span className="absolute right-full mr-6 text-[10px] uppercase tracking-[0.3em] opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0 whitespace-nowrap text-ink font-bold bg-bg-paper px-3 py-1.5 rounded-full border border-ink/5 shadow-xl">
+            <span className="absolute right-full mr-8 text-[11px] uppercase tracking-[0.3em] opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0 whitespace-nowrap text-white font-bold">
               {section.label}
             </span>
           </button>
         ))}
       </div>
       
-      <div className="w-[1.5px] h-12 bg-ink/10 rounded-full" />
+      <div className="w-[1.5px] h-12 bg-white/30 rounded-full mix-blend-difference" />
 
       <motion.button
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 10 }}
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-        className="w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-xl border border-ink/5 text-ink hover:text-accent transition-all"
+        className="w-10 h-10 flex items-center justify-center rounded-full text-white hover:text-white/80 transition-all mix-blend-difference"
         title="Back to Top"
       >
-        <ChevronUp size={20} />
+        <ChevronUp size={24} />
       </motion.button>
     </div>
     </>
