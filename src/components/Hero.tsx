@@ -29,7 +29,6 @@ export default function Hero() {
               src={settings.heroImageUrl} 
               alt="Artistic Hero"
               className="w-full h-full object-cover"
-              referrerPolicy="no-referrer"
               fetchPriority="high"
             />
           </motion.div>

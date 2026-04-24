@@ -55,7 +55,6 @@ function PhotoItem({ photo, index, onSelect, getCategoryName }: { photo: Photo, 
             "w-full h-full object-cover transition-all duration-1000 group-hover:scale-105 select-none",
             isLoaded ? "opacity-100 filter-none" : "opacity-30 blur-lg"
           )}
-          referrerPolicy="no-referrer"
           onContextMenu={(e) => e.preventDefault()}
           onDragStart={(e) => e.preventDefault()}
         />
@@ -283,7 +282,6 @@ export default function PhotoGallery() {
                   src={selectedPhoto.url || undefined} 
                   alt={selectedPhoto.title}
                   className="max-w-full max-h-[70dvh] md:max-h-[85dvh] object-contain shadow-[0_20px_50px_rgba(0,0,0,0.5)] select-none block mx-auto"
-                  referrerPolicy="no-referrer"
                 />
                 <div className="mt-8 text-center text-white">
                   <h3 className="text-lg font-medium tracking-tight">{selectedPhoto.title}</h3>
