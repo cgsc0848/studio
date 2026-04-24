@@ -9,6 +9,53 @@ import { db, handleFirestoreError, OperationType } from '../firebase';
 import { collection, query, orderBy, onSnapshot, limit } from 'firebase/firestore';
 import { X, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 
+// Custom Color Extraction Utility
+const getDominantColor = (img: HTMLImageElement): [number, number, number] => {
+  try {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    if (!ctx) return [11, 11, 11];
+
+    // Downsample for performance
+    const quality = 50;
+    const size = Math.sqrt(img.width * img.height) / quality;
+    canvas.width = Math.max(1, img.width / size);
+    canvas.height = Math.max(1, img.height / size);
+    
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+    
+    const colors: Record<string, number> = {};
+    let dominantColor: [number, number, number] = [11, 11, 11];
+    let maxCount = 0;
+
+    for (let i = 0; i < imageData.length; i += 4) {
+      const r = imageData[i];
+      const g = imageData[i + 1];
+      const b = imageData[i + 2];
+      const a = imageData[i + 3];
+
+      if (a < 125) continue; // Skip transparent pixels
+
+      // Quantize colors to group similar ones
+      const qr = Math.round(r / 10) * 10;
+      const qg = Math.round(g / 10) * 10;
+      const qb = Math.round(b / 10) * 10;
+      const key = `${qr},${qg},${qb}`;
+
+      colors[key] = (colors[key] || 0) + 1;
+      if (colors[key] > maxCount) {
+        maxCount = colors[key];
+        dominantColor = [qr, qg, qb];
+      }
+    }
+
+    return dominantColor;
+  } catch (e) {
+    return [11, 11, 11];
+  }
+};
+
 function PhotoItem({ photo, index, onSelect, getCategoryName }: { photo: Photo, index: number, onSelect: (p: Photo) => void, getCategoryName: (c: string) => string, key?: any }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState(false);
@@ -76,7 +123,7 @@ function PhotoItem({ photo, index, onSelect, getCategoryName }: { photo: Photo, 
 export default function PhotoGallery() {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
-  const [modalBgColor, setModalBgColor] = useState('rgba(26, 26, 26, 0.95)');
+  const [modalBgColor, setModalBgColor] = useState('rgba(11, 11, 11, 0.95)');
   const { t, settings, language } = useLanguage();
 
   const photoIndex = useMemo(() => {
@@ -133,23 +180,13 @@ export default function PhotoGallery() {
   useEffect(() => {
     if (selectedPhoto) {
       const img = new Image();
+      img.crossOrigin = 'Anonymous';
       img.src = selectedPhoto.url;
       img.onload = () => {
-        try {
-          const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d', { willReadFrequently: true });
-          if (!ctx) return;
-          canvas.width = 1;
-          canvas.height = 1;
-          ctx.drawImage(img, 0, 0, 1, 1);
-          const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
-          setModalBgColor(`rgba(${r}, ${g}, ${b}, 0.98)`);
-        } catch (e) {
-          // If tainted by CORS, use default
-          setModalBgColor('rgba(26, 26, 26, 0.95)');
-        }
+        const color = getDominantColor(img);
+        setModalBgColor(`rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.85)`);
       };
-      img.onerror = () => setModalBgColor('rgba(26, 26, 26, 0.95)');
+      img.onerror = () => setModalBgColor('rgba(11, 11, 11, 0.95)');
     }
   }, [selectedPhoto]);
 
@@ -252,7 +289,7 @@ export default function PhotoGallery() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[9999] flex items-center justify-center p-2 md:p-8 transition-colors duration-700"
+              className="fixed inset-0 z-[9999] flex items-center justify-center p-2 md:p-8 transition-colors duration-700 backdrop-blur-xl"
               style={{ 
                 backgroundColor: modalBgColor,
                 height: '100dvh'
