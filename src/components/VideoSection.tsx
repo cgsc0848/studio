@@ -321,11 +321,14 @@ export default function VideoSection() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/98 p-4 md:p-8 overflow-hidden"
+              className="fixed inset-0 z-[9999] flex items-center justify-center p-4 md:p-8 overflow-hidden"
               style={{ height: '100dvh' }}
             >
-              {/* Background Backdrop Blur */}
-              <div className="absolute inset-0 bg-black/40 backdrop-blur-3xl" onClick={() => setSelectedVideo(null)} />
+              {/* Background Backdrop Blur - The Frosted Glass Layer */}
+              <div 
+                className="absolute inset-0 bg-black/75 backdrop-blur-2xl" 
+                onClick={() => setSelectedVideo(null)} 
+              />
               
               <div className="relative w-full max-w-[1600px] h-full max-h-[90dvh] flex flex-col lg:flex-row gap-8 z-[10000]">
                 {/* Main Player Area */}
