@@ -5,9 +5,10 @@ import { auth, db, storage, googleProvider, handleFirestoreError, OperationType 
 import { signInWithPopup, onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, setDoc } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
-import { LogOut, Plus, Trash2, Save, Image as ImageIcon, Video as VideoIcon, Settings as SettingsIcon, Layout, Type, Palette, X, CheckCircle, AlertCircle, Loader2, Menu, Mail, Star } from 'lucide-react';
+import { LogOut, Plus, Trash2, Save, Image as ImageIcon, Video as VideoIcon, Settings as SettingsIcon, Layout, Type, Palette, X, CheckCircle, AlertCircle, Loader2, Menu, Mail, Star, GripVertical, ArrowUpDown } from 'lucide-react';
 import { cn, getReferrerPolicy } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 
 interface SiteSettings {
   heroTitle: string;
@@ -81,6 +82,8 @@ export default function Admin() {
   const [videoSearch, setVideoSearch] = useState('');
   const [photoFilter, setPhotoFilter] = useState('All');
   const [videoFilter, setVideoFilter] = useState('All');
+  const [isSortingPhotos, setIsSortingPhotos] = useState(false);
+  const [isSortingVideos, setIsSortingVideos] = useState(false);
   const { t, language, setLanguage } = useLanguage();
 
   const ADMIN_EMAIL = 'cgsc0848@gmail.com';
@@ -613,6 +616,36 @@ export default function Admin() {
     }
   };
 
+  const handleDragEnd = async (result: DropResult, type: 'photo' | 'video') => {
+    if (!result.destination) return;
+
+    const items = type === 'photo' ? [...photos] : [...videos];
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+
+    // Update local state immediately for smooth UI
+    if (type === 'photo') setPhotos(items as Photo[]);
+    else setVideos(items as Video[]);
+
+    // Calculate new weights: higher index in array = lower weight (for descending sort)
+    // We want the first item to have the highest weight.
+    const maxWeight = items.length * 100;
+    
+    try {
+      const promises = items.map((item, index) => {
+        const newWeight = maxWeight - (index * 10);
+        return updateDoc(doc(db, type === 'photo' ? 'photos' : 'videos', item.id), {
+          orderWeight: newWeight
+        });
+      });
+      
+      await Promise.all(promises);
+      showToast(language === 'en' ? 'Sort order updated' : '排序已更新');
+    } catch (error) {
+      showToast(language === 'en' ? 'Failed to update sort order' : '更新排序失败', 'error');
+    }
+  };
+
   if (loading) return <div className="min-h-screen flex items-center justify-center font-serif">Loading...</div>;
 
   if (!user || user.email !== ADMIN_EMAIL) {
@@ -724,6 +757,16 @@ export default function Admin() {
                 </h2>
                 <div className="flex gap-2">
                   <button 
+                    onClick={() => setIsSortingPhotos(!isSortingPhotos)}
+                    className={cn(
+                      "text-[10px] uppercase tracking-widest px-4 py-2 rounded-full transition-all flex items-center gap-2",
+                      isSortingPhotos ? "bg-accent text-white" : "border border-ink/10 text-ink/60 hover:bg-ink/5"
+                    )}
+                    title={language === 'en' ? 'Custom Sorting' : '自定义排序'}
+                  >
+                    <ArrowUpDown size={12} /> {language === 'en' ? 'Sort' : '排序'}
+                  </button>
+                  <button 
                     onClick={() => {
                       setIsAddingByUrl('photo');
                       setCategoryInput(settings.photoCategories[0] || '');
@@ -739,44 +782,83 @@ export default function Admin() {
                 </div>
               </div>
 
-              <div className="mb-6 flex flex-col gap-4">
-                <div className="relative">
-                  <input 
-                    type="text"
-                    placeholder={language === 'en' ? "Search photos..." : "搜索照片..."}
-                    value={photoSearch}
-                    onChange={(e) => setPhotoSearch(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 bg-white border border-ink/10 rounded-xl text-sm outline-none focus:ring-2 ring-accent/20 transition-all"
-                  />
-                  <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-ink/20" size={18} />
-                  {photoSearch && (
-                    <button 
-                      onClick={() => setPhotoSearch('')}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-ink/20 hover:text-ink"
-                    >
-                      <X size={16} />
-                    </button>
-                  )}
+              {!isSortingPhotos && (
+                <div className="mb-6 flex flex-col gap-4">
+                  <div className="relative">
+                    <input 
+                      type="text"
+                      placeholder={language === 'en' ? "Search photos..." : "搜索照片..."}
+                      value={photoSearch}
+                      onChange={(e) => setPhotoSearch(e.target.value)}
+                      className="w-full pl-10 pr-4 py-3 bg-white border border-ink/10 rounded-xl text-sm outline-none focus:ring-2 ring-accent/20 transition-all"
+                    />
+                    <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-ink/20" size={18} />
+                    {photoSearch && (
+                      <button 
+                        onClick={() => setPhotoSearch('')}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-ink/20 hover:text-ink"
+                      >
+                        <X size={16} />
+                      </button>
+                    )}
+                  </div>
+                  
+                  <div className="flex flex-wrap gap-2">
+                    {['All', ...settings.photoCategories].map(cat => (
+                      <button
+                        key={cat}
+                        onClick={() => setPhotoFilter(cat)}
+                        className={cn(
+                          "px-4 py-1.5 rounded-full text-[10px] uppercase tracking-widest transition-all",
+                          photoFilter === cat ? "bg-accent text-white shadow-sm" : "bg-white border border-ink/5 text-ink/40 hover:text-ink"
+                        )}
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                
-                <div className="flex flex-wrap gap-2">
-                  {['All', ...settings.photoCategories].map(cat => (
-                    <button
-                      key={cat}
-                      onClick={() => setPhotoFilter(cat)}
-                      className={cn(
-                        "px-4 py-1.5 rounded-full text-[10px] uppercase tracking-widest transition-all",
-                        photoFilter === cat ? "bg-accent text-white shadow-sm" : "bg-white border border-ink/5 text-ink/40 hover:text-ink"
-                      )}
-                    >
-                      {cat}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              )}
 
               <div className="space-y-6 max-h-[70vh] overflow-y-auto pr-4 custom-scrollbar bg-ink/[0.02] p-4 rounded-2xl border border-ink/5">
-                {filteredPhotos.length > 0 ? filteredPhotos.map((photo) => (
+                {isSortingPhotos ? (
+                  <DragDropContext onDragEnd={(res) => handleDragEnd(res, 'photo')}>
+                    <Droppable droppableId="photos-sort">
+                      {(provided) => (
+                        <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-2">
+                          {photos.map((photo, index) => (
+                            <Draggable key={photo.id} draggableId={photo.id} index={index}>
+                              {(provided, snapshot) => (
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  className={cn(
+                                    "bg-white p-3 rounded-lg border border-ink/5 flex items-center gap-4 transition-shadow",
+                                    snapshot.isDragging ? "shadow-2xl ring-2 ring-accent" : ""
+                                  )}
+                                >
+                                  <div {...provided.dragHandleProps} className="text-ink/20 hover:text-accent cursor-grab active:cursor-grabbing">
+                                    <GripVertical size={20} />
+                                  </div>
+                                  <div className="w-12 h-12 bg-ink/5 rounded flex-shrink-0 overflow-hidden">
+                                    <img src={photo.url} className="w-full h-full object-cover" />
+                                  </div>
+                                  <div className="flex-1 truncate">
+                                    <p className="text-xs font-medium truncate">{photo.title}</p>
+                                    <p className="text-[9px] uppercase tracking-widest text-ink/40 mt-0.5">{photo.category}</p>
+                                  </div>
+                                  {photo.isPinned && <Star size={12} className="text-accent fill-current" />}
+                                </div>
+                              )}
+                            </Draggable>
+                          ))}
+                          {provided.placeholder}
+                        </div>
+                      )}
+                    </Droppable>
+                  </DragDropContext>
+                ) : (
+                  filteredPhotos.length > 0 ? filteredPhotos.map((photo) => (
                   <div key={photo.id} className="bg-white p-4 rounded-xl border border-ink/5 flex gap-6 group">
                     <div className="w-24 h-24 flex-shrink-0 overflow-hidden rounded-lg bg-ink/5 relative group/img">
                       <img src={photo.url || undefined} className="w-full h-full object-cover" referrerPolicy={getReferrerPolicy(photo.url)} />
@@ -862,7 +944,7 @@ export default function Admin() {
                   <div className="py-20 text-center">
                     <p className="text-ink/20 text-xs uppercase tracking-widest">{language === 'en' ? 'No photos found' : '未找到照片'}</p>
                   </div>
-                )}
+                ))}
               </div>
             </section>
 
@@ -873,6 +955,16 @@ export default function Admin() {
                   <VideoIcon size={20} className="text-accent" /> {t.admin.cinematography}
                 </h2>
                 <div className="flex gap-2">
+                  <button 
+                    onClick={() => setIsSortingVideos(!isSortingVideos)}
+                    className={cn(
+                      "text-[10px] uppercase tracking-widest px-4 py-2 rounded-full transition-all flex items-center gap-2",
+                      isSortingVideos ? "bg-accent text-white" : "border border-ink/10 text-ink/60 hover:bg-ink/5"
+                    )}
+                    title={language === 'en' ? 'Custom Sorting' : '自定义排序'}
+                  >
+                    <ArrowUpDown size={12} /> {language === 'en' ? 'Sort' : '排序'}
+                  </button>
                   <button 
                     onClick={() => {
                       setIsAddingByUrl('video');
@@ -893,56 +985,97 @@ export default function Admin() {
                 </div>
               </div>
 
-              <div className="mb-6 p-4 bg-accent/5 rounded-xl border border-accent/10">
-                <h4 className="text-[10px] uppercase tracking-widest font-bold mb-2 text-accent">
-                  {language === 'en' ? 'Video Upload Instructions' : '视频上传与链接说明'}
-                </h4>
-                <ul className="text-[10px] space-y-1 text-ink/60 list-disc pl-4">
-                  <li>{language === 'en' ? 'Option 1: Click "Add Video by URL" and enter the link. YouTube thumbnails will be auto-generated.' : '方式一：点击“通过链接添加视频”，输入链接。YouTube 封面会自动生成。'}</li>
-                  <li>{language === 'en' ? 'Option 2: Upload a custom thumbnail first, or manually enter a "Thumbnail URL" below.' : '方式二：上传自定义封面，或者在下方手动输入“封面图链接”。'}</li>
-                  <li>{language === 'en' ? 'Bilibili: Paste the video URL (e.g., https://www.bilibili.com/video/BV...) or the full iframe embed code.' : 'Bilibili: 直接粘贴视频链接（如 https://www.bilibili.com/video/BV...）或完整的嵌入代码。'}</li>
-                  <li>{language === 'en' ? 'Supported: YouTube, Bilibili, Vimeo, and direct MP4 links.' : '支持：YouTube, Bilibili, Vimeo 以及直接的 MP4 链接。'}</li>
-                </ul>
-              </div>
-
-              <div className="mb-6 flex flex-col gap-4">
-                <div className="relative">
-                  <input 
-                    type="text"
-                    placeholder={language === 'en' ? "Search videos..." : "搜索视频..."}
-                    value={videoSearch}
-                    onChange={(e) => setVideoSearch(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 bg-white border border-ink/10 rounded-xl text-sm outline-none focus:ring-2 ring-accent/20 transition-all"
-                  />
-                  <VideoIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-ink/20" size={18} />
-                  {videoSearch && (
-                    <button 
-                      onClick={() => setVideoSearch('')}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-ink/20 hover:text-ink"
-                    >
-                      <X size={16} />
-                    </button>
-                  )}
+              {!isSortingVideos && (
+                <div className="mb-6 p-4 bg-accent/5 rounded-xl border border-accent/10">
+                  <h4 className="text-[10px] uppercase tracking-widest font-bold mb-2 text-accent">
+                    {language === 'en' ? 'Video Upload Instructions' : '视频上传与链接说明'}
+                  </h4>
+                  <ul className="text-[10px] space-y-1 text-ink/60 list-disc pl-4">
+                    <li>{language === 'en' ? 'Option 1: Click "Add Video by URL" and enter the link. YouTube thumbnails will be auto-generated.' : '方式一：点击“通过链接添加视频”，输入链接。YouTube 封面会自动生成。'}</li>
+                    <li>{language === 'en' ? 'Option 2: Upload a custom thumbnail first, or manually enter a "Thumbnail URL" below.' : '方式二：上传自定义封面，或者在下方手动输入“封面图链接”。'}</li>
+                    <li>{language === 'en' ? 'Bilibili: Paste the video URL (e.g., https://www.bilibili.com/video/BV...) or the full iframe embed code.' : 'Bilibili: 直接粘贴视频链接（如 https://www.bilibili.com/video/BV...）或完整的嵌入代码。'}</li>
+                    <li>{language === 'en' ? 'Supported: YouTube, Bilibili, Vimeo, and direct MP4 links.' : '支持：YouTube, Bilibili, Vimeo 以及直接的 MP4 链接。'}</li>
+                  </ul>
                 </div>
+              )}
 
-                <div className="flex flex-wrap gap-2">
-                  {['All', ...settings.videoCategories].map(cat => (
-                    <button
-                      key={cat}
-                      onClick={() => setVideoFilter(cat)}
-                      className={cn(
-                        "px-4 py-1.5 rounded-full text-[10px] uppercase tracking-widest transition-all",
-                        videoFilter === cat ? "bg-accent text-white shadow-sm" : "bg-white border border-ink/5 text-ink/40 hover:text-ink"
-                      )}
-                    >
-                      {cat}
-                    </button>
-                  ))}
+              {!isSortingVideos && (
+                <div className="mb-6 flex flex-col gap-4">
+                  <div className="relative">
+                    <input 
+                      type="text"
+                      placeholder={language === 'en' ? "Search videos..." : "搜索视频..."}
+                      value={videoSearch}
+                      onChange={(e) => setVideoSearch(e.target.value)}
+                      className="w-full pl-10 pr-4 py-3 bg-white border border-ink/10 rounded-xl text-sm outline-none focus:ring-2 ring-accent/20 transition-all"
+                    />
+                    <VideoIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-ink/20" size={18} />
+                    {videoSearch && (
+                      <button 
+                        onClick={() => setVideoSearch('')}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-ink/20 hover:text-ink"
+                      >
+                        <X size={16} />
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    {['All', ...settings.videoCategories].map(cat => (
+                      <button
+                        key={cat}
+                        onClick={() => setVideoFilter(cat)}
+                        className={cn(
+                          "px-4 py-1.5 rounded-full text-[10px] uppercase tracking-widest transition-all",
+                          videoFilter === cat ? "bg-accent text-white shadow-sm" : "bg-white border border-ink/5 text-ink/40 hover:text-ink"
+                        )}
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-4 custom-scrollbar bg-ink/[0.02] p-4 rounded-2xl border border-ink/5">
-                {filteredVideos.length > 0 ? filteredVideos.map((video) => (
+                {isSortingVideos ? (
+                  <DragDropContext onDragEnd={(res) => handleDragEnd(res, 'video')}>
+                    <Droppable droppableId="videos-sort">
+                      {(provided) => (
+                        <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-2">
+                          {videos.map((video, index) => (
+                            <Draggable key={video.id} draggableId={video.id} index={index}>
+                              {(provided, snapshot) => (
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  className={cn(
+                                    "bg-white p-3 rounded-lg border border-ink/5 flex items-center gap-4 transition-shadow",
+                                    snapshot.isDragging ? "shadow-2xl ring-2 ring-accent" : ""
+                                  )}
+                                >
+                                  <div {...provided.dragHandleProps} className="text-ink/20 hover:text-accent cursor-grab active:cursor-grabbing">
+                                    <GripVertical size={20} />
+                                  </div>
+                                  <div className="w-16 h-10 bg-ink/5 rounded flex-shrink-0 overflow-hidden">
+                                    <img src={video.thumbnail} className="w-full h-full object-cover" />
+                                  </div>
+                                  <div className="flex-1 truncate">
+                                    <p className="text-xs font-medium truncate">{video.title}</p>
+                                    <p className="text-[9px] uppercase tracking-widest text-ink/40 mt-0.5">{video.category}</p>
+                                  </div>
+                                  {video.isPinned && <Star size={12} className="text-accent fill-current" />}
+                                </div>
+                              )}
+                            </Draggable>
+                          ))}
+                          {provided.placeholder}
+                        </div>
+                      )}
+                    </Droppable>
+                  </DragDropContext>
+                ) : (
+                  filteredVideos.length > 0 ? filteredVideos.map((video) => (
                   <div key={video.id} className="bg-white p-4 rounded-xl border border-ink/5 flex flex-col gap-4 group">
                     <div className="flex gap-6">
                       <div className="w-32 h-20 flex-shrink-0 overflow-hidden rounded-lg bg-ink/5 relative group/img">
@@ -1051,7 +1184,7 @@ export default function Admin() {
                   <div className="py-20 text-center">
                     <p className="text-ink/20 text-xs uppercase tracking-widest">{language === 'en' ? 'No videos found' : '未找到视频'}</p>
                   </div>
-                )}
+                ))}
               </div>
             </section>
           </div>

@@ -198,49 +198,54 @@ export default function VideoSection() {
               )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-16">
               <AnimatePresence mode="popLayout">
-                {allVideos.slice(0, 4).map((video) => (
+                {allVideos.slice(0, 4).map((video, index) => (
                   <motion.div
                     key={video.id}
                     layout
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.6 }}
-                    className="group relative aspect-video overflow-hidden bg-white/5 cursor-pointer"
+                    transition={{ duration: 0.8, delay: index * 0.1, ease: [0.21, 0, 0.07, 1] }}
+                    className={cn(
+                      "group relative flex flex-col cursor-pointer",
+                      index % 3 === 0 ? "md:col-span-2 aspect-[21/9]" : "aspect-video"
+                    )}
                     onClick={() => setSelectedVideo(video)}
                   >
-                    <div className="mb-4 absolute top-4 left-4 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <span className="text-[9px] uppercase tracking-[0.2em] text-white bg-accent px-2 py-1 font-medium">{getCategoryName(video.category)}</span>
-                    </div>
-                    <div 
-                      className="absolute inset-0 z-10" 
-                      onContextMenu={(e) => e.preventDefault()}
-                      onDragStart={(e) => e.preventDefault()}
-                    />
-                    <img 
-                      src={getSafeThumbnail(video.thumbnail, video.videoUrl) || undefined} 
-                      alt={video.title}
-                      loading="lazy"
-                      className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 opacity-60 group-hover:opacity-80 select-none"
-                      onContextMenu={(e) => e.preventDefault()}
-                      onDragStart={(e) => e.preventDefault()}
-                      referrerPolicy={getReferrerPolicy(getSafeThumbnail(video.thumbnail, video.videoUrl))}
-                    />
-                    
-                    <div className="absolute inset-0 flex flex-col justify-center items-center bg-ink/20 backdrop-blur-[2px] opacity-0 md:group-hover:opacity-100 transition-opacity duration-500 z-20 max-md:opacity-100">
-                      <motion.button 
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        className="w-16 h-16 rounded-full border border-white/40 flex items-center justify-center bg-white/10 backdrop-blur-md text-white z-30 pointer-events-none"
-                      >
-                        <Play size={20} fill="currentColor" />
-                      </motion.button>
+                    <div className="relative flex-1 overflow-hidden bg-white/5">
+                      <div className="absolute top-4 left-4 z-20">
+                        <span className="text-[9px] uppercase tracking-[0.2em] text-white bg-black/60 backdrop-blur-md border border-white/10 px-3 py-1 font-medium">
+                          {getCategoryName(video.category)}
+                        </span>
+                      </div>
+                      
+                      <img 
+                        src={getSafeThumbnail(video.thumbnail, video.videoUrl) || undefined} 
+                        alt={video.title}
+                        loading="lazy"
+                        className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 opacity-60 group-hover:opacity-100"
+                        onContextMenu={(e) => e.preventDefault()}
+                        referrerPolicy={getReferrerPolicy(getSafeThumbnail(video.thumbnail, video.videoUrl))}
+                      />
+                      
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-20">
+                        <motion.div 
+                          whileHover={{ scale: 1.1 }}
+                          className="w-20 h-20 rounded-full border border-white/20 flex items-center justify-center bg-white/5 backdrop-blur-xl text-white"
+                        >
+                          <Play size={24} fill="currentColor" className="translate-x-0.5" />
+                        </motion.div>
+                      </div>
                     </div>
 
-                    <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-ink/80 to-transparent">
-                      <h3 className="text-xl font-serif">{video.title}</h3>
+                    <div className="mt-6 flex justify-between items-end">
+                      <div>
+                        <h3 className="text-2xl font-serif mb-1 group-hover:text-accent transition-colors">{video.title}</h3>
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">{getCategoryName(video.category)}</p>
+                      </div>
+                      <span className="text-[10px] font-mono opacity-20 group-hover:opacity-100 transition-opacity">0{(index + 1)}</span>
                     </div>
                   </motion.div>
                 ))}
