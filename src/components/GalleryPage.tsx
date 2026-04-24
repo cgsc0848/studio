@@ -159,16 +159,13 @@ export default function GalleryPage() {
       
       img.onload = () => {
         const color = getDominantColor(img);
-        
-        // Boost vibrancy
-        const boost = (val: number, factor = 1.2) => Math.min(255, Math.round(val * factor));
+        const boost = (val: number, factor = 1.1) => Math.min(255, Math.round(val * factor));
         const r = boost(color[0]);
         const g = boost(color[1]);
         const b = boost(color[2]);
-        
         setModalBgColor(`rgba(${r}, ${g}, ${b}, 0.7)`);
       };
-      img.onerror = () => setModalBgColor('rgba(30, 30, 30, 0.85)');
+      img.onerror = () => setModalBgColor('rgba(20, 20, 20, 0.4)');
     }
   }, [selectedPhoto]);
 

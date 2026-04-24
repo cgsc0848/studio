@@ -833,8 +833,9 @@ export default function Admin() {
                       {(provided) => (
                         <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-2">
                           {photos.map((photo, index) => (
+                            // @ts-expect-error key is required by React but not in Library props
                             <Draggable key={photo.id} draggableId={photo.id} index={index}>
-                              {(provided, snapshot) => (
+                              {(provided: any, snapshot: any) => (
                                 <div
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
@@ -1050,8 +1051,9 @@ export default function Admin() {
                       {(provided) => (
                         <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-2">
                           {videos.map((video, index) => (
+                            // @ts-expect-error key is required by React but not in Library props
                             <Draggable key={video.id} draggableId={video.id} index={index}>
-                              {(provided, snapshot) => (
+                              {(provided: any, snapshot: any) => (
                                 <div
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
