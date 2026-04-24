@@ -14,45 +14,61 @@ const getDominantColor = (img: HTMLImageElement): [number, number, number] => {
   try {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
-    if (!ctx) return [11, 11, 11];
+    if (!ctx) return [20, 20, 20];
 
-    // Downsample for performance
-    const quality = 50;
-    const size = Math.sqrt(img.width * img.height) / quality;
-    canvas.width = Math.max(1, img.width / size);
-    canvas.height = Math.max(1, img.height / size);
+    // Downsample significantly for performance and privacy
+    const size = 64;
+    const ratio = Math.min(1, size / img.width, size / img.height);
+    canvas.width = img.width * ratio;
+    canvas.height = img.height * ratio;
     
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
     
-    const colors: Record<string, number> = {};
-    let dominantColor: [number, number, number] = [11, 11, 11];
-    let maxCount = 0;
+    const colors: {r: number, g: number, b: number, count: number, score: number}[] = [];
+    const colorMap: Record<string, number> = {};
 
-    for (let i = 0; i < imageData.length; i += 4) {
+    for (let i = 0; i < imageData.length; i += 16) { // Sample every 4th pixel for speed
       const r = imageData[i];
       const g = imageData[i + 1];
       const b = imageData[i + 2];
       const a = imageData[i + 3];
 
-      if (a < 125) continue; // Skip transparent pixels
+      if (a < 200) continue; 
 
-      // Quantize colors to group similar ones
-      const qr = Math.round(r / 10) * 10;
-      const qg = Math.round(g / 10) * 10;
-      const qb = Math.round(b / 10) * 10;
+      // Simple quantization
+      const qr = Math.round(r / 15) * 15;
+      const qg = Math.round(g / 15) * 15;
+      const qb = Math.round(b / 15) * 15;
       const key = `${qr},${qg},${qb}`;
 
-      colors[key] = (colors[key] || 0) + 1;
-      if (colors[key] > maxCount) {
-        maxCount = colors[key];
-        dominantColor = [qr, qg, qb];
+      if (colorMap[key] === undefined) {
+        // Calculate "vibrancy" score: higher saturation and avoiding pure blacks/whites
+        const max = Math.max(qr, qg, qb);
+        const min = Math.min(qr, qg, qb);
+        const saturation = max === 0 ? 0 : (max - min) / max;
+        const brightness = max / 255;
+        
+        // Score: favor medium brightness and high saturation
+        const score = saturation * 2 + (1 - Math.abs(brightness - 0.5) * 2);
+        
+        colorMap[key] = colors.length;
+        colors.push({ r: qr, g: qg, b: qb, count: 1, score });
+      } else {
+        colors[colorMap[key]].count++;
       }
     }
 
-    return dominantColor;
+    if (colors.length === 0) return [20, 20, 20];
+
+    // Sort by count * score to find the most "dominant vibrant" color
+    colors.sort((a, b) => (b.count * b.score) - (a.count * a.score));
+    
+    const best = colors[0];
+    return [best.r, best.g, best.b];
   } catch (e) {
-    return [11, 11, 11];
+    console.warn('Color extraction failed (CORS?):', e);
+    return [20, 20, 20];
   }
 };
 
@@ -180,13 +196,15 @@ export default function PhotoGallery() {
   useEffect(() => {
     if (selectedPhoto) {
       const img = new Image();
-      img.crossOrigin = 'Anonymous';
-      img.src = selectedPhoto.url;
+      img.crossOrigin = 'anonymous'; // Set before src
+      // Add cache buster to force CORS check if hosted on shared domains
+      img.src = `${selectedPhoto.url}${selectedPhoto.url.includes('?') ? '&' : '?'}t=${Date.now()}`;
+      
       img.onload = () => {
         const color = getDominantColor(img);
-        setModalBgColor(`rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.85)`);
+        setModalBgColor(`rgba(${color[0]}, ${color[1]}, ${color[2]}, 0.75)`);
       };
-      img.onerror = () => setModalBgColor('rgba(11, 11, 11, 0.95)');
+      img.onerror = () => setModalBgColor('rgba(20, 20, 20, 0.9)');
     }
   }, [selectedPhoto]);
 
