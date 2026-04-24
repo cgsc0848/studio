@@ -126,8 +126,25 @@ export default function VideoSection() {
       const id = url.split('/').pop()?.split('?')[0];
       return `https://player.vimeo.com/video/${id}?autoplay=1&muted=1`;
     }
+
+    // Check if it is a direct video file
+    if (url.match(/\.(mp4|webm|ogg|mov)$/i)) {
+      return url;
+    }
     
+    // For non-embeddable links like CCTV, we return the URL but we will handle it in the UI
     return url;
+  };
+
+  const isEmbeddable = (url: string) => {
+    if (!url) return false;
+    return url.includes('youtube.com') || 
+           url.includes('youtu.be') || 
+           url.includes('bilibili.com') || 
+           url.includes('b23.tv') || 
+           url.includes('vimeo.com') ||
+           url.includes('xinpianchang.com') ||
+           url.match(/\.(mp4|webm|ogg|mov)$/i);
   };
 
   const getSafeThumbnail = (thumbnail: string, videoUrl: string) => {
@@ -291,9 +308,9 @@ export default function VideoSection() {
                      initial={{ scale: 0.98, opacity: 0 }}
                      animate={{ scale: 1, opacity: 1 }}
                      transition={{ duration: 0.4 }}
-                     className="w-full aspect-video bg-black rounded-xl overflow-hidden shadow-2xl border border-white/5 relative"
+                     className="w-full aspect-video bg-black rounded-xl overflow-hidden shadow-2xl border border-white/5 relative group/player"
                   >
-                    {selectedVideo.videoUrl && (
+                    {selectedVideo.videoUrl && isEmbeddable(selectedVideo.videoUrl) ? (
                       selectedVideo.videoUrl.includes('youtube.com') || 
                       selectedVideo.videoUrl.includes('youtu.be') || 
                       selectedVideo.videoUrl.includes('bilibili.com') || 
@@ -308,13 +325,34 @@ export default function VideoSection() {
                         referrerPolicy="strict-origin-when-cross-origin"
                         loading="lazy"
                       />
-                    ) : selectedVideo.videoUrl ? (
+                    ) : (
                       <video 
                         src={selectedVideo.videoUrl || undefined} 
                         controls 
                         autoPlay 
                         className="w-full h-full object-contain"
                       />
+                    ) : selectedVideo.videoUrl ? (
+                      <div className="w-full h-full flex flex-col items-center justify-center text-center p-8 bg-ink gap-6">
+                        <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center border border-white/10 group-hover/player:border-accent group-hover/player:bg-accent/10 transition-all duration-500">
+                           <Play size={32} className="text-white/40 group-hover/player:text-accent transition-colors translate-x-0.5" />
+                        </div>
+                        <div className="max-w-xs">
+                          <p className="text-white/60 text-sm mb-4">
+                            {language === 'en' 
+                              ? 'This video is hosted on an external platform that doesn\'t allow direct embedding.' 
+                              : '该视频托管在不支持直接嵌入的外部平台上。'}
+                          </p>
+                          <a 
+                            href={selectedVideo.videoUrl} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="inline-block px-8 py-3 bg-white text-ink text-[10px] uppercase tracking-widest font-bold rounded-full hover:bg-accent hover:text-white transition-all shadow-xl"
+                          >
+                            {language === 'en' ? 'Open in New Tab' : '在新标签页中打开播放'}
+                          </a>
+                        </div>
+                      </div>
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-white/20 text-xs uppercase tracking-widest">
                         {language === 'en' ? 'No video URL provided' : '未提供视频链接'}

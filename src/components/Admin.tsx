@@ -77,6 +77,10 @@ export default function Admin() {
   const [urlInput, setUrlInput] = useState('');
   const [titleInput, setTitleInput] = useState('');
   const [categoryInput, setCategoryInput] = useState('');
+  const [photoSearch, setPhotoSearch] = useState('');
+  const [videoSearch, setVideoSearch] = useState('');
+  const [photoFilter, setPhotoFilter] = useState('All');
+  const [videoFilter, setVideoFilter] = useState('All');
   const { t, language, setLanguage } = useLanguage();
 
   const ADMIN_EMAIL = 'cgsc0848@gmail.com';
@@ -544,7 +548,7 @@ export default function Admin() {
         ...settings,
         heroImageUrl: settings.heroImageUrl?.replace(/^http:\/\//i, 'https://'),
         aboutImageUrl: settings.aboutImageUrl?.replace(/^http:\/\//i, 'https://'),
-        socialLinks: settings.socialLinks.map(link => ({
+        socialLinks: (settings.socialLinks || []).map(link => ({
           ...link,
           url: link.url.replace(/^http:\/\//i, 'https://')
         }))
@@ -556,6 +560,18 @@ export default function Admin() {
       handleFirestoreError(error, OperationType.WRITE, 'settings/global');
     }
   };
+
+  const filteredPhotos = photos.filter(p => {
+    const matchesSearch = p.title.toLowerCase().includes(photoSearch.toLowerCase());
+    const matchesCategory = photoFilter === 'All' || p.category === photoFilter;
+    return matchesSearch && matchesCategory;
+  });
+
+  const filteredVideos = videos.filter(v => {
+    const matchesSearch = v.title.toLowerCase().includes(videoSearch.toLowerCase());
+    const matchesCategory = videoFilter === 'All' || v.category === videoFilter;
+    return matchesSearch && matchesCategory;
+  });
 
   const deleteItem = (id: string, type: 'photo' | 'video') => {
     setConfirmDelete({ id, type });
@@ -700,8 +716,44 @@ export default function Admin() {
                 </div>
               </div>
 
-              <div className="space-y-6 max-h-[70vh] overflow-y-auto pr-4 custom-scrollbar">
-                {photos.map((photo) => (
+              <div className="mb-6 flex flex-col gap-4">
+                <div className="relative">
+                  <input 
+                    type="text"
+                    placeholder={language === 'en' ? "Search photos..." : "搜索照片..."}
+                    value={photoSearch}
+                    onChange={(e) => setPhotoSearch(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 bg-white border border-ink/10 rounded-xl text-sm outline-none focus:ring-2 ring-accent/20 transition-all"
+                  />
+                  <ImageIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-ink/20" size={18} />
+                  {photoSearch && (
+                    <button 
+                      onClick={() => setPhotoSearch('')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-ink/20 hover:text-ink"
+                    >
+                      <X size={16} />
+                    </button>
+                  )}
+                </div>
+                
+                <div className="flex flex-wrap gap-2">
+                  {['All', ...settings.photoCategories].map(cat => (
+                    <button
+                      key={cat}
+                      onClick={() => setPhotoFilter(cat)}
+                      className={cn(
+                        "px-4 py-1.5 rounded-full text-[10px] uppercase tracking-widest transition-all",
+                        photoFilter === cat ? "bg-accent text-white shadow-sm" : "bg-white border border-ink/5 text-ink/40 hover:text-ink"
+                      )}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-6 max-h-[70vh] overflow-y-auto pr-4 custom-scrollbar bg-ink/[0.02] p-4 rounded-2xl border border-ink/5">
+                {filteredPhotos.length > 0 ? filteredPhotos.map((photo) => (
                   <div key={photo.id} className="bg-white p-4 rounded-xl border border-ink/5 flex gap-6 group">
                     <div className="w-24 h-24 flex-shrink-0 overflow-hidden rounded-lg bg-ink/5 relative group/img">
                       <img src={photo.url || undefined} className="w-full h-full object-cover" referrerPolicy={getReferrerPolicy(photo.url)} />
@@ -758,7 +810,11 @@ export default function Admin() {
                       </button>
                     </div>
                   </div>
-                ))}
+                )) : (
+                  <div className="py-20 text-center">
+                    <p className="text-ink/20 text-xs uppercase tracking-widest">{language === 'en' ? 'No photos found' : '未找到照片'}</p>
+                  </div>
+                )}
               </div>
             </section>
 
@@ -801,8 +857,44 @@ export default function Admin() {
                 </ul>
               </div>
 
-              <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-4 custom-scrollbar">
-                {videos.map((video) => (
+              <div className="mb-6 flex flex-col gap-4">
+                <div className="relative">
+                  <input 
+                    type="text"
+                    placeholder={language === 'en' ? "Search videos..." : "搜索视频..."}
+                    value={videoSearch}
+                    onChange={(e) => setVideoSearch(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 bg-white border border-ink/10 rounded-xl text-sm outline-none focus:ring-2 ring-accent/20 transition-all"
+                  />
+                  <VideoIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-ink/20" size={18} />
+                  {videoSearch && (
+                    <button 
+                      onClick={() => setVideoSearch('')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-ink/20 hover:text-ink"
+                    >
+                      <X size={16} />
+                    </button>
+                  )}
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  {['All', ...settings.videoCategories].map(cat => (
+                    <button
+                      key={cat}
+                      onClick={() => setVideoFilter(cat)}
+                      className={cn(
+                        "px-4 py-1.5 rounded-full text-[10px] uppercase tracking-widest transition-all",
+                        videoFilter === cat ? "bg-accent text-white shadow-sm" : "bg-white border border-ink/5 text-ink/40 hover:text-ink"
+                      )}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-4 custom-scrollbar bg-ink/[0.02] p-4 rounded-2xl border border-ink/5">
+                {filteredVideos.length > 0 ? filteredVideos.map((video) => (
                   <div key={video.id} className="bg-white p-4 rounded-xl border border-ink/5 flex flex-col gap-4 group">
                     <div className="flex gap-6">
                       <div className="w-32 h-20 flex-shrink-0 overflow-hidden rounded-lg bg-ink/5 relative group/img">
@@ -883,7 +975,11 @@ export default function Admin() {
                       </div>
                     </div>
                   </div>
-                ))}
+                )) : (
+                  <div className="py-20 text-center">
+                    <p className="text-ink/20 text-xs uppercase tracking-widest">{language === 'en' ? 'No videos found' : '未找到视频'}</p>
+                  </div>
+                )}
               </div>
             </section>
           </div>

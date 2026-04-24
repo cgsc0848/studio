@@ -86,37 +86,39 @@ function SidebarNav() {
 
       {/* Desktop Sidebar Nav */}
       <div className={cn(
-        "fixed right-6 md:right-12 top-1/2 -translate-y-1/2 z-[100] hidden md:flex flex-col items-center gap-10 transition-opacity duration-300",
+        "fixed right-6 md:right-12 top-1/2 -translate-y-1/2 z-[100] hidden md:flex flex-col items-center gap-10 transition-all duration-300",
         document.body.style.overflow === 'hidden' ? "opacity-0 pointer-events-none" : "opacity-100"
       )}>
-        <div className="flex flex-col gap-8">
+        <div className="flex flex-col gap-8 bg-black/5 backdrop-blur-sm p-3 rounded-full border border-white/10 shadow-sm transition-colors hover:bg-black/10">
           {sections.map((section) => (
           <button
             key={section.id}
             onClick={() => scrollToSection(section.id)}
-            className="group relative flex items-center justify-center p-3"
+            className="group relative flex items-center justify-center p-2"
           >
             <span className={cn(
-              "w-2 h-2 rounded-full transition-all duration-700 ring-1 ring-white/30 mix-blend-difference",
-              activeSection === section.id ? "bg-white scale-[2.8]" : "bg-white/60 group-hover:bg-white scale-125"
+              "w-2 h-2 rounded-full transition-all duration-500 shadow-sm",
+              activeSection === section.id 
+                ? "bg-accent scale-[2.2] shadow-[0_0_12px_rgba(var(--accent-rgb),0.5)]" 
+                : "bg-ink/20 group-hover:bg-accent/60 scale-100"
             )} />
-            <span className="absolute right-full mr-8 text-[11px] uppercase tracking-[0.3em] opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0 whitespace-nowrap text-white mix-blend-difference font-bold">
+            <span className="absolute right-full mr-6 text-[10px] uppercase tracking-[0.3em] opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0 whitespace-nowrap text-ink font-bold bg-bg-paper px-3 py-1.5 rounded-full border border-ink/5 shadow-xl">
               {section.label}
             </span>
           </button>
         ))}
       </div>
       
-      <div className="w-[1.5px] h-16 bg-white/20 mix-blend-difference rounded-full" />
+      <div className="w-[1.5px] h-12 bg-ink/10 rounded-full" />
 
       <motion.button
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 10 }}
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-        className="p-3 text-white mix-blend-difference hover:opacity-100 transition-opacity"
+        className="w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-xl border border-ink/5 text-ink hover:text-accent transition-all"
         title="Back to Top"
       >
-        <ChevronUp size={24} />
+        <ChevronUp size={20} />
       </motion.button>
     </div>
     </>
