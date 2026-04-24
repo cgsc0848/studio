@@ -224,10 +224,10 @@ export default function GalleryPage() {
 
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-8">
           <div>
-            <span className="text-[10px] uppercase tracking-[0.3em] text-ink/40 mb-4 block">
+            <span className="text-[10px] uppercase tracking-[0.3em] text-ink/40 mb-2 block leading-none">
               {language === 'en' ? 'Portfolio' : '作品集'}
             </span>
-            <h1 className="text-5xl md:text-7xl font-serif">
+            <h1 className="text-5xl md:text-7xl font-serif text-ink tracking-tight">
               {activeType === 'photos' ? (language === 'en' ? 'Stills' : '摄影') : (language === 'en' ? 'Films' : '影片')}
             </h1>
           </div>
@@ -262,7 +262,7 @@ export default function GalleryPage() {
               </button>
             </div>
             
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-x-6 gap-y-3">
               {categories.map(cat => (
                 <button
                   key={cat}
@@ -271,11 +271,14 @@ export default function GalleryPage() {
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
                   className={cn(
-                    "text-[10px] uppercase tracking-widest pb-1 border-b transition-all",
+                    "text-[10px] uppercase tracking-widest pb-1 border-b transition-all flex items-center gap-1.5",
                     activeCategory.toLowerCase() === cat.toLowerCase() ? "text-ink border-ink" : "text-ink/40 border-transparent hover:text-ink"
                   )}
                 >
-                  {getCategoryLabel(cat)} <span className="opacity-40 text-[9px] ml-0.5">({cat.toLowerCase() === 'all' ? categoryCounts.all : (categoryCounts[cat.toLowerCase()] || 0)})</span>
+                  <span className="leading-none">{getCategoryLabel(cat)}</span>
+                  <span className="opacity-40 text-[9px] font-mono leading-none">
+                    ({cat.toLowerCase() === 'all' ? categoryCounts.all : (categoryCounts[cat.toLowerCase()] || 0)})
+                  </span>
                 </button>
               ))}
             </div>
@@ -289,7 +292,10 @@ export default function GalleryPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: index * 0.05 }}
-              className="relative group cursor-pointer"
+              className={cn(
+                "relative group cursor-pointer",
+                settings.galleryLayout === 'masonry' || !settings.galleryLayout ? "break-inside-avoid mb-10 w-full inline-block" : ""
+              )}
               onClick={() => {
                 if ('videoUrl' in item) {
                   setSelectedVideo(item as Video);
@@ -298,7 +304,7 @@ export default function GalleryPage() {
                 }
               }}
             >
-              <div className="overflow-hidden bg-ink/5 relative">
+              <div className="overflow-hidden bg-ink/5 relative aspect-auto">
                 <div 
                   className="absolute inset-0 z-10" 
                   onContextMenu={(e) => e.preventDefault()}
@@ -309,21 +315,23 @@ export default function GalleryPage() {
                   alt={item.title}
                   loading="lazy"
                   className={cn(
-                    "w-full object-cover transition-transform duration-1000 group-hover:scale-105 select-none",
-                    activeType === 'photos' ? "h-auto" : "aspect-video"
+                    "w-full h-auto object-cover transition-transform duration-1000 group-hover:scale-105 select-none",
+                    activeType === 'videos' ? "aspect-video" : "h-auto"
                   )}
                 />
                 {'videoUrl' in item && (
                   <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                    <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center shadow-xl">
                       <Play size={20} className="text-ink fill-ink ml-1" />
                     </div>
                   </div>
                 )}
               </div>
-              <div className="mt-4">
-                <h3 className="text-sm font-medium tracking-tight">{item.title}</h3>
-                <p className="text-[10px] uppercase tracking-widest text-ink/40">{getCategoryLabel(item.category)}</p>
+              <div className="mt-4 flex flex-col gap-0.5">
+                <h3 className="text-sm font-medium tracking-tight text-ink leading-tight">{item.title}</h3>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] uppercase tracking-widest text-ink/40">{getCategoryLabel(item.category)}</span>
+                </div>
               </div>
             </motion.div>
           ))}
