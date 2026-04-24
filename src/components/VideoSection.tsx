@@ -277,9 +277,8 @@ export default function VideoSection() {
               ))}
             </ul>
 
-            <div className="mt-auto pt-12 flex justify-between text-[10px] uppercase tracking-widest text-white/20">
-              <span>China</span>
-              <span>© {new Date().getFullYear()} 0848 Studio</span>
+            <div className="mt-auto pt-12">
+              {/* Copyright moved to Footer */}
             </div>
           </aside>
         </div>

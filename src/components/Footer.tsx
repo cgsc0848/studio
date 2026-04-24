@@ -42,7 +42,7 @@ export default function Footer() {
         </div>
         
         <div className="flex flex-col md:flex-row justify-between items-center pt-12 border-t border-ink/5 gap-6">
-          <span className="text-[10px] uppercase tracking-[0.3em] text-ink/40">© {new Date().getFullYear()} 0848 Studio</span>
+          <span className="text-[10px] uppercase tracking-[0.3em] text-ink/40">China © 2026 0848 Studio</span>
           <div className="flex gap-8 text-[10px] uppercase tracking-[0.3em] text-ink/40">
             <a href="#" className="hover:text-ink transition-colors">{t.footer.privacy}</a>
             <a href="#" className="hover:text-ink transition-colors">{t.footer.terms}</a>
