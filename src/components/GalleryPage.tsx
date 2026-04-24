@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Photo, Video } from '@/src/types';
 import { useLanguage } from '../LanguageContext';
 import { ArrowLeft, Play, X, ChevronLeft, ChevronRight } from 'lucide-react';
-import { cn, getReferrerPolicy } from '../lib/utils';
+import { cn, getReferrerPolicy, getSafeImageUrl } from '../lib/utils';
 import { db, handleFirestoreError, OperationType } from '../firebase';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 
@@ -155,7 +155,7 @@ export default function GalleryPage() {
       const img = new Image();
       img.crossOrigin = 'anonymous'; 
       const url = selectedPhoto.url;
-      img.src = `${url}${url.includes('?') ? '&' : '?'}v=oss`;
+      img.src = getSafeImageUrl(url) || '';
       
       img.onload = () => {
         const color = getDominantColor(img);
@@ -382,7 +382,7 @@ export default function GalleryPage() {
                   onDragStart={(e) => e.preventDefault()}
                 />
                 <img
-                  src={('url' in item ? item.url : item.thumbnail) ? `${('url' in item ? item.url : item.thumbnail)}${('url' in item ? item.url : item.thumbnail).includes('?') ? '&' : '?'}v=oss` : undefined}
+                  src={getSafeImageUrl('url' in item ? item.url : item.thumbnail)}
                   alt={item.title}
                   loading="lazy"
                   crossOrigin="anonymous"
@@ -425,7 +425,7 @@ export default function GalleryPage() {
               >
                 <div 
                   className="absolute inset-[-15%] bg-cover bg-center blur-[120px] scale-110 opacity-50 transition-all duration-1000"
-                  style={{ backgroundImage: `url(${selectedPhoto.url})` }}
+                  style={{ backgroundImage: `url(${getSafeImageUrl(selectedPhoto.url)})` }}
                 />
               </motion.div>
 
@@ -474,7 +474,7 @@ export default function GalleryPage() {
                 style={{ filter: 'drop-shadow(0 20px 60px rgba(0,0,0,0.4))' }}
               >
                 <img 
-                  src={`${selectedPhoto.url}${selectedPhoto.url.includes('?') ? '&' : '?'}v=oss`} 
+                  src={getSafeImageUrl(selectedPhoto.url)} 
                   alt={selectedPhoto.title}
                   crossOrigin="anonymous"
                   className="max-w-full max-h-[70dvh] md:max-h-[85dvh] object-contain select-none block mx-auto rounded-sm border border-white/5"
@@ -587,7 +587,7 @@ export default function GalleryPage() {
                       >
                         <div className="w-24 aspect-video rounded-lg overflow-hidden flex-shrink-0 relative">
                           <img 
-                            src={getSafeThumbnail(video.thumbnail, video.videoUrl) ? `${getSafeThumbnail(video.thumbnail, video.videoUrl)}${getSafeThumbnail(video.thumbnail, video.videoUrl).includes('?') ? '&' : '?'}v=oss` : undefined} 
+                            src={getSafeImageUrl(getSafeThumbnail(video.thumbnail, video.videoUrl))} 
                             alt={video.title}
                             crossOrigin="anonymous"
                             className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" 

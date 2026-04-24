@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { useState, useEffect } from 'react';
 import { useLanguage } from '../LanguageContext';
-import { getReferrerPolicy } from '../lib/utils';
+import { getReferrerPolicy, getSafeImageUrl } from '../lib/utils';
 
 export default function Hero() {
   const { t, settings } = useLanguage();
@@ -27,7 +27,7 @@ export default function Hero() {
             className="absolute inset-0 z-0"
           >
             <img 
-              src={settings.heroImageUrl ? `${settings.heroImageUrl}${settings.heroImageUrl.includes('?') ? '&' : '?'}v=oss` : undefined} 
+              src={getSafeImageUrl(settings.heroImageUrl)} 
               alt="Artistic Hero"
               className="w-full h-full object-cover"
               fetchPriority="high"

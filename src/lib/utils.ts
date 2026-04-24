@@ -15,12 +15,24 @@ export function getReferrerPolicy(url?: string): "no-referrer" | "strict-origin-
     'i1.hdslb.com',
     'i2.hdslb.com',
     'images.unsplash.com',
-    'aliyuncs.com',
-    'oss-cn',
     'buyee.jp',
     'baidu.com'
   ];
   
   const isAntiLeech = antiLeechDomains.some(domain => url.includes(domain));
   return isAntiLeech ? "no-referrer" : "strict-origin-when-cross-origin";
+}
+
+export function getSafeImageUrl(url?: string): string | undefined {
+  if (!url) return undefined;
+  
+  // Handled signed URLs or URLs with existing params
+  const separator = url.includes('?') ? '&' : '?';
+  
+  // Aliyun OSS specific: Only append cache buster if it's an Aliyun OSS URL
+  if (url.includes('aliyuncs.com')) {
+    return `${url}${separator}v=oss`;
+  }
+  
+  return url;
 }

@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { Video, Category } from '@/src/types';
 import { Play, X } from 'lucide-react';
-import { cn, getReferrerPolicy } from '@/src/lib/utils';
+import { cn, getReferrerPolicy, getSafeImageUrl } from '@/src/lib/utils';
 import { useLanguage } from '../LanguageContext';
 import { db, handleFirestoreError, OperationType } from '../firebase';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
@@ -271,7 +271,7 @@ export default function VideoSection() {
                   </div>
                   
                   <img 
-                    src={getSafeThumbnail(video.thumbnail, video.videoUrl) ? `${getSafeThumbnail(video.thumbnail, video.videoUrl)}${getSafeThumbnail(video.thumbnail, video.videoUrl).includes('?') ? '&' : '?'}v=oss` : undefined} 
+                    src={getSafeImageUrl(getSafeThumbnail(video.thumbnail, video.videoUrl))} 
                     alt={video.title}
                     loading="lazy"
                     crossOrigin="anonymous"
@@ -431,7 +431,7 @@ export default function VideoSection() {
                       >
                         <div className="w-24 aspect-video rounded-lg overflow-hidden flex-shrink-0 relative">
                           <img 
-                            src={getSafeThumbnail(video.thumbnail, video.videoUrl) ? `${getSafeThumbnail(video.thumbnail, video.videoUrl)}${getSafeThumbnail(video.thumbnail, video.videoUrl).includes('?') ? '&' : '?'}v=oss` : undefined} 
+                            src={getSafeImageUrl(getSafeThumbnail(video.thumbnail, video.videoUrl))} 
                             alt={video.title}
                             crossOrigin="anonymous"
                             className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" 

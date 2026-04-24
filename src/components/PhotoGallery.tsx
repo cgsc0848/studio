@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { Photo } from '@/src/types';
 import { useLanguage } from '../LanguageContext';
 import { Link } from 'react-router-dom';
-import { cn, getReferrerPolicy } from '../lib/utils';
+import { cn, getReferrerPolicy, getSafeImageUrl } from '../lib/utils';
 import { db, handleFirestoreError, OperationType } from '../firebase';
 import { collection, query, orderBy, onSnapshot, limit } from 'firebase/firestore';
 import { X, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -109,7 +109,7 @@ function PhotoItem({ photo, index, onSelect, getCategoryName }: { photo: Photo, 
           onDragStart={(e) => e.preventDefault()}
         />
         <img
-          src={photo.url ? `${photo.url}${photo.url.includes('?') ? '&' : '?'}v=oss` : undefined}
+          src={getSafeImageUrl(photo.url)}
           alt={photo.title}
           loading="lazy"
           crossOrigin="anonymous"
@@ -200,7 +200,7 @@ export default function PhotoGallery() {
       img.crossOrigin = 'anonymous'; 
       const url = selectedPhoto.url;
       // Option A: Use a small cache buster suffix to bypass stale browser cache without CORS headers
-      img.src = `${url}${url.includes('?') ? '&' : '?'}v=oss`;
+      img.src = getSafeImageUrl(url) || '';
       
       img.onload = () => {
         const color = getDominantColor(img);
@@ -322,7 +322,7 @@ export default function PhotoGallery() {
               >
                 <div 
                   className="absolute inset-[-15%] bg-cover bg-center blur-[120px] scale-110 opacity-50 transition-all duration-1000"
-                  style={{ backgroundImage: `url(${selectedPhoto.url}${selectedPhoto.url.includes('?') ? '&' : '?'}v=oss)` }}
+                  style={{ backgroundImage: `url(${getSafeImageUrl(selectedPhoto.url)})` }}
                 />
               </motion.div>
 
@@ -371,7 +371,7 @@ export default function PhotoGallery() {
                 style={{ filter: 'drop-shadow(0 20px 60px rgba(0,0,0,0.4))' }}
               >
                 <img 
-                  src={selectedPhoto.url ? `${selectedPhoto.url}${selectedPhoto.url.includes('?') ? '&' : '?'}v=oss` : undefined} 
+                  src={getSafeImageUrl(selectedPhoto.url)} 
                   alt={selectedPhoto.title}
                   crossOrigin="anonymous"
                   className="max-w-full max-h-[70dvh] md:max-h-[85dvh] object-contain select-none block mx-auto rounded-sm border border-white/5"

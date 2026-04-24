@@ -7,7 +7,7 @@ import Footer from './components/Footer';
 import CustomCursor from './components/CustomCursor';
 import GalleryPage from './components/GalleryPage';
 import ScrollToTop from './components/ScrollToTop';
-import { cn, getReferrerPolicy } from './lib/utils';
+import { cn, getReferrerPolicy, getSafeImageUrl } from './lib/utils';
 import { motion, useScroll, useSpring } from 'motion/react';
 import { LanguageProvider, useLanguage } from './LanguageContext';
 import { useState, useEffect, lazy, Suspense } from 'react';
@@ -163,7 +163,7 @@ function HomePage() {
             transition={{ duration: 1 }}
           >
             <img 
-              src={settings.aboutImageUrl ? `${settings.aboutImageUrl}${settings.aboutImageUrl.includes('?') ? '&' : '?'}v=oss` : undefined} 
+              src={getSafeImageUrl(settings.aboutImageUrl)} 
               alt="Artist Portrait"
               className="w-full aspect-[4/5] object-cover grayscale hover:grayscale-0 transition-all duration-1000"
               fetchPriority="high"
