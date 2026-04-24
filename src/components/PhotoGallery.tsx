@@ -112,6 +112,7 @@ function PhotoItem({ photo, index, onSelect, getCategoryName }: { photo: Photo, 
           src={photo.url || undefined}
           alt={photo.title}
           loading="lazy"
+          crossOrigin="anonymous"
           onLoad={() => setIsLoaded(true)}
           onError={() => setError(true)}
           className={cn(
@@ -372,6 +373,7 @@ export default function PhotoGallery() {
                 <img 
                   src={selectedPhoto.url || undefined} 
                   alt={selectedPhoto.title}
+                  crossOrigin="anonymous"
                   className="max-w-full max-h-[70dvh] md:max-h-[85dvh] object-contain select-none block mx-auto rounded-sm border border-white/5"
                   referrerPolicy={getReferrerPolicy(selectedPhoto.url)}
                 />

@@ -385,6 +385,7 @@ export default function GalleryPage() {
                   src={('url' in item ? item.url : item.thumbnail) || undefined}
                   alt={item.title}
                   loading="lazy"
+                  crossOrigin="anonymous"
                   className={cn(
                     "w-full h-auto object-cover transition-transform duration-1000 group-hover:scale-105 select-none",
                     activeType === 'videos' ? "aspect-video" : "h-auto"
@@ -475,6 +476,7 @@ export default function GalleryPage() {
                 <img 
                   src={selectedPhoto.url} 
                   alt={selectedPhoto.title}
+                  crossOrigin="anonymous"
                   className="max-w-full max-h-[70dvh] md:max-h-[85dvh] object-contain select-none block mx-auto rounded-sm border border-white/5"
                   referrerPolicy={getReferrerPolicy(selectedPhoto.url)}
                 />
@@ -587,6 +589,7 @@ export default function GalleryPage() {
                           <img 
                             src={getSafeThumbnail(video.thumbnail, video.videoUrl)} 
                             alt={video.title}
+                            crossOrigin="anonymous"
                             className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" 
                             referrerPolicy={getReferrerPolicy(getSafeThumbnail(video.thumbnail, video.videoUrl))}
                           />
