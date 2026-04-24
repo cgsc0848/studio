@@ -44,6 +44,7 @@ async function startServer() {
   app.use(helmet({
     contentSecurityPolicy: false,
     crossOriginEmbedderPolicy: false,
+    crossOriginOpenerPolicy: false, // Required for Firebase Auth popups in iFrames
     frameguard: false, // Allow site to be displayed in iFrames (required for AI Studio)
     referrerPolicy: { policy: 'strict-origin-when-cross-origin' }
   }));

@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { Video, Category } from '@/src/types';
 import { Play, X } from 'lucide-react';
-import { cn } from '@/src/lib/utils';
+import { cn, getReferrerPolicy } from '@/src/lib/utils';
 import { useLanguage } from '../LanguageContext';
 import { db, handleFirestoreError, OperationType } from '../firebase';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
@@ -195,7 +195,7 @@ export default function VideoSection() {
                       className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 opacity-60 group-hover:opacity-80 select-none"
                       onContextMenu={(e) => e.preventDefault()}
                       onDragStart={(e) => e.preventDefault()}
-                      referrerPolicy="strict-origin-when-cross-origin"
+                      referrerPolicy={getReferrerPolicy(getSafeThumbnail(video.thumbnail, video.videoUrl))}
                     />
                     
                     <div className="absolute inset-0 flex flex-col justify-center items-center bg-ink/20 backdrop-blur-[2px] opacity-0 md:group-hover:opacity-100 transition-opacity duration-500 z-20 max-md:opacity-100">
@@ -350,7 +350,7 @@ export default function VideoSection() {
                             src={getSafeThumbnail(video.thumbnail, video.videoUrl)} 
                             alt={video.title}
                             className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" 
-                            referrerPolicy="strict-origin-when-cross-origin"
+                            referrerPolicy={getReferrerPolicy(getSafeThumbnail(video.thumbnail, video.videoUrl))}
                           />
                           {selectedVideo.id === video.id && (
                             <div className="absolute inset-0 bg-accent/20 flex items-center justify-center">

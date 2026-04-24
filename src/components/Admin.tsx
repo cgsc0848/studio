@@ -6,7 +6,8 @@ import { signInWithPopup, onAuthStateChanged, signOut, User } from 'firebase/aut
 import { collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, setDoc } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
 import { LogOut, Plus, Trash2, Save, Image as ImageIcon, Video as VideoIcon, Settings as SettingsIcon, Layout, Type, Palette, X, CheckCircle, AlertCircle, Loader2, Menu, Mail } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { cn, getReferrerPolicy } from '../lib/utils';
+import { motion, AnimatePresence } from 'motion/react';
 
 interface SiteSettings {
   heroTitle: string;
@@ -703,7 +704,7 @@ export default function Admin() {
                 {photos.map((photo) => (
                   <div key={photo.id} className="bg-white p-4 rounded-xl border border-ink/5 flex gap-6 group">
                     <div className="w-24 h-24 flex-shrink-0 overflow-hidden rounded-lg bg-ink/5 relative group/img">
-                      <img src={photo.url || undefined} className="w-full h-full object-cover" referrerPolicy="strict-origin-when-cross-origin" />
+                      <img src={photo.url || undefined} className="w-full h-full object-cover" referrerPolicy={getReferrerPolicy(photo.url)} />
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 group-hover/img:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
                         <label className="text-white hover:text-accent cursor-pointer">
                           <Plus size={20} />
@@ -805,7 +806,7 @@ export default function Admin() {
                   <div key={video.id} className="bg-white p-4 rounded-xl border border-ink/5 flex flex-col gap-4 group">
                     <div className="flex gap-6">
                       <div className="w-32 h-20 flex-shrink-0 overflow-hidden rounded-lg bg-ink/5 relative group/img">
-                        <img src={video.thumbnail || undefined} className="w-full h-full object-cover" referrerPolicy="strict-origin-when-cross-origin" />
+                        <img src={video.thumbnail || undefined} className="w-full h-full object-cover" referrerPolicy={getReferrerPolicy(video.thumbnail)} />
                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
                           <label className="text-white hover:text-accent cursor-pointer">
                             <Plus size={20} />
@@ -1326,7 +1327,7 @@ export default function Admin() {
                 <div className="p-6 bg-ink/5 rounded-2xl flex flex-col md:flex-row gap-8 items-center">
                    <div className="w-full md:w-64 aspect-video rounded-xl overflow-hidden bg-white shadow-sm relative group">
                       {settings.heroImageUrl ? (
-                        <img src={settings.heroImageUrl} className="w-full h-full object-cover" />
+                        <img src={settings.heroImageUrl} className="w-full h-full object-cover" referrerPolicy={getReferrerPolicy(settings.heroImageUrl)} />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-ink/10 font-bold tracking-[0.5em] text-[8px] uppercase">No Background</div>
                       )}
@@ -1406,7 +1407,7 @@ export default function Admin() {
                    <div>
                       <div className="w-full aspect-[4/5] bg-ink/5 rounded-2xl overflow-hidden mb-6 relative group border border-ink/5 shadow-sm">
                         {settings.aboutImageUrl ? (
-                          <img src={settings.aboutImageUrl} className="w-full h-full object-cover grayscale" />
+                          <img src={settings.aboutImageUrl} className="w-full h-full object-cover grayscale" referrerPolicy={getReferrerPolicy(settings.aboutImageUrl)} />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-ink/10 uppercase tracking-widest font-bold text-[8px]">No Portrait</div>
                         )}
@@ -1470,7 +1471,7 @@ export default function Admin() {
                           <img 
                             src={photo.url} 
                             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
-                            referrerPolicy="no-referrer"
+                            referrerPolicy={getReferrerPolicy(photo.url)}
                           />
                           <div className="absolute inset-0 bg-accent/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                              <span className="bg-white text-ink text-[10px] uppercase tracking-widest font-bold px-3 py-1 rounded-full shadow-lg">Select</span>

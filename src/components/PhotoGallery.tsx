@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom';
 import { Photo } from '@/src/types';
 import { useLanguage } from '../LanguageContext';
 import { Link } from 'react-router-dom';
-import { cn } from '../lib/utils';
+import { cn, getReferrerPolicy } from '../lib/utils';
 import { db, handleFirestoreError, OperationType } from '../firebase';
 import { collection, query, orderBy, onSnapshot, limit } from 'firebase/firestore';
 import { X, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -57,7 +57,7 @@ function PhotoItem({ photo, index, onSelect, getCategoryName }: { photo: Photo, 
           )}
           onContextMenu={(e) => e.preventDefault()}
           onDragStart={(e) => e.preventDefault()}
-          referrerPolicy="strict-origin-when-cross-origin"
+          referrerPolicy={getReferrerPolicy(photo.url)}
         />
       </div>
       <div className="mt-4 flex justify-between items-start opacity-0 group-hover:opacity-100 transition-opacity duration-500">
@@ -283,7 +283,7 @@ export default function PhotoGallery() {
                   src={selectedPhoto.url || undefined} 
                   alt={selectedPhoto.title}
                   className="max-w-full max-h-[70dvh] md:max-h-[85dvh] object-contain shadow-[0_20px_50px_rgba(0,0,0,0.5)] select-none block mx-auto"
-                  referrerPolicy="strict-origin-when-cross-origin"
+                  referrerPolicy={getReferrerPolicy(selectedPhoto.url)}
                 />
                 <div className="mt-8 text-center text-white">
                   <h3 className="text-lg font-medium tracking-tight">{selectedPhoto.title}</h3>

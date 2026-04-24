@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Photo, Video } from '@/src/types';
 import { useLanguage } from '../LanguageContext';
 import { ArrowLeft, Play, X, ChevronLeft, ChevronRight } from 'lucide-react';
-import { cn } from '../lib/utils';
+import { cn, getReferrerPolicy } from '../lib/utils';
 import { db, handleFirestoreError, OperationType } from '../firebase';
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 
@@ -318,7 +318,7 @@ export default function GalleryPage() {
                     "w-full h-auto object-cover transition-transform duration-1000 group-hover:scale-105 select-none",
                     activeType === 'videos' ? "aspect-video" : "h-auto"
                   )}
-                  referrerPolicy="strict-origin-when-cross-origin"
+                  referrerPolicy={getReferrerPolicy(('url' in item ? item.url : item.thumbnail) || undefined)}
                 />
                 {'videoUrl' in item && (
                   <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity z-20">
@@ -392,7 +392,7 @@ export default function GalleryPage() {
                   src={selectedPhoto.url} 
                   alt={selectedPhoto.title}
                   className="max-w-full max-h-[70dvh] md:max-h-[85dvh] object-contain shadow-[0_20px_50px_rgba(0,0,0,0.5)] select-none block mx-auto"
-                  referrerPolicy="strict-origin-when-cross-origin"
+                  referrerPolicy={getReferrerPolicy(selectedPhoto.url)}
                 />
                 <div className="mt-8 text-center text-white">
                   <h3 className="text-lg font-medium tracking-tight">{selectedPhoto.title}</h3>
@@ -504,7 +504,7 @@ export default function GalleryPage() {
                             src={getSafeThumbnail(video.thumbnail, video.videoUrl)} 
                             alt={video.title}
                             className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" 
-                            referrerPolicy="no-referrer"
+                            referrerPolicy={getReferrerPolicy(getSafeThumbnail(video.thumbnail, video.videoUrl))}
                           />
                           {selectedVideo.id === video.id && (
                             <div className="absolute inset-0 bg-white/10 flex items-center justify-center">

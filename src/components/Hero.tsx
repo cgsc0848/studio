@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { useState, useEffect } from 'react';
 import { useLanguage } from '../LanguageContext';
+import { getReferrerPolicy } from '../lib/utils';
 
 export default function Hero() {
   const { t, settings } = useLanguage();
@@ -30,6 +31,7 @@ export default function Hero() {
               alt="Artistic Hero"
               className="w-full h-full object-cover"
               fetchPriority="high"
+              referrerPolicy={getReferrerPolicy(settings.heroImageUrl)}
             />
           </motion.div>
         )}
