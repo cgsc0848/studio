@@ -402,42 +402,36 @@ export default function Admin() {
         }, 
         async () => {
           const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-          const storagePath = uploadTask.snapshot.ref.fullPath;
           const fileSize = file.size;
 
           try {
             if (type === 'about') {
               await updateDoc(doc(db, 'settings', 'global'), { 
-                aboutImageUrl: downloadURL,
-                aboutImagePath: storagePath 
+                aboutImageUrl: downloadURL
               });
-              setSettings(prev => ({ ...prev, aboutImageUrl: downloadURL, aboutImagePath: storagePath }));
+              setSettings(prev => ({ ...prev, aboutImageUrl: downloadURL }));
             } else if (type === 'hero') {
               await updateDoc(doc(db, 'settings', 'global'), { 
-                heroImageUrl: downloadURL,
-                heroImagePath: storagePath 
+                heroImageUrl: downloadURL
               });
-              setSettings(prev => ({ ...prev, heroImageUrl: downloadURL, heroImagePath: storagePath }));
+              setSettings(prev => ({ ...prev, heroImageUrl: downloadURL }));
             } else if (existingId) {
               const updatedAt = new Date().toISOString();
               if (type === 'photo') {
                 await updateDoc(doc(db, 'photos', existingId), { 
                   url: downloadURL, 
-                  storagePath,
                   fileSize, 
                   createdAt: updatedAt 
                 });
               } else if (type === 'video') {
                 await updateDoc(doc(db, 'videos', existingId), { 
                   thumbnail: downloadURL, 
-                  thumbnailPath: storagePath,
                   fileSize, 
                   createdAt: updatedAt 
                 });
               } else if (type === 'videoFile') {
                 await updateDoc(doc(db, 'videos', existingId), { 
                   videoUrl: downloadURL, 
-                  videoPath: storagePath,
                   fileSize, 
                   createdAt: updatedAt 
                 });
@@ -446,7 +440,6 @@ export default function Admin() {
               if (type === 'photo') {
                 await addDoc(collection(db, 'photos'), {
                   url: downloadURL,
-                  storagePath,
                   title: file.name.split('.')[0],
                   category: settings.photoCategories[0] || 'Editorial',
                   aspectRatio: 'portrait',
@@ -457,9 +450,7 @@ export default function Admin() {
               } else if (type === 'video' || type === 'videoFile') {
                 await addDoc(collection(db, 'videos'), {
                   thumbnail: type === 'video' ? downloadURL : 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&q=80&w=800',
-                  thumbnailPath: type === 'video' ? storagePath : '',
                   videoUrl: type === 'videoFile' ? downloadURL : '',
-                  videoPath: type === 'videoFile' ? storagePath : '',
                   title: file.name.split('.')[0],
                   category: settings.videoCategories[0] || 'Cinematic',
                   description: 'New video description',
