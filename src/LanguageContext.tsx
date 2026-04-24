@@ -71,9 +71,9 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     navLabels_zh: {
       home: '首页',
       about: '关于',
-      films: '影片',
-      stills: '摄影',
-      editorial: '社论'
+      films: '视频',
+      stills: '平面',
+      editorial: '作品'
     },
     photoCategories: [],
     videoCategories: []
@@ -129,8 +129,8 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setLoading(false);
     });
 
-    // Fallback timeout for loading
-    const timer = setTimeout(() => setLoading(false), 3000);
+    // Fallback timeout for loading - reduced for mobile responsiveness
+    const timer = setTimeout(() => setLoading(false), 2000);
 
     return () => {
       unsubscribe();
