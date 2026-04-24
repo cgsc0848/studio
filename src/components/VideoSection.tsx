@@ -215,13 +215,16 @@ export default function VideoSection() {
                     transition={{ duration: 0.8, delay: index * 0.1, ease: [0.21, 0, 0.07, 1] }}
                     className={cn(
                       "group relative flex flex-col cursor-pointer",
-                      (settings.videoLayout || 'masonry') === 'masonry' && index % 3 === 0 
-                        ? "md:col-span-2 aspect-[21/9]" 
-                        : "aspect-video"
+                      (settings.videoLayout || 'masonry') === 'masonry' && index % 3 === 0 ? "md:col-span-2" : ""
                     )}
                     onClick={() => setSelectedVideo(video)}
                   >
-                    <div className="relative flex-1 overflow-hidden bg-white/5">
+                    <div className={cn(
+                      "relative overflow-hidden bg-white/5",
+                      (settings.videoLayout || 'masonry') === 'masonry' && index % 3 === 0 
+                        ? "aspect-[21/9]" 
+                        : "aspect-video"
+                    )}>
                       <div className="absolute top-4 left-4 z-20">
                         <span className="text-[9px] uppercase tracking-[0.2em] text-white bg-black/60 backdrop-blur-md border border-white/10 px-3 py-1 font-medium">
                           {getCategoryName(video.category)}
