@@ -16,9 +16,9 @@ export default function Hero() {
   return (
     <section className="relative h-screen w-full overflow-hidden flex items-center justify-center bg-ink">
       <AnimatePresence>
-        {settings.heroImageUrl && (
+        {(settings.heroImageUrl || settings.heroImagePath) && (
           <motion.div 
-            key={settings.heroImageUrl}
+            key={settings.heroImagePath || settings.heroImageUrl}
             initial={{ scale: 1.1, opacity: 0 }}
             animate={{ scale: 1, opacity: 0.6 }}
             exit={{ opacity: 0 }}
