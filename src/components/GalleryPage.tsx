@@ -155,7 +155,7 @@ export default function GalleryPage() {
       const img = new Image();
       img.crossOrigin = 'anonymous'; 
       const url = selectedPhoto.url;
-      img.src = `${url}${url.includes('?') ? '&' : '?'}v=${Date.now()}`;
+      img.src = url;
       
       img.onload = () => {
         const color = getDominantColor(img);

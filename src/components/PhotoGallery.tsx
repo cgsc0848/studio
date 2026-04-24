@@ -198,8 +198,8 @@ export default function PhotoGallery() {
       const img = new Image();
       img.crossOrigin = 'anonymous'; 
       const url = selectedPhoto.url;
-      // Use cache buster only if extraction fails or to ensure fresh headers
-      img.src = `${url}${url.includes('?') ? '&' : '?'}v=${Date.now()}`;
+      // Do NOT append v=timestamp here to avoid breaking Aliyun OSS Signed URLs
+      img.src = url;
       
       img.onload = () => {
         const color = getDominantColor(img);
@@ -210,7 +210,7 @@ export default function PhotoGallery() {
         setModalBgColor(`rgba(${r}, ${g}, ${b}, 0.7)`);
       };
       img.onerror = () => {
-        console.warn('CORS missing for OSS - check OSS console');
+        // Fallback for CORS or missing images
         setModalBgColor('rgba(20, 20, 20, 0.4)');
       };
     }
