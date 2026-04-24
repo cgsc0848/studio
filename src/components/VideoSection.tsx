@@ -271,9 +271,10 @@ export default function VideoSection() {
                   </div>
                   
                   <img 
-                    src={getSafeThumbnail(video.thumbnail, video.videoUrl) || undefined} 
+                    src={getSafeThumbnail(video.thumbnail, video.videoUrl) ? `${getSafeThumbnail(video.thumbnail, video.videoUrl)}${getSafeThumbnail(video.thumbnail, video.videoUrl).includes('?') ? '&' : '?'}v=oss` : undefined} 
                     alt={video.title}
                     loading="lazy"
+                    crossOrigin="anonymous"
                     className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 opacity-70 group-hover:opacity-100"
                     onContextMenu={(e) => e.preventDefault()}
                     referrerPolicy={getReferrerPolicy(getSafeThumbnail(video.thumbnail, video.videoUrl))}
@@ -430,8 +431,9 @@ export default function VideoSection() {
                       >
                         <div className="w-24 aspect-video rounded-lg overflow-hidden flex-shrink-0 relative">
                           <img 
-                            src={getSafeThumbnail(video.thumbnail, video.videoUrl)} 
+                            src={getSafeThumbnail(video.thumbnail, video.videoUrl) ? `${getSafeThumbnail(video.thumbnail, video.videoUrl)}${getSafeThumbnail(video.thumbnail, video.videoUrl).includes('?') ? '&' : '?'}v=oss` : undefined} 
                             alt={video.title}
+                            crossOrigin="anonymous"
                             className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" 
                             referrerPolicy={getReferrerPolicy(getSafeThumbnail(video.thumbnail, video.videoUrl))}
                           />

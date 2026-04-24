@@ -95,9 +95,9 @@ export const translations = {
   zh: {
     nav: {
       home: '首页',
-      films: '影片',
-      stills: '摄影',
-      editorial: '社论',
+      films: '视频',
+      stills: '平面',
+      editorial: '作品',
       journal: '日志',
       about: '关于',
     },

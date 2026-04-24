@@ -322,7 +322,7 @@ export default function PhotoGallery() {
               >
                 <div 
                   className="absolute inset-[-15%] bg-cover bg-center blur-[120px] scale-110 opacity-50 transition-all duration-1000"
-                  style={{ backgroundImage: `url(${selectedPhoto.url})` }}
+                  style={{ backgroundImage: `url(${selectedPhoto.url}${selectedPhoto.url.includes('?') ? '&' : '?'}v=oss)` }}
                 />
               </motion.div>
 

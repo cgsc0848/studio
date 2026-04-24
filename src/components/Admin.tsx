@@ -63,7 +63,7 @@ export default function Admin() {
     socialLinks: [],
     categoryLabels: {},
     navLabels_en: { home: 'Home', about: 'About', films: 'Films', stills: 'Stills', editorial: 'Editorial' },
-    navLabels_zh: { home: '首页', about: '关于', films: '影片', stills: '摄影', editorial: '作品' },
+    navLabels_zh: { home: '首页', about: '关于', films: '视频', stills: '平面', editorial: '作品' },
     famousCars: '',
     remarks: '',
     photoCategories: ['Editorial', 'Personal'],

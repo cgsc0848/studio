@@ -382,7 +382,7 @@ export default function GalleryPage() {
                   onDragStart={(e) => e.preventDefault()}
                 />
                 <img
-                  src={itemUrl ? `${itemUrl}${itemUrl.includes('?') ? '&' : '?'}v=oss` : undefined}
+                  src={('url' in item ? item.url : item.thumbnail) ? `${('url' in item ? item.url : item.thumbnail)}${('url' in item ? item.url : item.thumbnail).includes('?') ? '&' : '?'}v=oss` : undefined}
                   alt={item.title}
                   loading="lazy"
                   crossOrigin="anonymous"
@@ -587,7 +587,7 @@ export default function GalleryPage() {
                       >
                         <div className="w-24 aspect-video rounded-lg overflow-hidden flex-shrink-0 relative">
                           <img 
-                            src={`${thumbUrl}${thumbUrl.includes('?') ? '&' : '?'}v=oss`} 
+                            src={getSafeThumbnail(video.thumbnail, video.videoUrl) ? `${getSafeThumbnail(video.thumbnail, video.videoUrl)}${getSafeThumbnail(video.thumbnail, video.videoUrl).includes('?') ? '&' : '?'}v=oss` : undefined} 
                             alt={video.title}
                             crossOrigin="anonymous"
                             className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" 

@@ -163,10 +163,11 @@ function HomePage() {
             transition={{ duration: 1 }}
           >
             <img 
-              src={settings.aboutImageUrl || undefined} 
+              src={settings.aboutImageUrl ? `${settings.aboutImageUrl}${settings.aboutImageUrl.includes('?') ? '&' : '?'}v=oss` : undefined} 
               alt="Artist Portrait"
               className="w-full aspect-[4/5] object-cover grayscale hover:grayscale-0 transition-all duration-1000"
               fetchPriority="high"
+              crossOrigin="anonymous"
               referrerPolicy={getReferrerPolicy(settings.aboutImageUrl)}
             />
           </motion.div>

@@ -15,6 +15,8 @@ export function getReferrerPolicy(url?: string): "no-referrer" | "strict-origin-
     'i1.hdslb.com',
     'i2.hdslb.com',
     'images.unsplash.com',
+    'aliyuncs.com',
+    'oss-cn',
     'buyee.jp',
     'baidu.com'
   ];

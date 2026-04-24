@@ -27,10 +27,11 @@ export default function Hero() {
             className="absolute inset-0 z-0"
           >
             <img 
-              src={settings.heroImageUrl} 
+              src={settings.heroImageUrl ? `${settings.heroImageUrl}${settings.heroImageUrl.includes('?') ? '&' : '?'}v=oss` : undefined} 
               alt="Artistic Hero"
               className="w-full h-full object-cover"
               fetchPriority="high"
+              crossOrigin="anonymous"
               referrerPolicy={getReferrerPolicy(settings.heroImageUrl)}
             />
           </motion.div>
