@@ -45,6 +45,7 @@ async function startServer() {
     contentSecurityPolicy: false,
     crossOriginEmbedderPolicy: false,
     frameguard: false, // Allow site to be displayed in iFrames (required for AI Studio)
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' }
   }));
 
   // Anti-attack: Rate Limiting (Disabled temporarily for debugging accessibility)
