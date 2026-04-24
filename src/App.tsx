@@ -30,75 +30,70 @@ function LoadingFallback() {
 function SidebarNav() {
   const [isVisible, setIsVisible] = useState(false);
   const [activeSection, setActiveSection] = useState('hero');
+  const [isNavVisible, setIsNavVisible] = useState(true);
   const { settings, language } = useLanguage();
   const labels = language === 'en' ? settings.navLabels_en : settings.navLabels_zh;
 
   useEffect(() => {
-    const handleScroll = () => {
-      // Toggle visibility
-      setIsVisible(window.pageYOffset > 500);
+    let timeout: NodeJS.Timeout;
+    
+    const handleActivity = () => {
+      setIsNavVisible(true);
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        setIsNavVisible(false);
+      }, 8000);
+    };
 
-      // detect active section
+    window.addEventListener('scroll', handleActivity, { passive: true });
+    window.addEventListener('mousemove', handleActivity);
+    
+    // Initial hide timer
+    timeout = setTimeout(() => {
+      setIsNavVisible(false);
+    }, 12000);
+
+    return () => {
+      window.removeEventListener('scroll', handleActivity);
+      window.removeEventListener('mousemove', handleActivity);
+      clearTimeout(timeout);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsVisible(window.pageYOffset > 500);
       const sections = ['hero', 'about', 'cinematography', 'photography'];
       for (const sectionId of sections) {
         const element = document.getElementById(sectionId);
         if (element) {
           const rect = element.getBoundingClientRect();
-          if (rect.top <= 200 && rect.bottom >= 200) {
+          if (rect.top <= 400 && rect.bottom >= 400) {
             setActiveSection(sectionId);
             break;
           }
         }
       }
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    } else if (id === 'hero') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      const offset = 80;
+      const bodyRect = document.body.getBoundingClientRect().top;
+      const elementRect = element.getBoundingClientRect().top;
+      const elementPosition = elementRect - bodyRect;
+      const offsetPosition = elementPosition - offset;
+
+      window.scrollTo({
+        top: id === 'hero' ? 0 : offsetPosition,
+        behavior: 'smooth'
+      });
     }
   };
-
-  const [isNavVisible, setIsNavVisible] = useState(true);
-
-  useEffect(() => {
-    let timeout: NodeJS.Timeout;
-    
-    const handleScroll = () => {
-      setIsNavVisible(true);
-      clearTimeout(timeout);
-      timeout = setTimeout(() => {
-        setIsNavVisible(false);
-      }, 3000); // 3秒无操作后隐藏
-    };
-
-    const handleMouseMove = () => {
-      setIsNavVisible(true);
-      clearTimeout(timeout);
-      timeout = setTimeout(() => {
-        setIsNavVisible(false);
-      }, 3000);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    window.addEventListener('mousemove', handleMouseMove);
-    
-    // 初始化计时器
-    timeout = setTimeout(() => {
-      setIsNavVisible(false);
-    }, 3000);
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('mousemove', handleMouseMove);
-      clearTimeout(timeout);
-    };
-  }, []);
 
   const sections = [
     { id: 'hero', label: labels?.['home'] || (language === 'en' ? 'Home' : '首页') },
@@ -110,20 +105,10 @@ function SidebarNav() {
 
   return (
     <>
-      {/* Mobile Back to Top */}
-      <motion.button
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: isVisible ? 1 : 0, scale: isVisible ? 1 : 0 }}
-        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-        className="fixed bottom-10 right-6 z-40 md:hidden bg-bg-paper border border-ink/10 p-3 rounded-full shadow-lg text-ink"
-      >
-        <ChevronUp size={20} />
-      </motion.button>
-
-      {/* Desktop Sidebar Nav */}
+      {/* Desktop/Mobile Sidebar Nav */}
       <div className={cn(
-        "fixed right-6 md:right-12 top-1/2 -translate-y-1/2 z-[100] hidden md:flex flex-col items-center gap-10 transition-all duration-700",
-        (document.body.style.overflow === 'hidden' || !isNavVisible) ? "opacity-0 translate-x-4 pointer-events-none" : "opacity-100 translate-x-0"
+        "fixed right-8 md:right-12 top-1/2 -translate-y-1/2 z-[9999] hidden md:flex flex-col items-center gap-10 transition-all duration-1000 ease-in-out",
+        !isNavVisible ? "translate-x-48 opacity-0" : "translate-x-0 opacity-100"
       )}>
         <div className="flex flex-col gap-8 mix-blend-difference">
           {sections.map((section) => (
@@ -133,29 +118,30 @@ function SidebarNav() {
             className="group relative flex items-center justify-center p-2"
           >
             <span className={cn(
-              "w-2 h-2 rounded-full transition-all duration-500 bg-white",
+              "w-4 h-4 rounded-full transition-all duration-500 bg-white border border-black/10 shadow-[0_2px_4px_rgba(0,0,0,0.5)]",
               activeSection === section.id 
-                ? "scale-[2.8]" 
-                : "opacity-40 group-hover:opacity-100 scale-125"
+                ? "scale-[1.8] shadow-[0_0_20px_rgba(255,255,255,0.6),0_2px_8px_rgba(0,0,0,0.8)]" 
+                : "scale-100 opacity-60 group-hover:opacity-100 group-hover:scale-125"
             )} />
-            <span className="absolute right-full mr-8 text-[11px] uppercase tracking-[0.3em] opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0 whitespace-nowrap text-white font-bold">
+            <span className={cn(
+              "absolute right-full mr-10 text-[10px] uppercase tracking-[0.4em] transition-all duration-500 whitespace-nowrap text-white font-black drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]",
+              activeSection === section.id ? "opacity-100 translate-x-0" : "opacity-0 group-hover:opacity-100 translate-x-0"
+            )}>
               {section.label}
             </span>
           </button>
         ))}
       </div>
       
-      <div className="w-[1.5px] h-12 bg-white/30 rounded-full mix-blend-difference" />
+      <div className="w-[1.5px] h-12 bg-white opacity-40 mix-blend-difference rounded-full shadow-[0_1px_2px_rgba(0,0,0,0.5)]" />
 
-      <motion.button
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: isVisible ? 1 : 0, y: isVisible ? 0 : 10 }}
+      <button
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-        className="w-10 h-10 flex items-center justify-center rounded-full text-white hover:text-white/80 transition-all mix-blend-difference"
+        className="w-12 h-12 flex items-center justify-center rounded-full text-white transition-all font-black mix-blend-difference hover:scale-110 active:scale-95 drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]"
         title="Back to Top"
       >
-        <ChevronUp size={24} />
-      </motion.button>
+        <ChevronUp size={28} strokeWidth={3} />
+      </button>
     </div>
     </>
   );
@@ -237,7 +223,7 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen selection:bg-ink selection:text-bg-paper">
+    <div className="min-h-screen bg-bg-paper selection:bg-ink selection:text-bg-paper relative">
       <ScrollToTop />
       <CustomCursor />
       <Navbar />
