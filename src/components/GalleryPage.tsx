@@ -155,7 +155,7 @@ export default function GalleryPage() {
       const img = new Image();
       img.crossOrigin = 'anonymous'; 
       const url = selectedPhoto.url;
-      img.src = url;
+      img.src = `${url}${url.includes('?') ? '&' : '?'}v=oss`;
       
       img.onload = () => {
         const color = getDominantColor(img);
@@ -382,7 +382,7 @@ export default function GalleryPage() {
                   onDragStart={(e) => e.preventDefault()}
                 />
                 <img
-                  src={('url' in item ? item.url : item.thumbnail) || undefined}
+                  src={itemUrl ? `${itemUrl}${itemUrl.includes('?') ? '&' : '?'}v=oss` : undefined}
                   alt={item.title}
                   loading="lazy"
                   crossOrigin="anonymous"
@@ -474,7 +474,7 @@ export default function GalleryPage() {
                 style={{ filter: 'drop-shadow(0 20px 60px rgba(0,0,0,0.4))' }}
               >
                 <img 
-                  src={selectedPhoto.url} 
+                  src={`${selectedPhoto.url}${selectedPhoto.url.includes('?') ? '&' : '?'}v=oss`} 
                   alt={selectedPhoto.title}
                   crossOrigin="anonymous"
                   className="max-w-full max-h-[70dvh] md:max-h-[85dvh] object-contain select-none block mx-auto rounded-sm border border-white/5"
@@ -587,7 +587,7 @@ export default function GalleryPage() {
                       >
                         <div className="w-24 aspect-video rounded-lg overflow-hidden flex-shrink-0 relative">
                           <img 
-                            src={getSafeThumbnail(video.thumbnail, video.videoUrl)} 
+                            src={`${thumbUrl}${thumbUrl.includes('?') ? '&' : '?'}v=oss`} 
                             alt={video.title}
                             crossOrigin="anonymous"
                             className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" 

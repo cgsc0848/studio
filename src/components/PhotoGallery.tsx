@@ -109,7 +109,7 @@ function PhotoItem({ photo, index, onSelect, getCategoryName }: { photo: Photo, 
           onDragStart={(e) => e.preventDefault()}
         />
         <img
-          src={photo.url || undefined}
+          src={photo.url ? `${photo.url}${photo.url.includes('?') ? '&' : '?'}v=oss` : undefined}
           alt={photo.title}
           loading="lazy"
           crossOrigin="anonymous"
@@ -199,8 +199,8 @@ export default function PhotoGallery() {
       const img = new Image();
       img.crossOrigin = 'anonymous'; 
       const url = selectedPhoto.url;
-      // Do NOT append v=timestamp here to avoid breaking Aliyun OSS Signed URLs
-      img.src = url;
+      // Option A: Use a small cache buster suffix to bypass stale browser cache without CORS headers
+      img.src = `${url}${url.includes('?') ? '&' : '?'}v=oss`;
       
       img.onload = () => {
         const color = getDominantColor(img);
@@ -371,7 +371,7 @@ export default function PhotoGallery() {
                 style={{ filter: 'drop-shadow(0 20px 60px rgba(0,0,0,0.4))' }}
               >
                 <img 
-                  src={selectedPhoto.url || undefined} 
+                  src={selectedPhoto.url ? `${selectedPhoto.url}${selectedPhoto.url.includes('?') ? '&' : '?'}v=oss` : undefined} 
                   alt={selectedPhoto.title}
                   crossOrigin="anonymous"
                   className="max-w-full max-h-[70dvh] md:max-h-[85dvh] object-contain select-none block mx-auto rounded-sm border border-white/5"
