@@ -186,116 +186,130 @@ export default function VideoSection() {
   return (
     <section id="cinematography" className="py-24 px-6 md:px-12 bg-ink text-white">
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-16 md:gap-24">
-          <div>
-            <div className="mb-16">
-              <span className="text-[10px] uppercase tracking-[0.3em] text-white/40 mb-4 block">{t.cinematography.label}</span>
-              <h2 className="text-4xl md:text-6xl font-serif mb-8">{settings.videoTitle || t.cinematography.title}</h2>
-              {settings.videoSubtitle && (
-                <p className="text-white/60 max-w-md leading-relaxed -mt-4 mb-8">
-                  {settings.videoSubtitle}
-                </p>
-              )}
-            </div>
-
-            <div className={cn(
-              "grid gap-x-8 gap-y-16",
-              (settings.videoLayout || 'masonry') === 'grid' 
-                ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" 
-                : "grid-cols-1 md:grid-cols-2"
-            )}>
-              <AnimatePresence mode="popLayout">
-                {allVideos.slice(0, 4).map((video, index) => (
-                  <motion.div
-                    key={video.id}
-                    layout
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.8, delay: index * 0.1, ease: [0.21, 0, 0.07, 1] }}
-                    className={cn(
-                      "group relative flex flex-col cursor-pointer",
-                      (settings.videoLayout || 'masonry') === 'masonry' && index % 3 === 0 ? "md:col-span-2" : ""
-                    )}
-                    onClick={() => setSelectedVideo(video)}
-                  >
-                    <div className={cn(
-                      "relative overflow-hidden bg-white/5",
-                      (settings.videoLayout || 'masonry') === 'masonry' && index % 3 === 0 
-                        ? "aspect-[21/9]" 
-                        : "aspect-video"
-                    )}>
-                      <div className="absolute top-4 left-4 z-20">
-                        <span className="text-[9px] uppercase tracking-[0.2em] text-white bg-black/60 backdrop-blur-md border border-white/10 px-3 py-1 font-medium">
-                          {getCategoryName(video.category)}
-                        </span>
-                      </div>
-                      
-                      <img 
-                        src={getSafeThumbnail(video.thumbnail, video.videoUrl) || undefined} 
-                        alt={video.title}
-                        loading="lazy"
-                        className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 opacity-60 group-hover:opacity-100"
-                        onContextMenu={(e) => e.preventDefault()}
-                        referrerPolicy={getReferrerPolicy(getSafeThumbnail(video.thumbnail, video.videoUrl))}
-                      />
-                      
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-20">
-                        <motion.div 
-                          whileHover={{ scale: 1.1 }}
-                          className="w-20 h-20 rounded-full border border-white/20 flex items-center justify-center bg-white/5 backdrop-blur-xl text-white"
-                        >
-                          <Play size={24} fill="currentColor" className="translate-x-0.5" />
-                        </motion.div>
-                      </div>
-                    </div>
-
-                    <div className="mt-6 flex justify-between items-end">
-                      <div>
-                        <h3 className="text-2xl font-serif mb-1 group-hover:text-accent transition-colors">{video.title}</h3>
-                        <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">{getCategoryName(video.category)}</p>
-                      </div>
-                      <span className="text-[10px] font-mono opacity-20 group-hover:opacity-100 transition-opacity">0{(index + 1)}</span>
-                    </div>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </div>
-            
-            <div className="mt-12 text-center md:text-left">
-              <Link 
-                to="/gallery/All?type=videos" 
-                className="inline-block text-[10px] uppercase tracking-[0.3em] border border-white/20 px-8 py-4 hover:bg-white hover:text-ink transition-all"
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-8 border-b border-white/5 pb-12">
+          <div className="max-w-full md:max-w-xl">
+            <motion.span 
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              className="text-[10px] uppercase tracking-[0.5em] text-white/40 mb-4 block"
+            >
+              {t.cinematography.label}
+            </motion.span>
+            <motion.h2 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              className="text-4xl md:text-5xl lg:text-7xl font-serif mb-6 leading-tight"
+            >
+              {settings.videoTitle || t.cinematography.title}
+            </motion.h2>
+            {settings.videoSubtitle && (
+              <motion.p 
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                className="text-white/40 text-xs md:text-sm leading-relaxed uppercase tracking-widest"
               >
-                {language === 'en' ? 'View All Films' : '查看全部影片'}
-              </Link>
-            </div>
+                {settings.videoSubtitle}
+              </motion.p>
+            )}
           </div>
 
-          <aside className="flex flex-col">
-            <h3 className="text-[10px] uppercase tracking-[2px] mb-8 border-b border-white/10 pb-2 text-white/60">{t.cinematography.sidebarTitle}</h3>
-            <ul className="space-y-10">
-              {CATEGORIES.map((cat) => (
-                <li key={cat}>
-                  <Link 
-                    to={`/gallery/${cat}?type=videos`}
-                    className="cursor-pointer transition-all duration-300 group block"
-                  >
-                    <div className="font-serif text-2xl flex items-baseline gap-3 group-hover:text-white transition-colors">
-                      {getCategoryName(cat)} <span className="text-[10px] font-sans opacity-50">/ {(categoryCounts[cat.toLowerCase()] || 0) < 10 ? `0${categoryCounts[cat.toLowerCase()] || 0}` : categoryCounts[cat.toLowerCase()]}</span>
-                    </div>
-                    <p className="text-xs mt-2 text-white/40 group-hover:text-white/60 leading-relaxed max-w-[240px] transition-colors">
-                      {getCategoryDesc(cat)}
-                    </p>
-                  </Link>
-                </li>
-              ))}
-            </ul>
+          {/* Compact Category Navigation */}
+          <div className="flex flex-wrap gap-4 md:justify-end">
+            {CATEGORIES.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
+                className={cn(
+                  "px-6 py-2.5 text-[9px] uppercase tracking-[0.25em] transition-all duration-500 rounded-full border font-medium",
+                  activeCategory === cat 
+                    ? "bg-accent text-white border-accent shadow-[0_0_20px_rgba(var(--accent-rgb),0.3)]" 
+                    : "text-white/40 border-white/10 hover:border-white/30 hover:text-white"
+                )}
+              >
+                {getCategoryName(cat)}
+                <span className="ml-2 opacity-30 text-[8px] font-mono">
+                  {categoryCounts[cat.toLowerCase()] || 0}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
 
-            <div className="mt-auto pt-12">
-              {/* Copyright moved to Footer */}
-            </div>
-          </aside>
+        {/* Videos Grid */}
+        <div className={cn(
+          "grid gap-x-8 gap-y-16",
+          (settings.videoLayout || 'masonry') === 'grid' 
+            ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" 
+            : "grid-cols-1 md:grid-cols-2"
+        )}>
+          <AnimatePresence mode="popLayout">
+            {filteredVideos.slice(0, settings.videoLayout === 'grid' ? 6 : 4).map((video, index) => (
+              <motion.div
+                key={video.id}
+                layout
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.8, delay: index * 0.1, ease: [0.21, 0, 0.07, 1] }}
+                className={cn(
+                  "group relative flex flex-col cursor-pointer",
+                  (settings.videoLayout || 'masonry') === 'masonry' && index === 0 ? "md:col-span-2" : ""
+                )}
+                onClick={() => setSelectedVideo(video)}
+              >
+                <div className={cn(
+                  "relative overflow-hidden bg-white/5 rounded-sm border border-white/5",
+                  (settings.videoLayout || 'masonry') === 'masonry' && index === 0 
+                    ? "aspect-[21/9]" 
+                    : "aspect-video"
+                )}>
+                  <div className="absolute top-4 left-4 z-20">
+                    <span className="text-[9px] uppercase tracking-[0.2em] text-white bg-black/40 backdrop-blur-md border border-white/10 px-3 py-1">
+                      {getCategoryName(video.category)}
+                    </span>
+                  </div>
+                  
+                  <img 
+                    src={getSafeThumbnail(video.thumbnail, video.videoUrl) || undefined} 
+                    alt={video.title}
+                    loading="lazy"
+                    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 opacity-70 group-hover:opacity-100"
+                    onContextMenu={(e) => e.preventDefault()}
+                    referrerPolicy={getReferrerPolicy(getSafeThumbnail(video.thumbnail, video.videoUrl))}
+                  />
+                  
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-20">
+                    <motion.div 
+                      whileHover={{ scale: 1.1 }}
+                      className="w-16 h-16 rounded-full border border-white/20 flex items-center justify-center bg-white/5 backdrop-blur-xl text-white"
+                    >
+                      <Play size={20} fill="currentColor" className="translate-x-0.5" />
+                    </motion.div>
+                  </div>
+                </div>
+
+                <div className="mt-6 flex justify-between items-start">
+                  <div>
+                    <h3 className="text-2xl font-serif mb-2 group-hover:text-accent transition-colors">{video.title}</h3>
+                    <p className="text-[10px] uppercase tracking-[0.3em] text-white/30">{getCategoryName(video.category)}</p>
+                  </div>
+                  <span className="text-[11px] font-mono text-white/10 group-hover:text-white/40 transition-colors">/0{(index + 1)}</span>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+
+        {/* View More Button */}
+        <div className="mt-20 text-center">
+          <Link 
+            to={`/gallery/${activeCategory}?type=videos`}
+            className="inline-flex items-center gap-6 text-[10px] uppercase tracking-[0.4em] text-white/40 hover:text-white transition-all group"
+          >
+            <span>{language === 'en' ? 'View Collective Works' : '查看全部作品'}</span>
+            <div className="w-12 h-[1px] bg-white/10 group-hover:w-20 group-hover:bg-accent transition-all duration-700" />
+          </Link>
         </div>
       </div>
 
