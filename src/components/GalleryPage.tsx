@@ -179,12 +179,34 @@ export default function GalleryPage() {
   useEffect(() => {
     const qPhotos = query(collection(db, 'photos'), orderBy('createdAt', 'desc'));
     const unsubscribePhotos = onSnapshot(qPhotos, (snapshot) => {
-      setPhotos(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Photo)));
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Photo));
+      data.sort((a, b) => {
+        if (a.isPinned && !b.isPinned) return -1;
+        if (!a.isPinned && b.isPinned) return 1;
+        const weightA = a.orderWeight || 0;
+        const weightB = b.orderWeight || 0;
+        if (weightA !== weightB) return weightB - weightA;
+        const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return timeB - timeA;
+      });
+      setPhotos(data);
     }, (error) => handleFirestoreError(error, OperationType.LIST, 'photos'));
 
     const qVideos = query(collection(db, 'videos'), orderBy('createdAt', 'desc'));
     const unsubscribeVideos = onSnapshot(qVideos, (snapshot) => {
-      setVideos(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Video)));
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Video));
+      data.sort((a, b) => {
+        if (a.isPinned && !b.isPinned) return -1;
+        if (!a.isPinned && b.isPinned) return 1;
+        const weightA = a.orderWeight || 0;
+        const weightB = b.orderWeight || 0;
+        if (weightA !== weightB) return weightB - weightA;
+        const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return timeB - timeA;
+      });
+      setVideos(data);
     }, (error) => handleFirestoreError(error, OperationType.LIST, 'videos'));
 
     return () => {
@@ -236,19 +258,6 @@ export default function GalleryPage() {
             <div className="flex bg-ink/5 p-1 rounded-full">
               <button 
                 onClick={() => { 
-                  setActiveType('photos'); 
-                  setActiveCategory('All'); 
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-                className={cn(
-                  "px-6 py-2 rounded-full text-[10px] uppercase tracking-widest transition-all",
-                  activeType === 'photos' ? "bg-ink text-white" : "text-ink/40 hover:text-ink"
-                )}
-              >
-                {language === 'en' ? 'Stills' : '摄影'}
-              </button>
-              <button 
-                onClick={() => { 
                   setActiveType('videos'); 
                   setActiveCategory('All'); 
                   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -259,6 +268,19 @@ export default function GalleryPage() {
                 )}
               >
                 {language === 'en' ? 'Films' : '影片'}
+              </button>
+              <button 
+                onClick={() => { 
+                  setActiveType('photos'); 
+                  setActiveCategory('All'); 
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className={cn(
+                  "px-6 py-2 rounded-full text-[10px] uppercase tracking-widest transition-all",
+                  activeType === 'photos' ? "bg-ink text-white" : "text-ink/40 hover:text-ink"
+                )}
+              >
+                {language === 'en' ? 'Stills' : '摄影'}
               </button>
             </div>
             

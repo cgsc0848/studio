@@ -10,7 +10,8 @@
         "title": { "type": "string" },
         "category": { "type": "string" },
         "aspectRatio": { "type": "string", "enum": ["portrait", "landscape", "square"] },
-        "order": { "type": "number" },
+        "isPinned": { "type": "boolean" },
+        "orderWeight": { "type": "number" },
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["url", "title", "category"]
@@ -26,7 +27,8 @@
         "title": { "type": "string" },
         "category": { "type": "string" },
         "description": { "type": "string" },
-        "order": { "type": "number" },
+        "isPinned": { "type": "boolean" },
+        "orderWeight": { "type": "number" },
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["thumbnail", "videoUrl", "title", "category"]

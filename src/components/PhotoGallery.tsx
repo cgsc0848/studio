@@ -164,6 +164,20 @@ export default function PhotoGallery() {
         id: doc.id,
         ...doc.data()
       } as Photo));
+      
+      photoData.sort((a, b) => {
+        if (a.isPinned && !b.isPinned) return -1;
+        if (!a.isPinned && b.isPinned) return 1;
+        
+        const weightA = a.orderWeight || 0;
+        const weightB = b.orderWeight || 0;
+        if (weightA !== weightB) return weightB - weightA;
+
+        const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return timeB - timeA;
+      });
+      
       setPhotos(photoData);
     }, (error) => {
       handleFirestoreError(error, OperationType.LIST, 'photos');

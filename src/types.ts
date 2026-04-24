@@ -6,6 +6,8 @@ export interface Photo {
   title: string;
   category: Category;
   aspectRatio: 'portrait' | 'landscape' | 'square';
+  isPinned?: boolean;
+  orderWeight?: number;
   createdAt?: string;
 }
 
@@ -16,5 +18,7 @@ export interface Video {
   title: string;
   category: Category;
   description: string;
+  isPinned?: boolean;
+  orderWeight?: number;
   createdAt?: string;
 }

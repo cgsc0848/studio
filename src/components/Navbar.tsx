@@ -49,9 +49,9 @@ export default function Navbar() {
 
   const navLinks = [
     { id: 'hero', label: labels?.['home'] || t.nav.home },
+    { id: 'about', label: labels?.['about'] || t.nav.about },
     { id: 'cinematography', label: labels?.['films'] || t.nav.films },
     { id: 'photography', label: labels?.['stills'] || t.nav.stills },
-    { id: 'about', label: labels?.['about'] || t.nav.about },
     { id: 'contact', label: language === 'en' ? 'Contact' : '联系' },
   ];
 

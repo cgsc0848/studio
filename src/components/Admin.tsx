@@ -5,7 +5,7 @@ import { auth, db, storage, googleProvider, handleFirestoreError, OperationType 
 import { signInWithPopup, onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, setDoc } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
-import { LogOut, Plus, Trash2, Save, Image as ImageIcon, Video as VideoIcon, Settings as SettingsIcon, Layout, Type, Palette, X, CheckCircle, AlertCircle, Loader2, Menu, Mail } from 'lucide-react';
+import { LogOut, Plus, Trash2, Save, Image as ImageIcon, Video as VideoIcon, Settings as SettingsIcon, Layout, Type, Palette, X, CheckCircle, AlertCircle, Loader2, Menu, Mail, Star } from 'lucide-react';
 import { cn, getReferrerPolicy } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -100,6 +100,16 @@ export default function Admin() {
         unsubscribePhotos = onSnapshot(qPhotos, (snapshot) => {
           const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Photo));
           data.sort((a, b) => {
+            // Pin priority
+            if (a.isPinned && !b.isPinned) return -1;
+            if (!a.isPinned && b.isPinned) return 1;
+            
+            // Order weight priority (higher weight = earlier)
+            const weightA = a.orderWeight || 0;
+            const weightB = b.orderWeight || 0;
+            if (weightA !== weightB) return weightB - weightA;
+
+            // Date priority
             const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
             const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
             return timeB - timeA;
@@ -111,6 +121,15 @@ export default function Admin() {
         unsubscribeVideos = onSnapshot(qVideos, (snapshot) => {
           const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Video));
           data.sort((a, b) => {
+            // Pin priority
+            if (a.isPinned && !b.isPinned) return -1;
+            if (!a.isPinned && b.isPinned) return 1;
+
+            // Order weight priority
+            const weightA = a.orderWeight || 0;
+            const weightB = b.orderWeight || 0;
+            if (weightA !== weightB) return weightB - weightA;
+
             const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
             const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
             return timeB - timeA;
@@ -514,7 +533,9 @@ export default function Admin() {
       await updateDoc(doc(db, 'photos', id), {
         title: photo.title,
         category: photo.category,
-        url: photo.url
+        url: photo.url,
+        isPinned: photo.isPinned || false,
+        orderWeight: Number(photo.orderWeight) || 0
       });
       showToast(language === 'en' ? 'Photo updated' : '照片已更新');
     } catch (error) {
@@ -532,7 +553,9 @@ export default function Admin() {
         category: video.category,
         description: video.description,
         videoUrl: video.videoUrl,
-        thumbnail: video.thumbnail
+        thumbnail: video.thumbnail,
+        isPinned: video.isPinned || false,
+        orderWeight: Number(video.orderWeight) || 0
       });
       showToast(language === 'en' ? 'Video updated' : '视频已更新');
     } catch (error) {
@@ -766,21 +789,46 @@ export default function Admin() {
                     </div>
                     <div className="flex-1 flex flex-col justify-between">
                       <div className="space-y-3">
-                        <input 
-                          value={photo.title} 
-                          onChange={(e) => updatePhoto(photo.id, { title: e.target.value })}
-                          className="w-full p-2 border-b border-ink/5 focus:border-accent outline-none text-sm font-medium"
-                          placeholder="Title"
-                        />
-                        <select 
-                          value={photo.category}
-                          onChange={(e) => updatePhoto(photo.id, { category: e.target.value })}
-                          className="w-full p-2 text-[10px] uppercase tracking-widest text-ink/60 outline-none hover:bg-ink/5 rounded"
-                        >
-                          {settings.photoCategories.map(cat => (
-                            <option key={cat} value={cat}>{cat}</option>
-                          ))}
-                        </select>
+                        <div className="flex gap-4">
+                          <input 
+                            value={photo.title} 
+                            onChange={(e) => updatePhoto(photo.id, { title: e.target.value })}
+                            className="flex-1 p-2 border-b border-ink/5 focus:border-accent outline-none text-sm font-medium"
+                            placeholder="Title"
+                          />
+                          <button
+                            onClick={() => updatePhoto(photo.id, { isPinned: !photo.isPinned })}
+                            className={cn(
+                              "p-2 rounded-lg transition-all",
+                              photo.isPinned ? "bg-accent/10 text-accent" : "bg-ink/5 text-ink/20 hover:text-ink/40"
+                            )}
+                            title={language === 'en' ? 'Pin to Top' : '置顶'}
+                          >
+                            <Star size={16} className={photo.isPinned ? "fill-current" : ""} />
+                          </button>
+                        </div>
+                        
+                        <div className="flex gap-4">
+                          <select 
+                            value={photo.category}
+                            onChange={(e) => updatePhoto(photo.id, { category: e.target.value })}
+                            className="flex-1 p-2 text-[10px] uppercase tracking-widest text-ink/60 outline-none hover:bg-ink/5 rounded"
+                          >
+                            {settings.photoCategories.map(cat => (
+                              <option key={cat} value={cat}>{cat}</option>
+                            ))}
+                          </select>
+                          <div className="flex items-center gap-2">
+                             <span className="text-[10px] text-ink/40 uppercase tracking-widest">{language === 'en' ? 'Weight' : '权重'}</span>
+                             <input 
+                               type="number"
+                               value={photo.orderWeight || 0}
+                               onChange={(e) => updatePhoto(photo.id, { orderWeight: parseInt(e.target.value) || 0 })}
+                               className="w-16 p-2 text-[10px] bg-ink/5 rounded outline-none focus:ring-1 ring-accent"
+                             />
+                          </div>
+                        </div>
+                        
                         <input 
                           value={photo.url}
                           onChange={(e) => updatePhoto(photo.id, { url: e.target.value })}
@@ -906,22 +954,46 @@ export default function Admin() {
                           </label>
                         </div>
                       </div>
-                      <div className="flex-1 space-y-2">
-                        <input 
-                          value={video.title} 
-                          onChange={(e) => updateVideo(video.id, { title: e.target.value })}
-                          className="w-full p-2 border-b border-ink/5 focus:border-accent outline-none text-sm font-medium"
-                          placeholder="Video Title"
-                        />
-                        <select 
-                          value={video.category}
-                          onChange={(e) => updateVideo(video.id, { category: e.target.value })}
-                          className="w-full p-2 text-[10px] uppercase tracking-widest text-ink/60 outline-none hover:bg-ink/5 rounded"
-                        >
-                          {settings.videoCategories.map(cat => (
-                            <option key={cat} value={cat}>{cat}</option>
-                          ))}
-                        </select>
+                      <div className="flex-1 space-y-3">
+                        <div className="flex gap-4">
+                          <input 
+                            value={video.title} 
+                            onChange={(e) => updateVideo(video.id, { title: e.target.value })}
+                            className="flex-1 p-2 border-b border-ink/5 focus:border-accent outline-none text-sm font-medium"
+                            placeholder="Video Title"
+                          />
+                          <button
+                            onClick={() => updateVideo(video.id, { isPinned: !video.isPinned })}
+                            className={cn(
+                              "p-2 rounded-lg transition-all",
+                              video.isPinned ? "bg-accent/10 text-accent" : "bg-ink/5 text-ink/20 hover:text-ink/40"
+                            )}
+                            title={language === 'en' ? 'Pin to Top' : '置顶'}
+                          >
+                            <Star size={16} className={video.isPinned ? "fill-current" : ""} />
+                          </button>
+                        </div>
+                        
+                        <div className="flex gap-4">
+                          <select 
+                            value={video.category}
+                            onChange={(e) => updateVideo(video.id, { category: e.target.value })}
+                            className="flex-1 p-2 text-[10px] uppercase tracking-widest text-ink/60 outline-none hover:bg-ink/5 rounded"
+                          >
+                            {settings.videoCategories.map(cat => (
+                              <option key={cat} value={cat}>{cat}</option>
+                            ))}
+                          </select>
+                          <div className="flex items-center gap-2">
+                             <span className="text-[10px] text-ink/40 uppercase tracking-widest">{language === 'en' ? 'Weight' : '权重'}</span>
+                             <input 
+                               type="number"
+                               value={video.orderWeight || 0}
+                               onChange={(e) => updateVideo(video.id, { orderWeight: parseInt(e.target.value) || 0 })}
+                               className="w-16 p-2 text-[10px] bg-ink/5 rounded outline-none focus:ring-1 ring-accent"
+                             />
+                          </div>
+                        </div>
                         <div className="flex justify-between items-center text-[9px] text-ink/30 mt-1">
                           {video.createdAt && (
                             <span>{formatDate(video.createdAt)}</span>
