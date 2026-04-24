@@ -703,7 +703,7 @@ export default function Admin() {
                 {photos.map((photo) => (
                   <div key={photo.id} className="bg-white p-4 rounded-xl border border-ink/5 flex gap-6 group">
                     <div className="w-24 h-24 flex-shrink-0 overflow-hidden rounded-lg bg-ink/5 relative group/img">
-                      <img src={photo.url || undefined} className="w-full h-full object-cover" />
+                      <img src={photo.url || undefined} className="w-full h-full object-cover" referrerPolicy="strict-origin-when-cross-origin" />
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 group-hover/img:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
                         <label className="text-white hover:text-accent cursor-pointer">
                           <Plus size={20} />
@@ -805,7 +805,7 @@ export default function Admin() {
                   <div key={video.id} className="bg-white p-4 rounded-xl border border-ink/5 flex flex-col gap-4 group">
                     <div className="flex gap-6">
                       <div className="w-32 h-20 flex-shrink-0 overflow-hidden rounded-lg bg-ink/5 relative group/img">
-                        <img src={video.thumbnail || undefined} className="w-full h-full object-cover" />
+                        <img src={video.thumbnail || undefined} className="w-full h-full object-cover" referrerPolicy="strict-origin-when-cross-origin" />
                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
                           <label className="text-white hover:text-accent cursor-pointer">
                             <Plus size={20} />

@@ -318,6 +318,7 @@ export default function GalleryPage() {
                     "w-full h-auto object-cover transition-transform duration-1000 group-hover:scale-105 select-none",
                     activeType === 'videos' ? "aspect-video" : "h-auto"
                   )}
+                  referrerPolicy="strict-origin-when-cross-origin"
                 />
                 {'videoUrl' in item && (
                   <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity z-20">
@@ -391,6 +392,7 @@ export default function GalleryPage() {
                   src={selectedPhoto.url} 
                   alt={selectedPhoto.title}
                   className="max-w-full max-h-[70dvh] md:max-h-[85dvh] object-contain shadow-[0_20px_50px_rgba(0,0,0,0.5)] select-none block mx-auto"
+                  referrerPolicy="strict-origin-when-cross-origin"
                 />
                 <div className="mt-8 text-center text-white">
                   <h3 className="text-lg font-medium tracking-tight">{selectedPhoto.title}</h3>
